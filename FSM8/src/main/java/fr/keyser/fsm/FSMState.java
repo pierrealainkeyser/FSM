@@ -1,0 +1,34 @@
+package fr.keyser.fsm;
+
+/**
+ * L'état d'une exécution d'un {@link FSM}
+ * 
+ * @author pakeyser
+ *
+ * @param <S>
+ * @param <C>
+ */
+public interface FSMState<S, C> {
+
+	/**
+	 * L'état courant
+	 * 
+	 * @return l'état courant
+	 */
+	public S getCurrentState();
+
+	/**
+	 * Accède au contexte
+	 * 
+	 * @return le contexte
+	 */
+	public C getContext();
+
+	/**
+	 * Renvoi vrai si l'exécution du {@link FSM} est terminée
+	 * 
+	 * @return vrai si terminée;
+	 */
+	public boolean isDone();
+
+}
