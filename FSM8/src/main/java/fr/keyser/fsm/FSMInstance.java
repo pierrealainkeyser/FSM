@@ -12,13 +12,13 @@ package fr.keyser.fsm;
  */
 public interface FSMInstance<S, E, C> extends FSMState<S, C> {
 
-	/**
-	 * Envoi un évènement à l'instance
-	 * 
-	 * @param event
-	 *            l'évènement à transmettre
-	 * @throws FSMException
-	 *             en cas d'erreur
-	 */
-	public void sendEvent(E event, Object... args) throws FSMException;
+    /**
+     * Envoi un évènement à l'instance
+     * 
+     * @param event
+     *            l'évènement à transmettre
+     * @throws FSMException
+     *             en cas d'erreur
+     */
+    public void sendEvent(E event, Object... args) throws FSMException;
 }

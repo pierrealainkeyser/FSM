@@ -34,8 +34,8 @@ public interface OnEnterAction<S, E, C> {
 		}
 	}
 
-	public static <S, E, C> NamedEnterAction<S, E, C> named(String name, OnEnterAction<S, E, C> onTransitionAction) {
-		return new NamedEnterAction<>(name, onTransitionAction);
+	public static <S, E, C> NamedEnterAction<S, E, C> named(String name, OnEnterAction<S, E, C> action) {
+		return new NamedEnterAction<>(name, action);
 	}
 
 	/**
