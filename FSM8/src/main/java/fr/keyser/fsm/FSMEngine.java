@@ -119,14 +119,10 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    // permet de vérifier que l'état existe bien
 	    State<S, E, C> state = lookup(current);
 
-	    if (doEnter) {
-		handleDone(state);
-		this.transitionCount = transitionCount;
+	    handleDone(state);
+	    this.transitionCount = transitionCount;
+	    if (doEnter)
 		processEnter(state, null);
-	    } else {
-		handleDone(state);
-		this.transitionCount = transitionCount;
-	    }
 
 	}
 
