@@ -1,5 +1,7 @@
 package fr.keyser.fsm;
 
+import java.util.concurrent.Executor;
+
 /**
  * Le point d'accès à une instance d'exécution d'un {@link FSM}
  * 
@@ -10,15 +12,14 @@ package fr.keyser.fsm;
  * @param <C>
  *            le type de contexte
  */
-public interface FSMInstance<S, E, C> extends FSMState<S, C> {
+public interface FSMInstance<S, E, C> extends FSMState<S, C>, Executor {
 
     /**
      * Envoi un évènement à l'instance
      * 
      * @param event
      *            l'évènement à transmettre
-     * @throws FSMException
-     *             en cas d'erreur
+     * 
      */
     public void sendEvent(E event, Object... args) throws FSMException;
 }

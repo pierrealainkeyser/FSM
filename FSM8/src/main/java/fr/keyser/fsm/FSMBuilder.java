@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -167,6 +169,8 @@ public class FSMBuilder<S, E, C> {
 
     private List<FSMListener<S, E, C>> listeners;
 
+    private Supplier<Executor> executor = FSMExecutor::new;
+
     /**
      * Création du {@link FSM}
      * 
@@ -175,8 +179,19 @@ public class FSMBuilder<S, E, C> {
     public FSM<S, E, C> build() {
 	List<State<S, E, C>> states = this.states.values().stream().map(StateBuilder::toState)
 		.collect(Collectors.toList());
-	return new FSMEngine<S, E, C>(initial, states, listeners);
+	return new FSMEngine<S, E, C>(executor, initial, states, listeners);
 
+    }
+
+    /**
+     * Remplace la fabrique d'executeur
+     * 
+     * @param executor
+     * @return
+     */
+    public FSMBuilder<S, E, C> executor(Supplier<Executor> executor) {
+	this.executor = executor;
+	return this;
     }
 
     /**

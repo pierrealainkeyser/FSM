@@ -10,25 +10,32 @@ package fr.keyser.fsm;
  */
 public interface FSMState<S, C> {
 
-	/**
-	 * L'état courant
-	 * 
-	 * @return l'état courant
-	 */
-	public S getCurrentState();
+    /**
+     * L'état courant
+     * 
+     * @return l'état courant
+     */
+    public S getCurrentState();
 
-	/**
-	 * Accède au contexte
-	 * 
-	 * @return le contexte
-	 */
-	public C getContext();
+    /**
+     * Accède au contexte
+     * 
+     * @return le contexte
+     */
+    public C getContext();
 
-	/**
-	 * Renvoi vrai si l'exécution du {@link FSM} est terminée
-	 * 
-	 * @return vrai si terminée;
-	 */
-	public boolean isDone();
+    /**
+     * Renvoi vrai si l'exécution du {@link FSM} est terminée
+     * 
+     * @return vrai si terminée;
+     */
+    public boolean isDone();
+
+    /**
+     * Le compteur de transition passé
+     * 
+     * @return
+     */
+    public long getTransitionCount();
 
 }

@@ -31,5 +31,6 @@ public class TestFSMEngine {
 	Assert.assertEquals("L'état à changer", "terminal", start.getCurrentState());
 	Assert.assertEquals("L'événement onExit est appelé", "initial", leaving[0]);
 	Assert.assertEquals("L'événement onTransition est appelé", new FSMEvent<>("next", 1), event[0]);
+	Assert.assertEquals(1l, start.getTransitionCount());
     }
 }

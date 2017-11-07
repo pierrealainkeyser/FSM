@@ -10,20 +10,20 @@ import fr.keyser.fsm.FSMEvent;
  */
 public class TargetedEvent {
 
-	private final FSMInstanceKey instance;
+    private final FSMInstanceKey instance;
 
-	private final FSMEvent<?> event;
+    private final FSMEvent<?> event;
 
-	public TargetedEvent(FSMInstanceKey instance, FSMEvent<?> event) {
-		this.instance = instance;
-		this.event = event;
-	}
+    public TargetedEvent(FSMInstanceKey instance, FSMEvent<?> event) {
+	this.instance = instance;
+	this.event = event;
+    }
 
-	public FSMInstanceKey getInstance() {
-		return instance;
-	}
+    public FSMInstanceKey getInstance() {
+	return instance;
+    }
 
-	public FSMEvent<?> getEvent() {
-		return event;
-	}
+    public FSMEvent<?> getEvent() {
+	return event;
+    }
 }
