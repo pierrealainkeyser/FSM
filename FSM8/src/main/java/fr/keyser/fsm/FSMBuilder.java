@@ -171,6 +171,8 @@ public class FSMBuilder<S, E, C> {
 
     private Supplier<Executor> executor = FSMExecutor::new;
 
+    private Supplier<FSMInstanceKey> instanceKey = UUIDFSMInstanceKeyBuilder.INSTANCE;
+
     /**
      * Création du {@link FSM}
      * 
@@ -179,8 +181,19 @@ public class FSMBuilder<S, E, C> {
     public FSM<S, E, C> build() {
 	List<State<S, E, C>> states = this.states.values().stream().map(StateBuilder::toState)
 		.collect(Collectors.toList());
-	return new FSMEngine<S, E, C>(executor, initial, states, listeners);
+	return new FSMEngine<S, E, C>(instanceKey, executor, initial, states, listeners);
 
+    }
+
+    /**
+     * Remplace la fabrique de {@link FSMInstanceKey}
+     * 
+     * @param instanceKey
+     * @return
+     */
+    public FSMBuilder<S, E, C> instanceKey(Supplier<FSMInstanceKey> instanceKey) {
+	this.instanceKey = instanceKey;
+	return this;
     }
 
     /**

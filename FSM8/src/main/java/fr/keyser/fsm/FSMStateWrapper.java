@@ -36,4 +36,9 @@ public class FSMStateWrapper<S, C> implements FSMState<S, C> {
 	return instance.isDone();
     }
 
+    @Override
+    public FSMInstanceKey getKey() {
+	return instance.getKey();
+    }
+
 }

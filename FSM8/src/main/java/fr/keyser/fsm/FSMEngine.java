@@ -59,6 +59,11 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	}
 
 	@Override
+	public FSMInstanceKey getKey() {
+	    return delegated.getKey();
+	}
+
+	@Override
 	public long getTransitionCount() {
 	    return delegated.getTransitionCount();
 	}
@@ -101,8 +106,11 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 
 	private final List<FSMListener<S, E, C>> instanceListeners;
 
-	FSMInstanceEngine(Executor executor, C context, S current, long transitionCount, boolean doEnter,
+	private final FSMInstanceKey key;
+
+	FSMInstanceEngine(FSMInstanceKey key, Executor executor, C context, S current, long transitionCount, boolean doEnter,
 		List<FSMListener<S, E, C>> instanceListeners) throws FSMException {
+	    this.key = key;
 	    this.context = context;
 	    this.current = current;
 	    this.executor = executor;
@@ -249,6 +257,11 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	public long getTransitionCount() {
 	    return transitionCount;
 	}
+
+	@Override
+	public FSMInstanceKey getKey() {
+	    return key;
+	}
     }
 
     private final Supplier<Executor> executorFactory;
@@ -258,6 +271,8 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
     private final Map<S, State<S, E, C>> states;
 
     private final List<FSMListener<S, E, C>> listeners;
+
+    private final Supplier<FSMInstanceKey> keyFactory;
 
     State<S, E, C> lookup(S state) throws FSMException {
 	if (state == null)
@@ -269,7 +284,9 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	throw new FSMNoSuchStateException(state.toString());
     }
 
-    FSMEngine(Supplier<Executor> executorFactory, S initial, Collection<State<S, E, C>> states, List<FSMListener<S, E, C>> listeners) {
+    FSMEngine(Supplier<FSMInstanceKey> keyFactory, Supplier<Executor> executorFactory, S initial, Collection<State<S, E, C>> states,
+	    List<FSMListener<S, E, C>> listeners) {
+	this.keyFactory = keyFactory;
 	this.executorFactory = executorFactory;
 	this.initial = initial;
 	this.listeners = listeners != null ? Collections.unmodifiableList(listeners) : null;
@@ -315,12 +332,13 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 
 	@Override
 	public FSMInstance<S, E, C> start(C context) throws FSMException {
-	    return new FSMInstanceEngine(executorFactory.get(), context, initial, 0l, true, listeners());
+	    return new FSMInstanceEngine(keyFactory.get(), executorFactory.get(), context, initial, 0l, true, listeners());
 	}
 
 	@Override
 	public FSMInstance<S, E, C> resume(FSMState<S, C> state) throws FSMException {
-	    return new FSMInstanceEngine(executorFactory.get(), state.getContext(), state.getCurrentState(), state.getTransitionCount(),
+	    return new FSMInstanceEngine(keyFactory.get(), executorFactory.get(), state.getContext(), state.getCurrentState(),
+		    state.getTransitionCount(),
 		    false, listeners());
 	}
 

@@ -11,6 +11,13 @@ package fr.keyser.fsm;
 public interface FSMState<S, C> {
 
     /**
+     * Renvoi la clé unique de l'instance associé
+     * 
+     * @return
+     */
+    public FSMInstanceKey getKey();
+
+    /**
      * L'état courant
      * 
      * @return l'état courant
