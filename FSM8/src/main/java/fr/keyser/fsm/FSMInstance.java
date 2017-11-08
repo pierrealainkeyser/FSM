@@ -1,5 +1,6 @@
 package fr.keyser.fsm;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
@@ -19,7 +20,8 @@ public interface FSMInstance<S, E, C> extends FSMState<S, C>, Executor {
      * 
      * @param event
      *            l'évènement à transmettre
-     * 
+     * @return un indicateur qui indique si l'événement est traité. Le future ne
+     *         renvoit jamais d'exception
      */
-    public void sendEvent(E event, Object... args) throws FSMException;
+    public CompletableFuture<Boolean> sendEvent(E event, Object... args);
 }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -31,6 +32,39 @@ import fr.keyser.fsm.exception.FSMNullStateException;
  *            le type du context
  */
 class FSMEngine<S, E, C> implements FSM<S, E, C> {
+
+    private class FSMEventConsumer implements Runnable {
+
+	private final FSMInstanceEngine engine;
+
+	private final FSMEvent<E> evt;
+
+	private final CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+	public FSMEventConsumer(FSMInstanceEngine engine, FSMEvent<E> evt) {
+	    this.evt = evt;
+	    this.engine = engine;
+	}
+
+	public void fireException(FSMException exception) {
+	    future.complete(Boolean.FALSE);
+	    engine.fireException(evt, exception);
+	}
+
+	public CompletableFuture<Boolean> getFuture() {
+	    return future;
+	}
+
+	@Override
+	public void run() {
+	    try {
+		engine.processEvent(evt);
+		future.complete(Boolean.TRUE);
+	    } catch (FSMException exception) {
+		fireException(exception);
+	    }
+	}
+    }
 
     /**
      * L'implémentation de base, utilise une Queue pour les problémes de récurvisité
@@ -78,10 +112,8 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    executor.execute(command);
 	}
 
-	private void fireException(FSMEvent<E> toProcess, FSMException exception, boolean doThrow) {
+	private void fireException(FSMEvent<E> toProcess, FSMException exception) {
 	    listeners(l -> l.exceptionThrowed(stateWrapper, toProcess, exception));
-	    if (doThrow)
-		throw exception;
 	}
 
 	@Override
@@ -120,11 +152,13 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	}
 
 	private void listeners(Consumer<FSMListener<S, E, C>> action) {
-	    if (listeners != null)
-		listeners.forEach(action);
-
+	    // d'abord les écouteurs d'instances
 	    if (instanceListeners != null)
 		instanceListeners.forEach(action);
+
+	    // puis les écouteurs globaux
+	    if (listeners != null)
+		listeners.forEach(action);
 	}
 
 	private void processEnter(State<S, E, C> destination, FSMEvent<E> event) throws FSMExecutionException {
@@ -193,21 +227,19 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	}
 
 	@Override
-	public void sendEvent(E event, Object... args) throws FSMException {
+	public CompletableFuture<Boolean> sendEvent(E event, Object... args) throws FSMException {
+
 	    FSMEvent<E> evt = new FSMEvent<>(event, args);
+	    FSMEventConsumer consumer = new FSMEventConsumer(this, evt);
+
 	    if (isDone())
-		fireException(evt, new FSMDoneException(), true);
+		consumer.fireException(new FSMDoneException());
+	    else if (event == null)
+		consumer.fireException(new FSMNullEventException());
+	    else
+		execute(consumer);
+	    return consumer.getFuture();
 
-	    if (event == null)
-		fireException(evt, new FSMNullEventException(), true);
-
-	    execute(() -> {
-		try {
-		    processEvent(evt);
-		} catch (FSMException exception) {
-		    fireException(evt, exception, false);
-		}
-	    });
 	}
     }
 
@@ -292,8 +324,8 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	}
 
 	@Override
-	public void sendEvent(E event, Object... args) throws FSMException {
-	    delegated.sendEvent(event, args);
+	public CompletableFuture<Boolean> sendEvent(E event, Object... args) {
+	    return delegated.sendEvent(event, args);
 	}
     }
 

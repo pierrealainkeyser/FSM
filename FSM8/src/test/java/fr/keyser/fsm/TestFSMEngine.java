@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import fr.keyser.fsm.exception.FSMNoSuchTransition;
+
 public class TestFSMEngine {
 
     /**
@@ -47,6 +49,13 @@ public class TestFSMEngine {
     @Test
     public void turnstile() {
 	FSMBuilder<String, String, AtomicBoolean> builder = new FSMBuilder<>();
+	FSMException[] exceptions = new FSMException[1];
+	builder.listener(new FSMListenerAdaptater<String, String, AtomicBoolean>() {
+	    @Override
+	    public void exceptionThrowed(FSMState<String, AtomicBoolean> fsm, FSMEvent<String> event, FSMException exception) {
+		exceptions[0] = exception;
+	    }
+	});
 	builder.state("locked").onEnter((i, e) -> i.getContext().set(true))
 		.transition("push", "locked")
 		.transition("coin", "unlocked");
@@ -57,14 +66,18 @@ public class TestFSMEngine {
 	AtomicBoolean context = new AtomicBoolean(false);
 	FSMInstance<String, String, AtomicBoolean> instance = builder.build().start(context);
 	Assert.assertTrue("Devrait être verrouillé", context.get());
-	instance.sendEvent("push");
+	Assert.assertTrue(instance.sendEvent("push").join());
 	Assert.assertTrue("Devrait être verrouillé", context.get());
 	instance.sendEvent("coin");
 	Assert.assertFalse("Devrait être déverrouillé", context.get());
 	instance.sendEvent("coin");
 	Assert.assertFalse("Devrait être déverrouillé", context.get());
-	instance.sendEvent("push");
+	Assert.assertTrue(instance.sendEvent("push").join());
 	Assert.assertTrue("Devrait être verrouillé", context.get());
+
+	// un évenenement qui n'existe pas provoque une erreur de transition
+	Assert.assertFalse(instance.sendEvent("noEvent").join());
+	Assert.assertTrue(exceptions[0] instanceof FSMNoSuchTransition);
     }
 
     @Test
