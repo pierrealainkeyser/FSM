@@ -4,8 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Permet d'exécuter une tache sur le même thread. Il est possible de passer en
@@ -20,9 +19,40 @@ public class SequentialExecutor implements Executor {
 
     private final BlockingQueue<Runnable> events;
 
-    private AtomicInteger processing = new AtomicInteger(0);
+    private final AtomicReference<InnerState> processing = new AtomicReference<>(new InnerState(0, false));
 
-    private AtomicBoolean buffering = new AtomicBoolean(false);
+    private static class InnerState {
+
+	private final int processing;
+
+	private final boolean buffering;
+
+	public InnerState(int processing, boolean buffering) {
+	    this.processing = processing;
+	    this.buffering = buffering;
+	}
+
+	public InnerState increment() {
+	    return new InnerState(processing + 1, buffering);
+	}
+
+	public InnerState decrement() {
+	    return new InnerState(processing - 1, buffering);
+	}
+
+	public InnerState buffer() {
+	    return new InnerState(processing, true);
+	}
+
+	public InnerState unbuffer() {
+	    return new InnerState(processing, false);
+	}
+
+	public boolean hasToLoop() {
+	    return processing > 0 && !buffering;
+	}
+
+    }
 
     public SequentialExecutor() {
 	this(0);
@@ -35,9 +65,8 @@ public class SequentialExecutor implements Executor {
     @Override
     public void execute(Runnable command) {
 	this.events.add(command);
-	boolean first = processing.getAndIncrement() == 0;
-	boolean processingMode = !buffering.get();
-	if (first && processingMode)
+	InnerState is = processing.updateAndGet(InnerState::increment);
+	if (is.hasToLoop())
 	    processingLoop();
     }
 
@@ -45,29 +74,28 @@ public class SequentialExecutor implements Executor {
      * Passe en mode "buffering"
      */
     public void bufferize() {
-	execute(() -> buffering.set(true));
+	execute(() -> processing.updateAndGet(InnerState::buffer));
     }
 
     /**
      * Quitte le mode "buffering"
      */
     public void unbuffer() {
-	if (buffering.compareAndSet(true, false) && processing.get() > 0)
+	InnerState is = processing.updateAndGet(InnerState::unbuffer);
+	if (is.hasToLoop())
 	    processingLoop();
     }
 
     private void processingLoop() {
 
-	boolean moreToProcess;
-	boolean processingMode;
+	InnerState state = null;
 	do {
 	    Runnable run = this.events.poll();
 	    run.run();
 
-	    moreToProcess = processing.decrementAndGet() > 0;
-	    processingMode = !buffering.get();
+	    state = processing.updateAndGet(InnerState::decrement);
 
-	} while (moreToProcess && processingMode);
+	} while (state.hasToLoop());
     }
 
 }
