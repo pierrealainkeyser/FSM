@@ -21,7 +21,7 @@ public interface OnTransitionAction<S, E, C> {
 	}
 
 	@Override
-	public void onTransition(FSMState<S, C> context, FSMEvent<E> event) throws Exception {
+	public void onTransition(FSMInstance<S, E, C> context, FSMEvent<E> event) throws Exception {
 	    action.onTransition(context, event);
 	}
 
@@ -42,5 +42,5 @@ public interface OnTransitionAction<S, E, C> {
      * @param event
      * @throws Exception
      */
-    public void onTransition(FSMState<S, C> context, FSMEvent<E> event) throws Exception;
+    public void onTransition(FSMInstance<S, E, C> context, FSMEvent<E> event) throws Exception;
 }

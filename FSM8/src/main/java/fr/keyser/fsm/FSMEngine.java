@@ -160,7 +160,7 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    OnTransitionAction<S, E, C> onTransition = transition.getOnTransition();
 	    if (onTransition != null) {
 		try {
-		    onTransition.onTransition(stateWrapper, event);
+		    onTransition.onTransition(this, event);
 		} catch (Exception e) {
 		    throw new FSMExecutionException(e);
 		}
