@@ -67,7 +67,7 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    // permet de vérifier que l'état existe bien
 	    State<S, E, C> state = lookup(current);
 
-	    handleDone(state, doEnter);
+	    handleDone(state, false);
 	    this.transitionCount = transitionCount;
 	    if (doEnter)
 		processEnter(state, null);
@@ -107,10 +107,11 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	private void handleDone(State<S, E, C> destination, boolean stateChanged) {
 	    this.current = destination.getState();
 	    this.done = destination.isTerminal();
-	    ++this.transitionCount;
 
-	    if (stateChanged)
+	    if (stateChanged) {
+		++this.transitionCount;
 		listeners(l -> l.stateReached(stateWrapper));
+	    }
 	}
 
 	@Override
