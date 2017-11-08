@@ -169,7 +169,7 @@ public class FSMBuilder<S, E, C> {
 
     private List<FSMListener<S, E, C>> listeners;
 
-    private Supplier<Executor> executor = FSMExecutor::new;
+    private Supplier<Executor> executor = SequentialExecutor::new;
 
     private Supplier<FSMInstanceKey> instanceKey = UUIDFSMInstanceKeyBuilder.INSTANCE;
 
