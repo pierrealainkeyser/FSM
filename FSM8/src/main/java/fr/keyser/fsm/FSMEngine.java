@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import fr.keyser.fsm.exception.FSMDoneException;
 import fr.keyser.fsm.exception.FSMExecutionException;
 import fr.keyser.fsm.exception.FSMNoSuchStateException;
+import fr.keyser.fsm.exception.FSMNoSuchTransition;
 import fr.keyser.fsm.exception.FSMNullEventException;
 import fr.keyser.fsm.exception.FSMNullStateException;
 
@@ -119,11 +120,16 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    // permet de vérifier que l'état existe bien
 	    State<S, E, C> state = lookup(current);
 
-	    handleDone(state);
+	    handleDone(state, doEnter);
 	    this.transitionCount = transitionCount;
 	    if (doEnter)
 		processEnter(state, null);
 
+	}
+
+	private Transition<S, E, C> getGlobalTransition(E event) throws FSMException {
+	    // TODO gestion des transitions globales
+	    throw new FSMNoSuchTransition(event.toString());
 	}
 
 	private void processEvent(FSMEvent<E> evt) throws FSMException {
@@ -134,26 +140,27 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 
 	    State<S, E, C> source = lookup(current);
 
-	    Transition<S, E, C> transition = source.lookup(event);
+	    Transition<S, E, C> transition = source.lookup(event).orElseGet(() -> getGlobalTransition(event));
 	    S dest = transition.getDestination();
 	    State<S, E, C> destination = lookup(dest);
 
 	    listeners(l -> l.willTransit(stateWrapper, evt, dest));
 
-	    boolean sameState = current.equals(dest);
+	    boolean statedChanged = !current.equals(dest);
 
 	    // gestion de la sortie
-	    if (!sameState)
+	    if (statedChanged)
 		processExit(source, evt);
 
 	    // gestion de la transition
 	    processTransition(transition, evt);
 
 	    // gestion de l'entrée
-	    processEnter(destination, evt);
+	    if (statedChanged)
+		processEnter(destination, evt);
 
 	    // mise en place de l'état
-	    handleDone(destination);
+	    handleDone(destination, statedChanged);
 	}
 
 	private void processTransition(Transition<S, E, C> transition, FSMEvent<E> event) {
@@ -190,12 +197,13 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 
 	}
 
-	private void handleDone(State<S, E, C> destination) {
+	private void handleDone(State<S, E, C> destination, boolean stateChanged) {
 	    this.current = destination.getState();
 	    this.done = destination.isTerminal();
 	    ++this.transitionCount;
 
-	    listeners(l -> l.stateReached(stateWrapper));
+	    if (stateChanged)
+		listeners(l -> l.stateReached(stateWrapper));
 	}
 
 	@Override

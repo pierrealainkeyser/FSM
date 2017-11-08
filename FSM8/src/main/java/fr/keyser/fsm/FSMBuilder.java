@@ -150,6 +150,17 @@ public class FSMBuilder<S, E, C> {
 	}
 
 	/**
+	 * Rajoute une transition sur soit même avec une action
+	 * 
+	 * @param event
+	 * @param onTransition
+	 * @return
+	 */
+	public StateBuilder self(E event, OnTransitionAction<S, E, C> onTransition) {
+	    return transition(event, state, onTransition);
+	}
+
+	/**
 	 * Rajoute une transition avec une action
 	 * 
 	 * @param event
