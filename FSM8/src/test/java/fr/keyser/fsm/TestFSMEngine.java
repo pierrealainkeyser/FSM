@@ -71,9 +71,6 @@ public class TestFSMEngine {
     public void automaticDoor() {
 	FSMBuilder<String, String, AtomicReference<String>> builder = new FSMBuilder<>();
 
-	builder.state("closed").onEnter((i, e) -> i.getContext().set("."))
-		.transition("open", "opening");
-
 	OnTransitionAction<String, String, AtomicReference<String>> sensor = (i, e) -> {
 	    float progress = (float) e.getArgs().get(0);
 	    if (progress <= 0f)
@@ -82,17 +79,23 @@ public class TestFSMEngine {
 		i.sendEvent("sensor_opened");
 	};
 
-	builder.state("opening").onEnter((i, e) -> i.getContext().set("opening"))
+	builder.global("sensor_opened", "open");
+	builder.global("sensor_closed", "closed");
+
+	builder.state("closed").onEnter(motor("."))
+		.transition("open", "opening")
+		.transition("close", "closed");
+
+	builder.state("opening").onEnter(motor("opening"))
 		.self("sensor", sensor)
-		.transition("sensor_opened", "open")
 		.transition("close", "closing");
 
-	builder.state("open").onEnter((i, e) -> i.getContext().set("."))
-		.transition("close", "closing");
+	builder.state("open").onEnter(motor("."))
+		.transition("close", "closing")
+		.transition("open", "open");
 
-	builder.state("closing").onEnter((i, e) -> i.getContext().set("closing"))
+	builder.state("closing").onEnter(motor("closing"))
 		.self("sensor", sensor)
-		.transition("sensor_closed", "closed")
 		.transition("open", "opening");
 
 	AtomicReference<String> context = new AtomicReference<String>(null);
@@ -114,5 +117,9 @@ public class TestFSMEngine {
 	instance.sendEvent("sensor", 0f);
 	Assert.assertEquals(".", context.get());
 	Assert.assertEquals("closed", instance.getCurrentState());
+    }
+
+    private static OnEnterAction<String, String, AtomicReference<String>> motor(String value) {
+	return (i, e) -> i.getContext().set(value);
     }
 }

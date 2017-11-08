@@ -33,59 +33,6 @@ import fr.keyser.fsm.exception.FSMNullStateException;
 class FSMEngine<S, E, C> implements FSM<S, E, C> {
 
     /**
-     * Permet de voir un coup devant l'execution
-     * 
-     * @author pakeyser
-     *
-     */
-    private class StateAheadInstance implements FSMInstance<S, E, C> {
-
-	private final FSMInstance<S, E, C> delegated;
-
-	private final State<S, E, C> destination;
-
-	public StateAheadInstance(FSMInstance<S, E, C> delegated, State<S, E, C> destination) {
-	    this.delegated = delegated;
-	    this.destination = destination;
-	}
-
-	@Override
-	public void sendEvent(E event, Object... args) throws FSMException {
-	    delegated.sendEvent(event, args);
-	}
-
-	@Override
-	public void execute(Runnable command) {
-	    delegated.execute(command);
-	}
-
-	@Override
-	public FSMInstanceKey getKey() {
-	    return delegated.getKey();
-	}
-
-	@Override
-	public long getTransitionCount() {
-	    return delegated.getTransitionCount();
-	}
-
-	@Override
-	public C getContext() {
-	    return delegated.getContext();
-	}
-
-	@Override
-	public S getCurrentState() {
-	    return destination.getState();
-	}
-
-	@Override
-	public boolean isDone() {
-	    return destination.isTerminal();
-	}
-    }
-
-    /**
      * L'implémentation de base, utilise une Queue pour les problémes de récurvisité
      * 
      * @author pakeyser
@@ -93,21 +40,21 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
      */
     private class FSMInstanceEngine implements FSMInstance<S, E, C> {
 
-	private final Executor executor;
-
 	private final C context;
 
 	private S current;
 
 	private boolean done;
 
-	private long transitionCount;
-
-	private FSMState<S, C> stateWrapper = new FSMStateWrapper<>(this);
+	private final Executor executor;
 
 	private final List<FSMListener<S, E, C>> instanceListeners;
 
 	private final FSMInstanceKey key;
+
+	private FSMState<S, C> stateWrapper = new FSMStateWrapper<>(this);
+
+	private long transitionCount;
 
 	FSMInstanceEngine(FSMInstanceKey key, Executor executor, C context, S current, long transitionCount, boolean doEnter,
 		List<FSMListener<S, E, C>> instanceListeners) throws FSMException {
@@ -127,9 +74,68 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 
 	}
 
-	private Transition<S, E, C> getGlobalTransition(E event) throws FSMException {
-	    // TODO gestion des transitions globales
-	    throw new FSMNoSuchTransition(event.toString());
+	public void execute(Runnable command) {
+	    executor.execute(command);
+	}
+
+	private void fireException(FSMEvent<E> toProcess, FSMException exception, boolean doThrow) {
+	    listeners(l -> l.exceptionThrowed(stateWrapper, toProcess, exception));
+	    if (doThrow)
+		throw exception;
+	}
+
+	@Override
+	public C getContext() {
+	    return context;
+	}
+
+	@Override
+	public S getCurrentState() {
+	    return current;
+	}
+
+	@Override
+	public FSMInstanceKey getKey() {
+	    return key;
+	}
+
+	@Override
+	public long getTransitionCount() {
+	    return transitionCount;
+	}
+
+	private void handleDone(State<S, E, C> destination, boolean stateChanged) {
+	    this.current = destination.getState();
+	    this.done = destination.isTerminal();
+	    ++this.transitionCount;
+
+	    if (stateChanged)
+		listeners(l -> l.stateReached(stateWrapper));
+	}
+
+	@Override
+	public boolean isDone() {
+	    return done;
+	}
+
+	private void listeners(Consumer<FSMListener<S, E, C>> action) {
+	    if (listeners != null)
+		listeners.forEach(action);
+
+	    if (instanceListeners != null)
+		instanceListeners.forEach(action);
+	}
+
+	private void processEnter(State<S, E, C> destination, FSMEvent<E> event) throws FSMExecutionException {
+	    OnEnterAction<S, E, C> onEnter = destination.getOnEnter();
+	    if (onEnter != null) {
+		try {
+		    onEnter.onEnter(new StateAheadInstance(this, destination), event);
+		} catch (Exception e) {
+		    throw new FSMExecutionException(e);
+		}
+	    }
+
 	}
 
 	private void processEvent(FSMEvent<E> evt) throws FSMException {
@@ -163,17 +169,6 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    handleDone(destination, statedChanged);
 	}
 
-	private void processTransition(Transition<S, E, C> transition, FSMEvent<E> event) {
-	    OnTransitionAction<S, E, C> onTransition = transition.getOnTransition();
-	    if (onTransition != null) {
-		try {
-		    onTransition.onTransition(this, event);
-		} catch (Exception e) {
-		    throw new FSMExecutionException(e);
-		}
-	    }
-	}
-
 	private void processExit(State<S, E, C> source, FSMEvent<E> event) {
 	    OnExitAction<S, E, C> onExit = source.getOnExit();
 	    if (onExit != null) {
@@ -185,25 +180,15 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	    }
 	}
 
-	private void processEnter(State<S, E, C> destination, FSMEvent<E> event) throws FSMExecutionException {
-	    OnEnterAction<S, E, C> onEnter = destination.getOnEnter();
-	    if (onEnter != null) {
+	private void processTransition(Transition<S, E, C> transition, FSMEvent<E> event) {
+	    OnTransitionAction<S, E, C> onTransition = transition.getOnTransition();
+	    if (onTransition != null) {
 		try {
-		    onEnter.onEnter(new StateAheadInstance(this, destination), event);
+		    onTransition.onTransition(this, event);
 		} catch (Exception e) {
 		    throw new FSMExecutionException(e);
 		}
 	    }
-
-	}
-
-	private void handleDone(State<S, E, C> destination, boolean stateChanged) {
-	    this.current = destination.getState();
-	    this.done = destination.isTerminal();
-	    ++this.transitionCount;
-
-	    if (stateChanged)
-		listeners(l -> l.stateReached(stateWrapper));
 	}
 
 	@Override
@@ -222,96 +207,6 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 		    fireException(evt, exception, false);
 		}
 	    });
-	}
-
-	public void execute(Runnable command) {
-	    executor.execute(command);
-	}
-
-	private void fireException(FSMEvent<E> toProcess, FSMException exception, boolean doThrow) {
-	    listeners(l -> l.exceptionThrowed(stateWrapper, toProcess, exception));
-	    if (doThrow)
-		throw exception;
-	}
-
-	private void listeners(Consumer<FSMListener<S, E, C>> action) {
-	    if (listeners != null)
-		listeners.forEach(action);
-
-	    if (instanceListeners != null)
-		instanceListeners.forEach(action);
-	}
-
-	@Override
-	public boolean isDone() {
-	    return done;
-	}
-
-	@Override
-	public C getContext() {
-	    return context;
-	}
-
-	@Override
-	public S getCurrentState() {
-	    return current;
-	}
-
-	@Override
-	public long getTransitionCount() {
-	    return transitionCount;
-	}
-
-	@Override
-	public FSMInstanceKey getKey() {
-	    return key;
-	}
-    }
-
-    private final Supplier<Executor> executorFactory;
-
-    private final S initial;
-
-    private final Map<S, State<S, E, C>> states;
-
-    private final List<FSMListener<S, E, C>> listeners;
-
-    private final Supplier<FSMInstanceKey> keyFactory;
-
-    State<S, E, C> lookup(S state) throws FSMException {
-	if (state == null)
-	    throw new FSMNullStateException();
-
-	if (states.containsKey(state))
-	    return states.get(state);
-
-	throw new FSMNoSuchStateException(state.toString());
-    }
-
-    FSMEngine(Supplier<FSMInstanceKey> keyFactory, Supplier<Executor> executorFactory, S initial, Collection<State<S, E, C>> states,
-	    List<FSMListener<S, E, C>> listeners) {
-	this.keyFactory = keyFactory;
-	this.executorFactory = executorFactory;
-	this.initial = initial;
-	this.listeners = listeners != null ? Collections.unmodifiableList(listeners) : null;
-
-	Map<S, State<S, E, C>> newStates = new LinkedHashMap<S, State<S, E, C>>();
-	for (State<S, E, C> state : states)
-	    newStates.put(state.getState(), state);
-	this.states = Collections.unmodifiableMap(newStates);
-    }
-
-    @Override
-    public void visit(FSMVisitor<S, E> visitor) {
-	State<S, E, C> init = states.get(initial);
-	if (init != null) {
-	    visitor.initial(init.getState(), init.getOnEnter(), init.getOnExit());
-	    init.visit(visitor);
-	}
-
-	for (State<S, E, C> state : states.values()) {
-	    visitor.state(state.getState(), state.getOnEnter(), state.getOnExit(), state.isTerminal());
-	    state.visit(visitor);
 	}
     }
 
@@ -335,21 +230,137 @@ class FSMEngine<S, E, C> implements FSM<S, E, C> {
 	}
 
 	@Override
-	public FSMInstance<S, E, C> start(C context) throws FSMException {
-	    return new FSMInstanceEngine(keyFactory.get(), executorFactory.get(), context, initial, 0l, true, listeners());
-	}
-
-	@Override
 	public FSMInstance<S, E, C> resume(FSMState<S, C> state) throws FSMException {
 	    return new FSMInstanceEngine(keyFactory.get(), executorFactory.get(), state.getContext(), state.getCurrentState(),
 		    state.getTransitionCount(),
 		    false, listeners());
 	}
 
+	@Override
+	public FSMInstance<S, E, C> start(C context) throws FSMException {
+	    return new FSMInstanceEngine(keyFactory.get(), executorFactory.get(), context, initial, 0l, true, listeners());
+	}
+
+    }
+
+    /**
+     * Permet de voir un coup devant l'execution
+     * 
+     * @author pakeyser
+     *
+     */
+    private class StateAheadInstance implements FSMInstance<S, E, C> {
+
+	private final FSMInstance<S, E, C> delegated;
+
+	private final State<S, E, C> destination;
+
+	public StateAheadInstance(FSMInstance<S, E, C> delegated, State<S, E, C> destination) {
+	    this.delegated = delegated;
+	    this.destination = destination;
+	}
+
+	@Override
+	public void execute(Runnable command) {
+	    delegated.execute(command);
+	}
+
+	@Override
+	public C getContext() {
+	    return delegated.getContext();
+	}
+
+	@Override
+	public S getCurrentState() {
+	    return destination.getState();
+	}
+
+	@Override
+	public FSMInstanceKey getKey() {
+	    return delegated.getKey();
+	}
+
+	@Override
+	public long getTransitionCount() {
+	    return delegated.getTransitionCount();
+	}
+
+	@Override
+	public boolean isDone() {
+	    return destination.isTerminal();
+	}
+
+	@Override
+	public void sendEvent(E event, Object... args) throws FSMException {
+	    delegated.sendEvent(event, args);
+	}
+    }
+
+    private final Supplier<Executor> executorFactory;
+
+    private final Map<E, Transition<S, E, C>> globals;
+
+    private final S initial;
+
+    private final Supplier<FSMInstanceKey> keyFactory;
+
+    private final List<FSMListener<S, E, C>> listeners;
+
+    private final Map<S, State<S, E, C>> states;
+
+    FSMEngine(Supplier<FSMInstanceKey> keyFactory, Supplier<Executor> executorFactory, S initial, Collection<State<S, E, C>> states,
+	    Collection<Transition<S, E, C>> globals,
+	    List<FSMListener<S, E, C>> listeners) {
+	this.keyFactory = keyFactory;
+	this.executorFactory = executorFactory;
+	this.initial = initial;
+	this.listeners = listeners != null ? Collections.unmodifiableList(listeners) : null;
+
+	Map<S, State<S, E, C>> newStates = new LinkedHashMap<>();
+	for (State<S, E, C> state : states)
+	    newStates.put(state.getState(), state);
+	this.states = Collections.unmodifiableMap(newStates);
+
+	Map<E, Transition<S, E, C>> newGlobals = new LinkedHashMap<>();
+	for (Transition<S, E, C> global : globals)
+	    newGlobals.put(global.getEvent(), global);
+	this.globals = Collections.unmodifiableMap(newGlobals);
+
+    }
+
+    private Transition<S, E, C> getGlobalTransition(E event) throws FSMException {
+	if (globals.containsKey(event))
+	    return globals.get(event);
+
+	throw new FSMNoSuchTransition(event.toString());
     }
 
     @Override
     public FSMInstanceBuilder<S, E, C> instance() {
 	return new InstanceBuilder();
+    }
+
+    State<S, E, C> lookup(S state) throws FSMException {
+	if (state == null)
+	    throw new FSMNullStateException();
+
+	if (states.containsKey(state))
+	    return states.get(state);
+
+	throw new FSMNoSuchStateException(state.toString());
+    }
+
+    @Override
+    public void visit(FSMVisitor<S, E> visitor) {
+	State<S, E, C> init = states.get(initial);
+	if (init != null) {
+	    visitor.initial(init.getState(), init.getOnEnter(), init.getOnExit());
+	    init.visit(visitor);
+	}
+
+	for (State<S, E, C> state : states.values()) {
+	    visitor.state(state.getState(), state.getOnEnter(), state.getOnExit(), state.isTerminal());
+	    state.visit(visitor);
+	}
     }
 }

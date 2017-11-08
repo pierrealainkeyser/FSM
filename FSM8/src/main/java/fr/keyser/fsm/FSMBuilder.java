@@ -176,7 +176,9 @@ public class FSMBuilder<S, E, C> {
 
     private S initial;
 
-    private final Map<S, StateBuilder> states = new LinkedHashMap<S, StateBuilder>();
+    private final Map<S, StateBuilder> states = new LinkedHashMap<>();
+
+    private final Map<E, Transition<S, E, C>> globals = new LinkedHashMap<>();
 
     private List<FSMListener<S, E, C>> listeners;
 
@@ -192,8 +194,32 @@ public class FSMBuilder<S, E, C> {
     public FSM<S, E, C> build() {
 	List<State<S, E, C>> states = this.states.values().stream().map(StateBuilder::toState)
 		.collect(Collectors.toList());
-	return new FSMEngine<S, E, C>(instanceKey, executor, initial, states, listeners);
+	return new FSMEngine<S, E, C>(instanceKey, executor, initial, states, globals.values(), listeners);
+    }
 
+    /**
+     * Rajoute une transition globale sans action
+     * 
+     * @param event
+     * @param destination
+     * @return
+     */
+    public FSMBuilder<S, E, C> global(E event, S destination) {
+	return global(event, destination, null);
+    }
+
+    /**
+     * Rajoute une transition globale avec une action
+     * 
+     * @param event
+     * @param destination
+     * @param onTransition
+     * @return
+     */
+    public FSMBuilder<S, E, C> global(E event, S destination, OnTransitionAction<S, E, C> onTransition) {
+	Transition<S, E, C> transition = new Transition<S, E, C>(destination, event, onTransition);
+	globals.put(event, transition);
+	return this;
     }
 
     /**
