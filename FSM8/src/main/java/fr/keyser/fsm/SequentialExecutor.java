@@ -51,6 +51,10 @@ public class SequentialExecutor implements Executor {
 	public boolean hasToLoop() {
 	    return processing > 0 && !buffering;
 	}
+	
+	public boolean hasToStart() {
+	    return processing == 1 && !buffering;
+	}
 
     }
 
@@ -66,7 +70,7 @@ public class SequentialExecutor implements Executor {
     public void execute(Runnable command) {
 	this.events.add(command);
 	InnerState is = processing.updateAndGet(InnerState::increment);
-	if (is.hasToLoop())
+	if (is.hasToStart())
 	    processingLoop();
     }
 
