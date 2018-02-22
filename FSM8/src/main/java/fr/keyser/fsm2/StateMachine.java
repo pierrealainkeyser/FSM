@@ -36,16 +36,28 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 	return cs.thenApply(this::merge);
     }
 
-    public CompletionStage<RoutingStatus<S, E>> enterInitialState() {
+    private CompletionStage<RoutingStatus<S, E>> enterState0(State<S> current) {
 	return CompletableFuture.supplyAsync(() -> {
 	    NodeState<S, E> working = root.lookup(current);
 	    if (working == null)
 		return RoutingStatus.noStateFound(current);
-	    else {
+	    else
 		return working.fireEntry();
-	    }
 
 	}, executor);
+    }
+
+    public CompletionStage<RoutingStatus<S, E>> enterState(State<S> current) {
+	return enterState0(current).thenApply(i -> setStateAndMerge(current, i));
+    }
+
+    private RoutingStatus<S, E> setStateAndMerge(State<S> current, RoutingStatus<S, E> input) {
+	this.current = current;
+	return input.mergeFinalState(this.current);
+    }
+
+    public CompletionStage<RoutingStatus<S, E>> enterInitialState() {
+	return enterState0(current);
     }
 
     private RoutingStatus<S, E> merge(RoutingStatus<S, E> input) {
