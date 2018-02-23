@@ -10,12 +10,18 @@ import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import fr.keyser.fsm.SequentialExecutor;
 
 public class StateMachineBuilder<S, E> {
+
+    public static <S, E> Supplier<StateMachineBuilder<S, E>> withExecutor(Executor executor) {
+	return () -> new StateMachineBuilder<S, E>().executor(executor);
+
+    }
 
     public static class TransitionBuilder<S, E> {
 	private TransitionBuilder(E event, State<S> destination) {
