@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Executor;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -136,7 +137,9 @@ public class StateMachineBuilder<S, E> {
 
     private final DelegatedDelayedEventConsumer<S, E> eventConsumer = new DelegatedDelayedEventConsumer<>();
 
-    private SequentialExecutor executor = new SequentialExecutor();
+    private SequentialExecutor sequential = new SequentialExecutor();
+
+    private Executor executor;
 
     private final List<TransitionBuilder<S, E>> transitions = new ArrayList<>();
 
@@ -213,6 +216,16 @@ public class StateMachineBuilder<S, E> {
     }
 
     public StateMachine<S, E> build() {
-	return new StateMachine<>(executor, buildRoot(), eventConsumer);
+	StateMachine<S, E> stateMachine = new StateMachine<>(sequential, buildRoot());
+	if (executor != null)
+	    eventConsumer.setDelegated(new ExecutorDelayedEventConsumer<>(executor, stateMachine));
+	else
+	    eventConsumer.setDelegated(stateMachine);
+	return stateMachine;
+    }
+
+    public StateMachineBuilder<S, E> executor(Executor executor) {
+	this.executor = executor;
+	return this;
     }
 }

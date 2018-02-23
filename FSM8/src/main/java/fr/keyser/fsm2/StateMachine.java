@@ -9,14 +9,13 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 
     private State<S> current;
 
-    private final SequentialExecutor executor;
+    private final SequentialExecutor sequential;
 
     private final NodeState<S, E> root;
 
-    StateMachine(SequentialExecutor executor, NodeState<S, E> root, DelegatedDelayedEventConsumer<S, E> delegated) {
-	this.executor = executor;
+    StateMachine(SequentialExecutor sequential, NodeState<S, E> root) {
+	this.sequential = sequential;
 	this.root = root;
-	delegated.setDelegated(this);
 	this.current = root.firstChildOrSelf().getState();
     }
 
@@ -32,7 +31,7 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 		return status;
 	    }
 
-	}, executor);
+	}, sequential);
 	return cs.thenApply(this::merge);
     }
 
@@ -44,7 +43,7 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 	    else
 		return working.fireEntry();
 
-	}, executor);
+	}, sequential);
     }
 
     public CompletionStage<RoutingStatus<S, E>> enterState(State<S> current) {
