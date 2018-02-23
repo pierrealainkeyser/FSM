@@ -137,8 +137,6 @@ public class StateMachineBuilder<S, E> {
 
     private final DelegatedDelayedEventConsumer<S, E> eventConsumer = new DelegatedDelayedEventConsumer<>();
 
-    private SequentialExecutor sequential = new SequentialExecutor();
-
     private Executor executor;
 
     private final List<TransitionBuilder<S, E>> transitions = new ArrayList<>();
@@ -216,11 +214,8 @@ public class StateMachineBuilder<S, E> {
     }
 
     public StateMachine<S, E> build() {
-	StateMachine<S, E> stateMachine = new StateMachine<>(sequential, buildRoot());
-	if (executor != null)
-	    eventConsumer.setDelegated(new ExecutorDelayedEventConsumer<>(executor, stateMachine));
-	else
-	    eventConsumer.setDelegated(stateMachine);
+	StateMachine<S, E> stateMachine = new StateMachine<>(executor == null ? new SequentialExecutor() : executor, buildRoot());
+	eventConsumer.setDelegated(stateMachine);
 	return stateMachine;
     }
 

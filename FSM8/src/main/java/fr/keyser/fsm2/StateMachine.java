@@ -2,19 +2,18 @@ package fr.keyser.fsm2;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
-import fr.keyser.fsm.SequentialExecutor;
+import java.util.concurrent.Executor;
 
 public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 
     private State<S> current;
 
-    private final SequentialExecutor sequential;
+    private final Executor executor;
 
     private final NodeState<S, E> root;
 
-    StateMachine(SequentialExecutor sequential, NodeState<S, E> root) {
-	this.sequential = sequential;
+    StateMachine(Executor sequential, NodeState<S, E> root) {
+	this.executor = sequential;
 	this.root = root;
 	this.current = root.firstChildOrSelf().getState();
     }
@@ -31,7 +30,7 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 		return status;
 	    }
 
-	}, sequential);
+	}, executor);
 	return cs.thenApply(this::merge);
     }
 
@@ -43,7 +42,7 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 	    else
 		return working.fireEntry();
 
-	}, sequential);
+	}, executor);
     }
 
     public CompletionStage<RoutingStatus<S, E>> enterState(State<S> current) {
