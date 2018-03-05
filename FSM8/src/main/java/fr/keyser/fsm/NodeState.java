@@ -1,4 +1,4 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
 import static java.util.stream.Collectors.toCollection;
 

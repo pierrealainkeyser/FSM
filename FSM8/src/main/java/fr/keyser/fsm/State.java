@@ -1,59 +1,68 @@
 package fr.keyser.fsm;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import fr.keyser.fsm.exception.FSMNullEventException;
+public final class State<S> {
 
-class State<S, E, C> {
+    private final List<S> states;
 
-    private final OnEnterAction<S, E, C> onEnter;
-
-    private final OnExitAction<S, E, C> onExit;
-
-    private final S state;
-
-    private final Map<E, Transition<S, E, C>> transitions;
-
-    private final boolean terminal;
-
-    public State(S state, OnEnterAction<S, E, C> onEnter, OnExitAction<S, E, C> onExit,
-	    Map<E, Transition<S, E, C>> transitions, boolean terminal) {
-	this.state = state;
-	this.onEnter = onEnter;
-	this.onExit = onExit;
-	this.transitions = transitions;
-	this.terminal = terminal;
+    public State(List<S> states) {
+	if (states.isEmpty())
+	    throw new IllegalArgumentException("empty states not allowed");
+	this.states = Collections.unmodifiableList(states);
     }
 
-    void visit(FSMVisitor<S, E> visitor) {
-	for (Transition<S, E, C> t : transitions.values())
-	    visitor.transition(state, t.getEvent(), t.getOnTransition(), t.getDestination());
+    @SafeVarargs
+    public State(S... states) {
+	this(Arrays.asList(states));
     }
 
-    Optional<Transition<S, E, C>> lookup(E event) throws FSMException {
-	if (event == null)
-	    throw new FSMNullEventException();
-
-	if (transitions.containsKey(event))
-	    return Optional.of(transitions.get(event));
-	else
-	    return Optional.empty();
+    /**
+     * Création d'un sous état
+     * 
+     * @param sub
+     * @return
+     */
+    public State<S> subState(S sub) {
+	ArrayList<S> st = new ArrayList<>(states);
+	st.add(sub);
+	return new State<>(st);
     }
 
-    OnEnterAction<S, E, C> getOnEnter() {
-	return onEnter;
+    public boolean isHierarchical() {
+	return states.size() > 1;
     }
 
-    OnExitAction<S, E, C> getOnExit() {
-	return onExit;
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((states == null) ? 0 : states.hashCode());
+	return result;
     }
 
-    boolean isTerminal() {
-	return terminal;
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	State<?> other = (State<?>) obj;
+	if (states == null) {
+	    if (other.states != null)
+		return false;
+	} else if (!states.equals(other.states))
+	    return false;
+	return true;
     }
 
-    S getState() {
-	return state;
+    @Override
+    public String toString() {
+	return "State" + states;
     }
 }

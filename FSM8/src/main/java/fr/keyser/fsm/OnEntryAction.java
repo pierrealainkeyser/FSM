@@ -1,4 +1,4 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
 /**
  * Une action pour l'entrée dans un état

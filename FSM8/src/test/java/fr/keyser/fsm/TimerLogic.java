@@ -1,10 +1,12 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import fr.keyser.fsm2.Event.Builder;
+import fr.keyser.fsm.DelayedEventConsumer;
+import fr.keyser.fsm.Event;
+import fr.keyser.fsm.Event.Builder;
 
 class TimerLogic {
 

@@ -1,4 +1,4 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
 /**
  * Action produite durant une transition

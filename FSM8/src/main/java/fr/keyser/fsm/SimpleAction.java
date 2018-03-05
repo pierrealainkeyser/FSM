@@ -1,4 +1,4 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
 @FunctionalInterface
 public interface SimpleAction {

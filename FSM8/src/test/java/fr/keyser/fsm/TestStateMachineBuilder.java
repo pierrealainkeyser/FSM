@@ -1,6 +1,6 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
-import static fr.keyser.fsm2.Event.create;
+import static fr.keyser.fsm.Event.create;
 
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -8,7 +8,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import fr.keyser.fsm2.StateMachineBuilder.StateBuilder;
+import fr.keyser.fsm.DelayedEventConsumer;
+import fr.keyser.fsm.Event;
+import fr.keyser.fsm.RoutingStatus;
+import fr.keyser.fsm.State;
+import fr.keyser.fsm.StateMachine;
+import fr.keyser.fsm.StateMachineBuilder;
+import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 
 public class TestStateMachineBuilder {
 

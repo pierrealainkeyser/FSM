@@ -1,10 +1,13 @@
-package fr.keyser.fsm2;
+package fr.keyser.fsm;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import fr.keyser.fsm2.StateMachineBuilder.StateBuilder;
+import fr.keyser.fsm.Event;
+import fr.keyser.fsm.StateMachine;
+import fr.keyser.fsm.StateMachineBuilder;
+import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 
 public class TimerMachine {
 
