@@ -56,12 +56,17 @@ class NodeState<S, E> {
 	    NodeState<S, E> me = NodeState.this;
 	    State<S> from = me.state;
 	    E eventValue = event.getValue();
+
 	    if (transition == null)
 		return RoutingStatus.noRouteFound(from, eventValue);
 
 	    try {
-		boolean valid = transition.validate(event);
+		boolean valid = me.validate(event);
 		if (!valid)
+		    return RoutingStatus.invalidEvent(from, eventValue);
+
+		boolean validTransition = transition.validate(event);
+		if (!validTransition)
 		    return RoutingStatus.invalidEvent(from, eventValue);
 
 		List<NodeState<S, E>> entryStack = destination.collect();
@@ -100,12 +105,15 @@ class NodeState<S, E> {
 
     private final Map<E, NodeTransition<S, E>> transitions;
 
+    private final List<TransitionGuard<E>> guards;
+
     public NodeState(State<S> state, Map<E, NodeTransition<S, E>> transitions, List<OnEntryAction<E>> onEntry,
-            List<OnExitAction<E>> onExit) {
+            List<OnExitAction<E>> onExit, List<TransitionGuard<E>> guards) {
 	this.state = state;
 	this.transitions = transitions;
 	this.onEntry = onEntry;
 	this.onExit = onExit;
+	this.guards = guards;
     }
 
     private void addParentThenMe(List<NodeState<S, E>> all) {
@@ -129,6 +137,16 @@ class NodeState<S, E> {
 	    }
 	}
 	return RoutingStatus.done(null, state, null);
+    }
+
+    private boolean validate(Event<E> event) throws Exception {
+	boolean valid = true;
+	for (TransitionGuard<E> g : guards) {
+	    valid = g.validate(event);
+	    if (!valid)
+		break;
+	}
+	return valid;
     }
 
     private List<NodeState<S, E>> collect() {

@@ -79,12 +79,21 @@ public class StateMachineBuilder<S, E> {
 
 	private List<OnExitAction<E>> exits;
 
+	private List<TransitionGuard<E>> guards;
+
 	private final List<TransitionBuilder<S, E>> transitions = new ArrayList<>();
 
 	private StateBuilder(StateMachineBuilder<S, E> builder, State<S> parent, State<S> state) {
 	    this.builder = builder;
 	    this.parent = parent;
 	    this.state = state;
+	}
+
+	public StateBuilder<S, E> guard(TransitionGuard<E> guard) {
+	    if (guards == null)
+		guards = new ArrayList<>();
+	    guards.add(guard);
+	    return this;
 	}
 
 	public StateBuilder<S, E> onEntry(SimpleAction onEntry) {
@@ -129,7 +138,7 @@ public class StateMachineBuilder<S, E> {
 
 	NodeState<S, E> build() {
 	    return new NodeState<>(state, transitions.stream().collect(transitionMapper()),
-	            entries, exits);
+	            entries, exits, guards == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(guards)));
 	}
     }
 
@@ -183,7 +192,7 @@ public class StateMachineBuilder<S, E> {
     }
 
     private NodeState<S, E> buildRoot() {
-	NodeState<S, E> root = new NodeState<>(null, transitions.stream().collect(transitionMapper()), null, null);
+	NodeState<S, E> root = new NodeState<>(null, transitions.stream().collect(transitionMapper()), null, null, Collections.emptyList());
 
 	Map<State<S>, NodeState<S, E>> alls = Collections
 	        .unmodifiableMap(builders.entrySet().stream()
