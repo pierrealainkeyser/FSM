@@ -10,22 +10,30 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import fr.keyser.pt.units.GrandArchitect;
-import fr.keyser.pt.units.Notable;
-import fr.keyser.pt.units.WoodNegociant;
-
 public class BuildingPlanner {
+
+    public static interface ProvideWoodForGold {
+
+    }
+
+    public static interface IgnoreBuildingBaseCost {
+
+    }
+
+    public static interface ProvideAnyResourceForGold {
+
+    }
 
     private final static Comparator<RawBuildingCost> MIN_COST = Comparator.comparingInt(RawBuildingCost::getGold);
     private RawBuildingCost available;
 
     private int baseCost;
 
-    private boolean hasGrandArchitect;
+    private boolean anyResourceForGold;
 
-    private boolean hasNotable;
+    private boolean ignoreBuildingBaseCost;
 
-    private boolean hasWoodNegociant;
+    private boolean woodForGold;
 
     public BuildingPlanner(PlayerBoardModel model, PlayerCounters counters, Stream<DeployedCard> cards) {
 	available = new RawBuildingCost()
@@ -38,12 +46,12 @@ public class BuildingPlanner {
 
 	cards.forEach(c -> {
 	    Card u = c.getCard();
-	    if (u instanceof Notable)
-		hasNotable = true;
-	    else if (u instanceof GrandArchitect)
-		hasGrandArchitect = true;
-	    else if (u instanceof WoodNegociant)
-		hasWoodNegociant = true;
+	    if (u instanceof IgnoreBuildingBaseCost)
+		ignoreBuildingBaseCost = true;
+	    else if (u instanceof ProvideAnyResourceForGold)
+		anyResourceForGold = true;
+	    else if (u instanceof ProvideWoodForGold)
+		woodForGold = true;
 	    else if (u instanceof Building)
 		buildingCount.incrementAndGet();
 	});
@@ -51,7 +59,7 @@ public class BuildingPlanner {
     }
 
     private RawBuildingCost buildCost(RawBuildingCost cost) {
-	if (hasNotable)
+	if (ignoreBuildingBaseCost)
 	    return goldGost(cost);
 	else
 	    return goldGost(cost.clone().gold(cost.getGold() + baseCost));
@@ -99,8 +107,8 @@ public class BuildingPlanner {
 
 	// modification du cout
 	RawBuildingCost altered = cost.clone();
-	if (hasGrandArchitect || hasWoodNegociant) {
-	    if (hasGrandArchitect) {
+	if (anyResourceForGold || woodForGold) {
+	    if (anyResourceForGold) {
 		increaseGoldCost(lacking, RawBuildingCost::getCrystal, altered, RawBuildingCost::crystal);
 		increaseGoldCost(lacking, RawBuildingCost::getFood, altered, RawBuildingCost::food);
 	    }
