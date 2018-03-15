@@ -106,7 +106,7 @@ public class BoardFSM {
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
 	int count = 5;
 	for (int i = 0; i < count; ++i)
-	    buildingSub.add(from.sub(i + ""));
+	    buildingSub.add(from.sub("d" + i));
 
 	for (int i = 0; i < count; ++i) {
 	    StateBuilder<String, BoardEvent> next = to;
@@ -127,7 +127,7 @@ public class BoardFSM {
 	int count = players.size();
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
 	for (int i = 0; i < count; ++i)
-	    buildingSub.add(from.sub(i + ""));
+	    buildingSub.add(from.sub("" + i));
 
 	for (int i = 0; i < count; ++i) {
 	    StateBuilder<String, BoardEvent> next = to;
@@ -138,7 +138,7 @@ public class BoardFSM {
 	}
     }
 
-    public void next() {
+    void next() {
 	stateMachine.push(BoardEvent.NEXT);
     }
 }

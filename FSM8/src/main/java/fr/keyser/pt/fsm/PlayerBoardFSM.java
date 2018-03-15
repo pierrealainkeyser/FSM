@@ -18,15 +18,19 @@ public class PlayerBoardFSM {
 	USER_INPUT, WAIT_FOR_BUILDING, WAIT_FOR_DEPLOY, WAIT_FOR_CARD, WAIT_FOR_INPUT, WAIT_NOOP
     }
 
-    private enum PlayerState {
-	BUILDING, CARD, IDLE, DEPLOY, INPUT, NOOP, WAITING_USER
-    }
+    private final static String BUILDING = "BUILDING";
+    private final static String CARD = "CARD";
+    private final static String IDLE = "IDLE";
+    private final static String DEPLOY = "DEPLOY";
+    private final static String INPUT = "INPUT";
+    private final static String NOOP = "NOOP";
+    private final static String WAITING_USER = "WAITING_USER";
 
     private Class<?> expectedInput;
 
     private final PlayerBoard player;
 
-    private final StateMachine<PlayerState, PlayerEvent> stateMachine;
+    private final StateMachine<String, PlayerEvent> stateMachine;
 
     private final BoardFSM boardFSM;
 
@@ -34,20 +38,20 @@ public class PlayerBoardFSM {
 	this.player = player;
 	this.boardFSM = boardFSM;
 
-	StateMachineBuilder<PlayerState, PlayerEvent> builder = new StateMachineBuilder<>();
-	StateBuilder<PlayerState, PlayerEvent> idle = builder.state(PlayerState.IDLE);
+	StateMachineBuilder<String, PlayerEvent> builder = new StateMachineBuilder<>();
+	StateBuilder<String, PlayerEvent> idle = builder.state(IDLE);
 
-	StateBuilder<PlayerState, PlayerEvent> waitingUser = builder.state(PlayerState.WAITING_USER).onExit(expectedInput(null));
-
-	// TODO
-	StateBuilder<PlayerState, PlayerEvent> deploy = waitingUser.sub(PlayerState.DEPLOY);
-
-	StateBuilder<PlayerState, PlayerEvent> input = waitingUser.sub(PlayerState.INPUT);
+	StateBuilder<String, PlayerEvent> waitingUser = builder.state(WAITING_USER).onExit(expectedInput(null));
 
 	// TODO
-	StateBuilder<PlayerState, PlayerEvent> building = waitingUser.sub(PlayerState.BUILDING);
-	StateBuilder<PlayerState, PlayerEvent> card = waitingUser.sub(PlayerState.CARD);
-	StateBuilder<PlayerState, PlayerEvent> noop = waitingUser.sub(PlayerState.NOOP);
+	StateBuilder<String, PlayerEvent> deploy = waitingUser.sub(DEPLOY);
+
+	StateBuilder<String, PlayerEvent> input = waitingUser.sub(INPUT);
+
+	// TODO
+	StateBuilder<String, PlayerEvent> building = waitingUser.sub(BUILDING);
+	StateBuilder<String, PlayerEvent> card = waitingUser.sub(CARD);
+	StateBuilder<String, PlayerEvent> noop = waitingUser.sub(NOOP);
 
 	idle.transition(PlayerEvent.WAIT_FOR_DEPLOY, deploy);
 	idle.transition(PlayerEvent.WAIT_FOR_INPUT, input);
@@ -72,7 +76,7 @@ public class PlayerBoardFSM {
 	return expectedInput;
     }
 
-    private <T> void onInput(StateBuilder<PlayerState, PlayerEvent> from, StateBuilder<PlayerState, PlayerEvent> to, Class<T> type,
+    private <T> void onInput(StateBuilder<String, PlayerEvent> from, StateBuilder<String, PlayerEvent> to, Class<T> type,
             Consumer<T> consumer) {
 	from.onEntry(expectedInput(type));
 	from.transition(PlayerEvent.USER_INPUT, to).guard(this::validateArgs).onTransition(wrapConsumer(consumer));

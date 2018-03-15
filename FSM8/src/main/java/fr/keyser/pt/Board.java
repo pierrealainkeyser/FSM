@@ -50,9 +50,9 @@ public class Board {
 	for (PlayerBoard player : players)
 	    player.computeDeployGain();
     }
-    
-    void moveToDiscard(MetaCard meta) {
 
+    void moveToDiscard(MetaCard meta) {
+	deck.getDiscarded().add(meta);
     }
 
     public void warPhase() {
@@ -120,6 +120,10 @@ public class Board {
 
     public int getTurnValue() {
 	return turn.getTurn();
+    }
+
+    public List<Building> getAvailableBuildings() {
+	return deck.getBuildings();
     }
 
 }
