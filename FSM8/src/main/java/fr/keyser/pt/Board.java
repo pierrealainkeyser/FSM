@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 import fr.keyser.pt.SpecialEffectScope.When;
 
-public class Board {
+public class Board implements BoardContract {
 
     private Turn turn;
 
@@ -13,10 +13,18 @@ public class Board {
 
     private MetaDeck deck;
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#distributeCards()
+     */
+    @Override
     public void distributeCards() {
 
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#passCardsToNext()
+     */
+    @Override
     public void passCardsToNext() {
 
     }
@@ -25,18 +33,34 @@ public class Board {
 	return turn.getTurn() == model.getPlayedTurn();
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#resetCounters()
+     */
+    @Override
     public void resetCounters() {
 	players.forEach(PlayerBoard::resetCounters);
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#newTurn()
+     */
+    @Override
     public void newTurn() {
 	turn.setTurn(turn.getTurn() + 1);
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#isLastTurn()
+     */
+    @Override
     public boolean isLastTurn() {
 	return turn.getTurn() == 4;
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#deployPhaseEffect()
+     */
+    @Override
     public void deployPhaseEffect() {
 
 	for (PlayerBoard player : players) {
@@ -46,6 +70,10 @@ public class Board {
 	}
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#endOfDeployPhase()
+     */
+    @Override
     public void endOfDeployPhase() {
 	for (PlayerBoard player : players)
 	    player.computeDeployGain();
@@ -55,6 +83,10 @@ public class Board {
 	deck.getDiscarded().add(meta);
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#warPhase()
+     */
+    @Override
     public void warPhase() {
 	for (PlayerBoard player : players)
 	    player.computeValues();
@@ -66,15 +98,27 @@ public class Board {
 	}
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#goldPhase()
+     */
+    @Override
     public void goldPhase() {
 	for (PlayerBoard player : players)
 	    player.gainGold();
 
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#buildPhase()
+     */
+    @Override
     public void buildPhase() {
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#agePhase()
+     */
+    @Override
     public void agePhase() {
 	for (PlayerBoard player : players) {
 	    player.clearInputActions();
@@ -83,6 +127,10 @@ public class Board {
 	}
     }
 
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#endAgePhase()
+     */
+    @Override
     public void endAgePhase() {
 	for (PlayerBoard player : players) {
 	    player.computeDyingGain();
@@ -114,7 +162,11 @@ public class Board {
 	return wins;
     }
 
-    public Stream<PlayerBoard> getPlayers() {
+    /* (non-Javadoc)
+     * @see fr.keyser.pt.BoardContract#getPlayers()
+     */
+    @Override
+    public Stream<? extends PlayerBoardContract> getPlayers() {
 	return players.stream();
     }
 

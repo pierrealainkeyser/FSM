@@ -51,9 +51,7 @@ import fr.keyser.pt.SpecialEffectScope.When;
  * @author pakeyser
  *
  */
-public final class PlayerBoard {
-
-
+public final class PlayerBoard implements PlayerBoardContract {
 
     private static final int POINT_PER_VICTORY = 3;
 
@@ -96,16 +94,28 @@ public final class PlayerBoard {
 	return board.sameTurn(model);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.keyser.pt.PlayerBoardContract#processDraft(int)
+     */
+    @Override
     public void processDraft(int id) {
 	List<MetaCard> toDeploy = model.getToDeploy();
 	removeDrafted(id, toDeploy::add);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.keyser.pt.PlayerBoardContract#processDiscard(int)
+     */
+    @Override
     public void processDiscard(int id) {
 	removeDrafted(id, board::moveToDiscard);
     }
 
-    public void removeDrafted(int id, Consumer<MetaCard> consumer) {
+    private void removeDrafted(int id, Consumer<MetaCard> consumer) {
 	List<MetaCard> toDraft = model.getToDraft();
 	Optional<MetaCard> first = toDraft.stream().filter(MetaCard.sameId(id)).findFirst();
 	if (first.isPresent()) {
@@ -115,6 +125,13 @@ public final class PlayerBoard {
 	}
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.keyser.pt.PlayerBoardContract#processDeployCardAction(fr.keyser.pt.
+     * DoDeployCard)
+     */
+    @Override
     public void processDeployCardAction(DoDeployCard action) {
 	Optional<MetaCard> first = model.getToDeploy().stream().filter(MetaCard.sameId(action.getSource())).findFirst();
 	if (first.isPresent()) {
@@ -131,6 +148,12 @@ public final class PlayerBoard {
 	}
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.keyser.pt.PlayerBoardContract#keepToDeploy(int)
+     */
+    @Override
     public void keepToDeploy(int id) {
 	Iterator<MetaCard> it = model.getToDeploy().iterator();
 	while (it.hasNext()) {
@@ -142,6 +165,13 @@ public final class PlayerBoard {
 	}
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.keyser.pt.PlayerBoardContract#processCardAction(fr.keyser.pt.CardAction)
+     */
+    @Override
     public void processCardAction(CardAction action) {
 	CardPositionSelector selector = model.getInputActions().remove(action.getSource());
 	selector.process(this, action.getTarget());
@@ -151,7 +181,7 @@ public final class PlayerBoard {
 	return asDeployedCard(building.stream());
     }
 
-    public void clearInputActions() {
+    void clearInputActions() {
 	model.getInputActions().clear();
     }
 
@@ -174,7 +204,7 @@ public final class PlayerBoard {
 	}
     }
 
-    public void fireEffect(When when) {
+    void fireEffect(When when) {
 
 	List<FiredEffect> fired = units().flatMap(d -> d.firedEffects(when).map(e -> new FiredEffect(d, e))).collect(Collectors.toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
@@ -182,12 +212,12 @@ public final class PlayerBoard {
 
     }
 
-    public void collectDying() {
+    void collectDying() {
 	dying.clear();
 	units().filter(DeployedCard::willDie).forEach(dying::add);
     }
 
-    public void computeDeployGain() {
+    void computeDeployGain() {
 	all().forEach(DeployedCard::computeDeployGain);
 	counters(all()).forEach(counters::sumDeployGain);
 
@@ -195,7 +225,7 @@ public final class PlayerBoard {
 	model.addLegend(counters.getDeployLegend());
     }
 
-    public void computeDyingGain() {
+    void computeDyingGain() {
 	all().forEach(DeployedCard::computeDyingGain);
 	counters(all()).forEach(counters::sumDyingGain);
 
@@ -203,7 +233,7 @@ public final class PlayerBoard {
 	model.addLegend(counters.getDieLegend());
     }
 
-    public void computeValues() {
+    void computeValues() {
 	counters.setGoldGain(2);
 
 	all().forEach(DeployedCard::computeGoldGain);
@@ -213,7 +243,7 @@ public final class PlayerBoard {
 	counters(all()).forEach(counters::sumValues);
     }
 
-    public void computeWarGain() {
+    void computeWarGain() {
 	counters.setWarLegend(POINT_PER_VICTORY * getVictoriousWar());
 
 	units().forEach(DeployedCard::computeWarGain);
@@ -232,11 +262,11 @@ public final class PlayerBoard {
 	return Arrays.asList(ctx);
     }
 
-    public void doAge() {
+    void doAge() {
 	units().forEach(DeployedCard::doAge);
     }
 
-    public Stream<DeployedCard> dyings() {
+    Stream<DeployedCard> dyings() {
 	return dying.stream();
     }
 
@@ -258,36 +288,32 @@ public final class PlayerBoard {
 	return list.get(position.getIndex());
     }
 
-    public void gainGold() {
+    void gainGold() {
 	model.addGold(counters.getGoldGain());
     }
 
-    public int getCombat() {
+    int getCombat() {
 	return counters.getCombat();
     }
 
-    public int getCrystal() {
+    int getCrystal() {
 	return counters.getCrystal();
     }
 
-    public int getFood() {
+    int getFood() {
 	return counters.getFood();
     }
 
-    public int getGoldGain() {
+    int getGoldGain() {
 	return counters.getGoldGain();
     }
 
-    public int getVictoriousWar() {
+    int getVictoriousWar() {
 	return counters.getVictoriousWar();
     }
 
-    public int getWood() {
+    int getWood() {
 	return counters.getFood();
-    }
-
-    public boolean hasInputActions() {
-	return !model.getInputActions().isEmpty();
     }
 
     public void preserveFromDeath(CardPosition position) {
@@ -300,17 +326,17 @@ public final class PlayerBoard {
 
     }
 
-    public void removeDead() {
+    void removeDead() {
 	dyings().map(DeployedCard::getPosition).map(this::find).forEach(CardSlot::clear);
 	dying.clear();
     }
 
-    public void resetCounters() {
+    void resetCounters() {
 	counters = new PlayerCounters();
 	all().forEach(DeployedCard::resetCounters);
     }
 
-    public void setVictoriousWar(int victoriousWar) {
+    void setVictoriousWar(int victoriousWar) {
 	counters.setVictoriousWar(victoriousWar);
     }
 

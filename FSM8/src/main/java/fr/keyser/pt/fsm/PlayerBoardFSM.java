@@ -10,7 +10,7 @@ import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.CardAction;
 import fr.keyser.pt.DoDeployCard;
-import fr.keyser.pt.PlayerBoard;
+import fr.keyser.pt.PlayerBoardContract;
 
 public class PlayerBoardFSM {
 
@@ -28,20 +28,22 @@ public class PlayerBoardFSM {
 
     private Class<?> expectedInput;
 
-    private final PlayerBoard player;
+    private String appearance;
+
+    private final PlayerBoardContract contract;
 
     private final StateMachine<String, PlayerEvent> stateMachine;
 
     private final BoardFSM boardFSM;
 
-    public PlayerBoardFSM(PlayerBoard player, BoardFSM boardFSM) {
-	this.player = player;
+    public PlayerBoardFSM(PlayerBoardContract contract, BoardFSM boardFSM) {
+	this.contract = contract;
 	this.boardFSM = boardFSM;
 
 	StateMachineBuilder<String, PlayerEvent> builder = new StateMachineBuilder<>();
-	StateBuilder<String, PlayerEvent> idle = builder.state(IDLE);
+	StateBuilder<String, PlayerEvent> idle = builder.state(IDLE).onEntry(expect(null, "idle"));
 
-	StateBuilder<String, PlayerEvent> waitingUser = builder.state(WAITING_USER).onExit(expectedInput(null));
+	StateBuilder<String, PlayerEvent> waitingUser = builder.state(WAITING_USER);
 
 	// TODO
 	StateBuilder<String, PlayerEvent> deploy = waitingUser.sub(DEPLOY);
@@ -59,17 +61,19 @@ public class PlayerBoardFSM {
 	idle.transition(PlayerEvent.WAIT_FOR_CARD, card);
 	idle.transition(PlayerEvent.WAIT_NOOP, noop);
 
-	onInput(input, idle, CardActionCommand.class, this::processInput);
-	onInput(deploy, idle, DoDeployCardCommand.class, this::processDeploy);
-	onInput(card, idle, DraftCommand.class, this::processDraft);
-	onInput(noop, idle, Object.class, e -> {
+	onInput(input, idle, CardActionCommand.class, "activateCard", this::processInput);
+	onInput(deploy, idle, DoDeployCardCommand.class, "deployCard", this::processDeploy);
+	onInput(card, idle, DraftCommand.class, "selectCard", this::processDraft);
+	onInput(noop, idle, Object.class, "confirmNoop", e -> {
 	});
 	stateMachine = builder.build();
-	stateMachine.enterInitialState();
     }
 
-    private SimpleAction expectedInput(Class<?> expectedInput) {
-	return () -> this.expectedInput = expectedInput;
+    private SimpleAction expect(Class<?> expectedInput, String appearance) {
+	return () -> {
+	    this.expectedInput = expectedInput;
+	    this.appearance = appearance;
+	};
     }
 
     public Class<?> getExpectedInput() {
@@ -77,28 +81,28 @@ public class PlayerBoardFSM {
     }
 
     private <T> void onInput(StateBuilder<String, PlayerEvent> from, StateBuilder<String, PlayerEvent> to, Class<T> type,
-            Consumer<T> consumer) {
-	from.onEntry(expectedInput(type));
+            String appeareance, Consumer<T> consumer) {
+	from.onEntry(expect(type, appeareance));
 	from.transition(PlayerEvent.USER_INPUT, to).guard(this::validateArgs).onTransition(wrapConsumer(consumer));
     }
 
     private void processInput(CardActionCommand command) {
 	for (CardAction action : command.getActions())
-	    player.processCardAction(action);
+	    contract.processCardAction(action);
     }
 
     private void processDraft(DraftCommand command) {
-	player.processDraft(command.getDraft());
+	contract.processDraft(command.getDraft());
 
 	if (command.getDiscard() != null)
-	    player.processDiscard(command.getDiscard());
+	    contract.processDiscard(command.getDiscard());
     }
 
     private void processDeploy(DoDeployCardCommand command) {
 	for (DoDeployCard action : command.getActions())
-	    player.processDeployCardAction(action);
+	    contract.processDeployCardAction(action);
 
-	player.keepToDeploy(command.getKeep());
+	contract.keepToDeploy(command.getKeep());
     }
 
     public void receiveInput(Object input) {
@@ -113,23 +117,23 @@ public class PlayerBoardFSM {
 	    return expectedInput.isAssignableFrom(args.getClass());
     }
 
-    public void waitForBuilding() {
+    void waitForBuilding() {
 	stateMachine.push(PlayerEvent.WAIT_FOR_BUILDING);
     }
 
-    public void waitForDeploy() {
+    void waitForDeploy() {
 	stateMachine.push(PlayerEvent.WAIT_FOR_DEPLOY);
     }
 
-    public void waitForCard() {
+    void waitForCard() {
 	stateMachine.push(PlayerEvent.WAIT_FOR_CARD);
     }
 
-    public void waitForInput() {
+    void waitForInput() {
 	stateMachine.push(PlayerEvent.WAIT_FOR_INPUT);
     }
 
-    public void waitFor() {
+    void waitFor() {
 	stateMachine.push(PlayerEvent.WAIT_NOOP);
     }
 
@@ -144,7 +148,7 @@ public class PlayerBoardFSM {
 	};
     }
 
-    public PlayerBoard getPlayer() {
-	return player;
+    public String getAppearance() {
+	return appearance;
     }
 }

@@ -9,7 +9,7 @@ import fr.keyser.fsm.DelayedEventConsumer;
 import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
-import fr.keyser.pt.Board;
+import fr.keyser.pt.BoardContract;
 
 public class BoardFSM {
 
@@ -27,15 +27,15 @@ public class BoardFSM {
 	NEXT, END
     }
 
-    private final Board board;
+    private final BoardContract contract;
 
     private final StateMachine<String, BoardEvent> stateMachine;
 
     private final List<PlayerBoardFSM> players;
 
-    public BoardFSM(Board board) {
-	this.board = board;
-	this.players = Collections.unmodifiableList(board.getPlayers().map(p -> new PlayerBoardFSM(p, this)).collect(Collectors.toList()));
+    public BoardFSM(BoardContract b) {
+	this.contract = b;
+	this.players = Collections.unmodifiableList(this.contract.getPlayers().map(p -> new PlayerBoardFSM(p, this)).collect(Collectors.toList()));
 	StateMachineBuilder<String, BoardEvent> builder = new StateMachineBuilder<>();
 	DelayedEventConsumer<String, BoardEvent> ec = builder.eventConsummer();
 
@@ -60,28 +60,28 @@ public class BoardFSM {
 	chainedSubByPlayers(building, age);
 	chainedSubByPlayers(age, checkEOG);
 
-	turn.onEntry(board::resetCounters);
-	draft.onEntry(this.board::distributeCards);
+	turn.onEntry(this.contract::resetCounters);
+	draft.onEntry(this.contract::distributeCards);
 
 	play.onEntry(this::waitForDeploy);
 
-	deploy.onEntry(this.board::deployPhaseEffect).onEntry(this::waitForInput);
-	deploy.onExit(this.board::endOfDeployPhase);
+	deploy.onEntry(this.contract::deployPhaseEffect).onEntry(this::waitForInput);
+	deploy.onExit(this.contract::endOfDeployPhase);
 
-	war.onEntry(this.board::warPhase).onEntry(this::waitFor);
-	gold.onEntry(this.board::goldPhase).onEntry(this::waitFor);
-	building.onEntry(this.board::buildPhase).onEntry(this::waitForBuilding);
+	war.onEntry(this.contract::warPhase).onEntry(this::waitFor);
+	gold.onEntry(this.contract::goldPhase).onEntry(this::waitFor);
+	building.onEntry(this.contract::buildPhase).onEntry(this::waitForBuilding);
 
-	age.onEntry(this.board::agePhase).onEntry(this::waitForInput);
-	age.onExit(this.board::endAgePhase);
+	age.onEntry(this.contract::agePhase).onEntry(this::waitForInput);
+	age.onExit(this.contract::endAgePhase);
 
 	checkEOG.onEntry(() -> {
-	    if (board.isLastTurn())
+	    if (this.contract.isLastTurn())
 		ec.push(BoardEvent.END);
 	    else
 		ec.push(BoardEvent.NEXT);
 	});
-	checkEOG.transition(BoardEvent.NEXT, turn).onTransition(this.board::newTurn);
+	checkEOG.transition(BoardEvent.NEXT, turn).onTransition(this.contract::newTurn);
 
 	this.stateMachine = builder.build();
     }
@@ -119,7 +119,7 @@ public class BoardFSM {
 	    chainedSubByPlayers(current, next);
 
 	    if (notFirst && notLast)
-		current.onEntry(this.board::passCardsToNext);
+		current.onEntry(this.contract::passCardsToNext);
 	}
     }
 
