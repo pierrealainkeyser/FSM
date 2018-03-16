@@ -66,15 +66,19 @@ public class BoardFSM {
 
 	play.onEntry(this::waitForDeploy);
 
-	deploy.onEntry(this.contract::deployPhaseEffect).onEntry(this::waitForInput);
-	deploy.onExit(this.contract::endOfDeployPhase);
+	deploy.onEntry(this.contract::deployPhaseEffect)
+	        .onEntry(this::waitForInput)
+	        .onExit(this.contract::endOfDeployPhase);
 
 	war.onEntry(this.contract::warPhase).onEntry(this::waitFor);
 	gold.onEntry(this.contract::goldPhase).onEntry(this::waitFor);
-	building.onEntry(this.contract::buildPhase).onEntry(this::waitForBuilding).onExit(this.contract::endBuildPhase);
+	building.onEntry(this.contract::buildPhase)
+	        .onEntry(this::waitForBuilding)
+	        .onExit(this.contract::endBuildPhase);
 
-	age.onEntry(this.contract::agePhase).onEntry(this::waitForInput);
-	age.onExit(this.contract::endAgePhase);
+	age.onEntry(this.contract::agePhase)
+	        .onEntry(this::waitForInput)
+	        .onExit(this.contract::endAgePhase);
 
 	checkEOG.onEntry(() -> {
 	    if (this.contract.isLastTurn())
@@ -82,7 +86,8 @@ public class BoardFSM {
 	    else
 		ec.push(BoardEvent.NEXT);
 	});
-	checkEOG.transition(BoardEvent.NEXT, turn).onTransition(this.contract::newTurn);
+	checkEOG.transition(BoardEvent.NEXT, turn)
+	        .onTransition(this.contract::newTurn);
 
 	this.stateMachine = builder.build();
     }
