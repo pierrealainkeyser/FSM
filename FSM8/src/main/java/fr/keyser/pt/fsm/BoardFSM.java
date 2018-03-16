@@ -35,7 +35,8 @@ public class BoardFSM {
 
     public BoardFSM(BoardContract b) {
 	this.contract = b;
-	this.players = Collections.unmodifiableList(this.contract.getPlayers().map(p -> new PlayerBoardFSM(p, this)).collect(Collectors.toList()));
+	this.players = Collections
+	        .unmodifiableList(this.contract.getPlayers().map(p -> new PlayerBoardFSM(p, this)).collect(Collectors.toList()));
 	StateMachineBuilder<String, BoardEvent> builder = new StateMachineBuilder<>();
 	DelayedEventConsumer<String, BoardEvent> ec = builder.eventConsummer();
 
@@ -104,7 +105,7 @@ public class BoardFSM {
 
     private void chainDraft(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
-	int count = 5;
+	int count = 4;
 	for (int i = 0; i < count; ++i)
 	    buildingSub.add(from.sub("d" + i));
 
@@ -124,7 +125,7 @@ public class BoardFSM {
     }
 
     private void chainedSubByPlayers(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {
-	int count = players.size();
+	int count = players.size() - 1;
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
 	for (int i = 0; i < count; ++i)
 	    buildingSub.add(from.sub("" + i));
