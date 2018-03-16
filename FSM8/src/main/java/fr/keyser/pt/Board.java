@@ -1,6 +1,8 @@
 package fr.keyser.pt;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.SpecialEffectScope.When;
@@ -13,27 +15,41 @@ public class Board implements BoardContract {
 
     private MetaDeck deck;
 
-    /* (non-Javadoc)
-     * @see fr.keyser.pt.BoardContract#distributeCards()
-     */
     @Override
     public void distributeCards() {
+	List<MetaCard> cards = deck.getCards();
 
+	int nb = 5;
+	if (players.size() == 2)
+	    nb = 9;
+
+	for (PlayerBoard player : players) {
+	    List<MetaCard> draft = new ArrayList<>();
+	    for (int i = 0; i < nb; ++i)
+		draft.add(cards.remove(0));
+
+	    player.setToDraft(draft);
+	}
     }
 
-    /* (non-Javadoc)
-     * @see fr.keyser.pt.BoardContract#passCardsToNext()
-     */
     @Override
     public void passCardsToNext() {
+	boolean even = turn.getTurn() % 2 == 0;
+	int direction = even ? 1 : -1;
 
+	List<List<MetaCard>> toDraft = players.stream().map(PlayerBoard::getToDraft).collect(Collectors.toList());
+
+	for (int i = 0; i < players.size(); ++i)
+	    players.get(i).setToDraft(next(toDraft, i, direction));
     }
 
     boolean sameTurn(CardModel model) {
 	return turn.getTurn() == model.getPlayedTurn();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#resetCounters()
      */
     @Override
@@ -41,7 +57,9 @@ public class Board implements BoardContract {
 	players.forEach(PlayerBoard::resetCounters);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#newTurn()
      */
     @Override
@@ -49,7 +67,9 @@ public class Board implements BoardContract {
 	turn.setTurn(turn.getTurn() + 1);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#isLastTurn()
      */
     @Override
@@ -57,7 +77,9 @@ public class Board implements BoardContract {
 	return turn.getTurn() == 4;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#deployPhaseEffect()
      */
     @Override
@@ -70,7 +92,9 @@ public class Board implements BoardContract {
 	}
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#endOfDeployPhase()
      */
     @Override
@@ -83,7 +107,9 @@ public class Board implements BoardContract {
 	deck.getDiscarded().add(meta);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#warPhase()
      */
     @Override
@@ -98,7 +124,9 @@ public class Board implements BoardContract {
 	}
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#goldPhase()
      */
     @Override
@@ -108,14 +136,27 @@ public class Board implements BoardContract {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#buildPhase()
      */
     @Override
     public void buildPhase() {
+	for (PlayerBoard player : players)
+	    player.collectBuilding(deck.getBuildings());
+
     }
 
-    /* (non-Javadoc)
+    @Override
+    public void endBuildPhase() {
+	for (PlayerBoard player : players)
+	    player.clearBuilding();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#agePhase()
      */
     @Override
@@ -127,7 +168,9 @@ public class Board implements BoardContract {
 	}
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#endAgePhase()
      */
     @Override
@@ -138,15 +181,21 @@ public class Board implements BoardContract {
 	}
     }
 
+    private static <T> T next(List<T> input, int current, int direction) {
+	int size = input.size();
+	int directionMod = direction % size;
+	return input.get((size + current + directionMod) % size);
+    }
+
     private int warWinned(int playerIndex) {
 
 	int size = players.size();
 
 	int current = players.get(playerIndex).getCombat();
-	int right = players.get((playerIndex + 1) % size).getCombat();
+	int right = next(players, playerIndex, +1).getCombat();
 	int wins = 0;
 	if (size > 2) {
-	    int left = players.get((size + (playerIndex - 1)) % size).getCombat();
+	    int left = next(players, playerIndex, -1).getCombat();
 
 	    if (current >= left)
 		++wins;
@@ -162,7 +211,9 @@ public class Board implements BoardContract {
 	return wins;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see fr.keyser.pt.BoardContract#getPlayers()
      */
     @Override
@@ -173,9 +224,4 @@ public class Board implements BoardContract {
     public int getTurnValue() {
 	return turn.getTurn();
     }
-
-    public List<Building> getAvailableBuildings() {
-	return deck.getBuildings();
-    }
-
 }

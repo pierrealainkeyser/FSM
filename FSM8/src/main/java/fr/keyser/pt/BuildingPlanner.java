@@ -2,13 +2,17 @@ package fr.keyser.pt;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import fr.keyser.pt.BuildingConstruction.BuildType;
 
 public class BuildingPlanner {
 
@@ -35,7 +39,11 @@ public class BuildingPlanner {
 
     private boolean woodForGold;
 
-    public BuildingPlanner(PlayerBoardModel model, PlayerCounters counters, Stream<DeployedCard> cards) {
+    private final Set<String> buildLevel1 = new HashSet<>();
+
+    private final Set<String> buildLevel2 = new HashSet<>();
+
+    BuildingPlanner(PlayerBoardModel model, PlayerCounters counters, Stream<DeployedCard> cards) {
 	available = new RawBuildingCost()
 	        .crystal(counters.getCrystal())
 	        .food(counters.getFood())
@@ -52,10 +60,40 @@ public class BuildingPlanner {
 		anyResourceForGold = true;
 	    else if (u instanceof ProvideWoodForGold)
 		woodForGold = true;
-	    else if (u instanceof Building)
+
+	    if (u instanceof Building) {
 		buildingCount.incrementAndGet();
+		if (BuildingLevel.LEVEL1 == c.getLevel())
+		    buildLevel1.add(u.getName());
+		else
+		    buildLevel2.add(u.getName());
+	    }
 	});
 	baseCost = 2 * buildingCount.get();
+    }
+
+    List<BuildingConstruction> compute(List<MetaCard> bluePrints) {
+	List<BuildingConstruction> plan = new ArrayList<>();
+	for (MetaCard meta : bluePrints) {
+	    Building bluePrint = (Building) meta.getCard();
+	    String name = bluePrint.getName();
+	    if (buildLevel1.contains(name)) {
+
+		upgrade(bluePrint).ifPresent(r -> {
+		    plan.add(new BuildingConstruction(meta, r.getGold(), BuildType.UPGRADE, BuildingLevel.LEVEL2));
+		});
+
+	    } else if (!buildLevel2.contains(name)) {
+		buildLevel1(bluePrint).ifPresent(r -> {
+		    plan.add(new BuildingConstruction(meta, r.getGold(), BuildType.BUILD, BuildingLevel.LEVEL1));
+		});
+
+		buildLevel2(bluePrint).ifPresent(r -> {
+		    plan.add(new BuildingConstruction(meta, r.getGold(), BuildType.BUILD, BuildingLevel.LEVEL2));
+		});
+	    }
+	}
+	return plan;
     }
 
     private RawBuildingCost buildCost(RawBuildingCost cost) {
@@ -65,7 +103,7 @@ public class BuildingPlanner {
 	    return goldGost(cost.clone().gold(cost.getGold() + baseCost));
     }
 
-    public Optional<RawBuildingCost> buildLevel1(Building building) {
+    private Optional<RawBuildingCost> buildLevel1(Building building) {
 	List<RawBuildingCost> cost = new ArrayList<>();
 
 	RawBuildingCost level1 = building.getLevel1();
@@ -77,7 +115,7 @@ public class BuildingPlanner {
 	return cost.stream().filter(Objects::nonNull).min(MIN_COST);
     }
 
-    public Optional<RawBuildingCost> buildLevel2(Building building) {
+    private Optional<RawBuildingCost> buildLevel2(Building building) {
 	List<RawBuildingCost> cost = new ArrayList<>();
 
 	RawBuildingCost level1 = building.getLevel1();
@@ -133,7 +171,7 @@ public class BuildingPlanner {
 
     }
 
-    public Optional<RawBuildingCost> upgrade(Building building) {
+    private Optional<RawBuildingCost> upgrade(Building building) {
 	List<RawBuildingCost> cost = new ArrayList<>();
 
 	RawBuildingCost level2 = building.getLevel2();

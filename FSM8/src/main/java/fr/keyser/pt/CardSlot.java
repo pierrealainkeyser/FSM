@@ -14,6 +14,14 @@ public final class CardSlot {
 	this.position = position;
     }
 
+    public void upgrade() {
+	card.ifPresent(c -> c.setLevel(BuildingLevel.LEVEL2));
+    }
+
+    public boolean isCard(MetaCard meta) {
+	return meta.equals(card.map(DeployedCard::getMeta).orElse(null));
+    }
+
     public void build(MetaCard building, BuildingLevel level) {
 	CardModel model = new CardModel();
 	model.setLevel(level);
@@ -32,6 +40,14 @@ public final class CardSlot {
 
     public void clear() {
 	card = Optional.empty();
+    }
+
+    public boolean isPresent() {
+	return card.isPresent();
+    }
+
+    public boolean isEmpty() {
+	return !isPresent();
     }
 
     public Optional<DeployedCard> getCard() {

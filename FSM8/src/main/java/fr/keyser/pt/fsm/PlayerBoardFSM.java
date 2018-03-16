@@ -64,6 +64,7 @@ public class PlayerBoardFSM {
 	onInput(input, idle, CardActionCommand.class, "activateCard", this::processInput);
 	onInput(deploy, idle, DoDeployCardCommand.class, "deployCard", this::processDeploy);
 	onInput(card, idle, DraftCommand.class, "selectCard", this::processDraft);
+	onInput(building, idle, BuildCommand.class, "build", this::processuBuilding);
 	onInput(noop, idle, Object.class, "confirmNoop", e -> {
 	});
 	stateMachine = builder.build();
@@ -89,6 +90,12 @@ public class PlayerBoardFSM {
     private void processInput(CardActionCommand command) {
 	for (CardAction action : command.getActions())
 	    contract.processCardAction(action);
+    }
+    
+    private void processuBuilding(BuildCommand command) {
+	Integer index=command.getIndex();
+	if(index!=null)
+	    contract.doBuild(index);
     }
 
     private void processDraft(DraftCommand command) {

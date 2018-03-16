@@ -12,4 +12,6 @@ public interface PlayerBoardContract {
 
     void processCardAction(CardAction action);
 
+    void doBuild(int index);
+
 }

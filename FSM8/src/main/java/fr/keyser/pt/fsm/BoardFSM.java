@@ -70,7 +70,7 @@ public class BoardFSM {
 
 	war.onEntry(this.contract::warPhase).onEntry(this::waitFor);
 	gold.onEntry(this.contract::goldPhase).onEntry(this::waitFor);
-	building.onEntry(this.contract::buildPhase).onEntry(this::waitForBuilding);
+	building.onEntry(this.contract::buildPhase).onEntry(this::waitForBuilding).onExit(this.contract::endBuildPhase);
 
 	age.onEntry(this.contract::agePhase).onEntry(this::waitForInput);
 	age.onExit(this.contract::endAgePhase);

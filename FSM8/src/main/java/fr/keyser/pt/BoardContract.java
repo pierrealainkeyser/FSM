@@ -30,4 +30,6 @@ public interface BoardContract {
 
     Stream<? extends PlayerBoardContract> getPlayers();
 
+    void endBuildPhase();
+
 }

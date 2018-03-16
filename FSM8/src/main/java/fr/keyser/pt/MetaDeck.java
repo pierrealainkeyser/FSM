@@ -10,7 +10,7 @@ public class MetaDeck {
 
     private List<MetaCard> discarded = new ArrayList<>();
 
-    private List<Building> buildings = new ArrayList<>();
+    private List<MetaCard> buildings = new ArrayList<>();
 
     public void load(Card card, int count) {
 	for (int i = 0; i < count; ++i) {
@@ -35,11 +35,11 @@ public class MetaDeck {
 	this.discarded = discarded;
     }
 
-    public List<Building> getBuildings() {
+    public List<MetaCard> getBuildings() {
 	return Collections.unmodifiableList(buildings);
     }
 
-    public void setBuildings(List<Building> buildings) {
+    public void setBuildings(List<MetaCard> buildings) {
 	this.buildings = buildings;
     }
 }

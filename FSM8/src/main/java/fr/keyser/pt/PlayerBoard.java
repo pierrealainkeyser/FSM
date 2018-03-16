@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fr.keyser.pt.BuildingConstruction.BuildType;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.SpecialEffectScope.When;
 
@@ -82,6 +83,14 @@ public final class PlayerBoard implements PlayerBoardContract {
 	this.board = board;
     }
 
+    List<MetaCard> getToDraft() {
+	return model.getToDraft();
+    }
+
+    void setToDraft(List<MetaCard> toDraft) {
+	model.setToDraft(toDraft);
+    }
+
     void addInputAction(DeployedCard ctx, CardPositionSelector input) {
 	model.getInputActions().put(ctx.getPosition(), input);
     }
@@ -148,6 +157,26 @@ public final class PlayerBoard implements PlayerBoardContract {
 	}
     }
 
+    public void clearBuilding() {
+	model.getBuildPlan().clear();
+    }
+
+    @Override
+    public void doBuild(int index) {
+	BuildingConstruction plan = model.getBuildPlan().get(index);
+	MetaCard meta = plan.getBuilding();
+
+	if (BuildType.UPGRADE == plan.getType()) {
+	    CardSlot slot = building.stream().filter(c -> c.isCard(meta)).findFirst().get();
+	    slot.upgrade();
+
+	} else {
+	    CardSlot slot = building.stream().filter(CardSlot::isEmpty).findFirst().get();
+	    slot.build(meta, plan.getLevel());
+	}
+	model.addGold(plan.getGoldCost());
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -210,6 +239,11 @@ public final class PlayerBoard implements PlayerBoardContract {
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
 	fired.forEach(FiredEffect::fire);
 
+    }
+
+    void collectBuilding(List<MetaCard> bluePrints) {
+	List<BuildingConstruction> buildPlan = new BuildingPlanner(model, counters, all()).compute(bluePrints);
+	model.setBuildPlan(buildPlan);
     }
 
     void collectDying() {

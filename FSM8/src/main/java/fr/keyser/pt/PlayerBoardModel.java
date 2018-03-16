@@ -17,6 +17,8 @@ public final class PlayerBoardModel {
 
     private List<MetaCard> toDeploy = new ArrayList<>();
 
+    private List<BuildingConstruction> buildPlan = new ArrayList<>();
+
     public int getGold() {
 	return gold;
     }
@@ -63,6 +65,14 @@ public final class PlayerBoardModel {
 
     public void setToDeploy(List<MetaCard> toDeploy) {
 	this.toDeploy = toDeploy;
+    }
+
+    public List<BuildingConstruction> getBuildPlan() {
+        return buildPlan;
+    }
+
+    public void setBuildPlan(List<BuildingConstruction> buildPlan) {
+        this.buildPlan = buildPlan;
     }
 
 }
