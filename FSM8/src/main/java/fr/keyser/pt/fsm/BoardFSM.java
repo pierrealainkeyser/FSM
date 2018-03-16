@@ -125,7 +125,7 @@ public class BoardFSM {
     }
 
     private void chainedSubByPlayers(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {
-	int count = players.size() - 1;
+	int count = players.size();
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
 	for (int i = 0; i < count; ++i)
 	    buildingSub.add(from.sub("" + i));
