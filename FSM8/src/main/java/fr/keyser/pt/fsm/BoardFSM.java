@@ -112,15 +112,13 @@ public class BoardFSM {
 	for (int i = 0; i < count; ++i) {
 	    StateBuilder<String, BoardEvent> next = to;
 	    boolean notLast = i < count - 1;
-	    boolean notFirst = i > 0;
 	    if (notLast)
 		next = buildingSub.get(i + 1);
 
 	    StateBuilder<String, BoardEvent> current = buildingSub.get(i);
 	    chainedSubByPlayers(current, next);
 
-	    if (notFirst && notLast)
-		current.onEntry(this.contract::passCardsToNext);
+	    current.onExit(this.contract::passCardsToNext);
 	}
     }
 
