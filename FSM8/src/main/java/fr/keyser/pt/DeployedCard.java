@@ -118,6 +118,10 @@ public class DeployedCard {
     public int getCombat() {
 	return counters.getCombat();
     }
+    
+    public boolean isMayCombat() {
+	return counters.isMayCombat();
+    }
 
     CardCounters getCounters() {
 	return counters;

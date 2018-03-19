@@ -10,6 +10,7 @@ import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.BoardContract;
+import fr.keyser.pt.BoardVisitor;
 
 public class BoardFSM {
 
@@ -90,6 +91,11 @@ public class BoardFSM {
 	        .onTransition(this.contract::newTurn);
 
 	this.stateMachine = builder.build();
+    }
+
+    public void visit(BoardVisitor visitor) {
+	visitor.turn(contract.getTurnValue(), "");
+	players.forEach(p -> p.visit(visitor));
     }
 
     public void start() {

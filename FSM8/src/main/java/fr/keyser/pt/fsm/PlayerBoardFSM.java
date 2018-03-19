@@ -11,6 +11,7 @@ import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.CardAction;
 import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.PlayerBoardContract;
+import fr.keyser.pt.PlayerBoardVisitor;
 
 public class PlayerBoardFSM {
 
@@ -59,11 +60,16 @@ public class PlayerBoardFSM {
 
 	onInput(input, idle, CardActionCommand.class, "activateCard", this::processInput);
 	onInput(deploy, idle, DoDeployCardCommand.class, "deployCard", this::processDeploy);
-	onInput(draft, idle, DraftCommand.class, "selectCard", this::processDraft);
+	onInput(draft, idle, DraftCommand.class, "draftCard", this::processDraft);
 	onInput(building, idle, BuildCommand.class, "build", this::processuBuilding);
 	onInput(noop, idle, Object.class, "confirmNoop", e -> {
 	});
 	stateMachine = builder.build();
+    }
+
+    public void visit(PlayerBoardVisitor visitor) {
+	contract.visit(visitor);
+	visitor.state(contract.getUuid(), appearance);
     }
 
     private SimpleAction expect(Class<?> expectedInput, String appearance) {
@@ -87,10 +93,10 @@ public class PlayerBoardFSM {
 	for (CardAction action : command.getActions())
 	    contract.processCardAction(action);
     }
-    
+
     private void processuBuilding(BuildCommand command) {
-	Integer index=command.getIndex();
-	if(index!=null)
+	Integer index = command.getIndex();
+	if (index != null)
 	    contract.doBuild(index);
     }
 

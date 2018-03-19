@@ -237,7 +237,9 @@ public class Board implements BoardContract {
 	return players.stream();
     }
 
+    @Override
     public int getTurnValue() {
 	return turn.getTurn();
     }
+
 }

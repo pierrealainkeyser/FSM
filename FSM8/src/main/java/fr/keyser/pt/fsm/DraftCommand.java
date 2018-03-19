@@ -9,7 +9,11 @@ public class DraftCommand {
     public DraftCommand() {
     }
 
-    public DraftCommand(int draft, int discard) {
+    public DraftCommand(int draft) {
+	this(draft, null);
+    }
+
+    public DraftCommand(int draft, Integer discard) {
 	this.draft = draft;
 	this.discard = discard;
     }

@@ -32,4 +32,6 @@ public interface BoardContract {
 
     void endBuildPhase();
 
+    int getTurnValue();
+
 }

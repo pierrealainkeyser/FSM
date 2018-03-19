@@ -18,4 +18,6 @@ public interface PlayerBoardContract {
 
     UUID getUuid();
 
+    void visit(PlayerBoardVisitor visitor);
+
 }
