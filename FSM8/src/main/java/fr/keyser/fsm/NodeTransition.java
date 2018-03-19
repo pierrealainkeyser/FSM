@@ -33,6 +33,11 @@ class NodeTransition<S, E> {
 	}
     }
 
+    @Override
+    public String toString() {
+	return "->" + destination;
+    }
+
     public State<S> computeDestination(State<S> current) {
 	return destination == null ? current : destination;
     }

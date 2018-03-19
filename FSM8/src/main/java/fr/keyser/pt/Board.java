@@ -2,6 +2,7 @@ package fr.keyser.pt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -9,11 +10,26 @@ import fr.keyser.pt.SpecialEffectScope.When;
 
 public class Board implements BoardContract {
 
-    private Turn turn;
+    public Board(MetaDeck deck) {
+	this.deck = deck;
+    }
 
-    private List<PlayerBoard> players;
+    private final Turn turn = new Turn();
 
-    private MetaDeck deck;
+    private final List<PlayerBoard> players = new ArrayList<>();
+
+    private final MetaDeck deck;
+
+    public void addNewPlayer() {
+	PlayerBoardModel model = new PlayerBoardModel();
+	model.setGold(3);
+
+	players.add(new PlayerBoard(UUID.randomUUID(), model, this));
+    }
+
+    public void addPlayer(UUID uuid, PlayerBoardModel model) {
+	players.add(new PlayerBoard(uuid, model, this));
+    }
 
     @Override
     public void distributeCards() {

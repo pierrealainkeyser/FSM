@@ -51,4 +51,9 @@ public final class CardPosition {
 	return true;
     }
 
+    @Override
+    public String toString() {
+	return "CardPosition [position=" + position + ", index=" + index + "]";
+    }
+
 }

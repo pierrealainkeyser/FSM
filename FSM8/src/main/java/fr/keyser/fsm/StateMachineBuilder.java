@@ -218,7 +218,8 @@ public class StateMachineBuilder<S, E> {
 	    List<NodeState<S, E>> childs = childrens.get(n.getState());
 	    if (childs != null) {
 		Map<State<S>, NodeState<S, E>> um = Collections
-		        .unmodifiableMap(childs.stream().collect(Collectors.toMap(NodeState::getState, Function.identity())));
+		        .unmodifiableMap(childs.stream()
+		                .collect(Collectors.toMap(NodeState::getState, Function.identity(), throwingMerger(), LinkedHashMap::new)));
 		n.setChildrens(um);
 	    }
 	}

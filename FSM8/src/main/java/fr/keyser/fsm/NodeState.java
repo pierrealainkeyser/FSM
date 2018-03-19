@@ -126,6 +126,9 @@ class NodeState<S, E> {
     }
 
     public RoutingStatus<S, E> fireEntry() {
+	if (parent != null)
+	    parent.fireEntry();
+
 	if (onEntry != null) {
 	    try {
 		for (OnEntryAction<E> a : onEntry)

@@ -57,4 +57,9 @@ public final class CardSlot {
     public CardPosition getPosition() {
 	return position;
     }
+
+    @Override
+    public String toString() {
+	return "CardSlot [position=" + position + ", card=" + card + "]";
+    }
 }

@@ -1,5 +1,7 @@
 package fr.keyser.pt;
 
+import java.util.UUID;
+
 public interface PlayerBoardContract {
 
     void processDraft(int id);
@@ -13,5 +15,7 @@ public interface PlayerBoardContract {
     void processCardAction(CardAction action);
 
     void doBuild(int index);
+
+    UUID getUuid();
 
 }

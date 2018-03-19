@@ -57,4 +57,9 @@ public class MetaCard {
 	    return false;
 	return true;
     }
+
+    @Override
+    public String toString() {
+	return card.getName() + "#" + id;
+    }
 }

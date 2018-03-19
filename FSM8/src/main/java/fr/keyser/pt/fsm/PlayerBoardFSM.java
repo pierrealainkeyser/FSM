@@ -15,11 +15,11 @@ import fr.keyser.pt.PlayerBoardContract;
 public class PlayerBoardFSM {
 
     private enum PlayerEvent {
-	USER_INPUT, WAIT_FOR_BUILDING, WAIT_FOR_DEPLOY, WAIT_FOR_CARD, WAIT_FOR_INPUT, WAIT_NOOP
+	USER_INPUT, WAIT_FOR_BUILDING, WAIT_FOR_DEPLOY, WAIT_FOR_DRAFT, WAIT_FOR_INPUT, WAIT_NOOP
     }
 
     private final static String BUILDING = "BUILDING";
-    private final static String CARD = "CARD";
+    private final static String DRAFT = "DRAFT";
     private final static String IDLE = "IDLE";
     private final static String DEPLOY = "DEPLOY";
     private final static String INPUT = "INPUT";
@@ -45,25 +45,21 @@ public class PlayerBoardFSM {
 
 	StateBuilder<String, PlayerEvent> waitingUser = builder.state(WAITING_USER);
 
-	// TODO
 	StateBuilder<String, PlayerEvent> deploy = waitingUser.sub(DEPLOY);
-
 	StateBuilder<String, PlayerEvent> input = waitingUser.sub(INPUT);
-
-	// TODO
 	StateBuilder<String, PlayerEvent> building = waitingUser.sub(BUILDING);
-	StateBuilder<String, PlayerEvent> card = waitingUser.sub(CARD);
+	StateBuilder<String, PlayerEvent> draft = waitingUser.sub(DRAFT);
 	StateBuilder<String, PlayerEvent> noop = waitingUser.sub(NOOP);
 
 	idle.transition(PlayerEvent.WAIT_FOR_DEPLOY, deploy);
 	idle.transition(PlayerEvent.WAIT_FOR_INPUT, input);
 	idle.transition(PlayerEvent.WAIT_FOR_BUILDING, building);
-	idle.transition(PlayerEvent.WAIT_FOR_CARD, card);
+	idle.transition(PlayerEvent.WAIT_FOR_DRAFT, draft);
 	idle.transition(PlayerEvent.WAIT_NOOP, noop);
 
 	onInput(input, idle, CardActionCommand.class, "activateCard", this::processInput);
 	onInput(deploy, idle, DoDeployCardCommand.class, "deployCard", this::processDeploy);
-	onInput(card, idle, DraftCommand.class, "selectCard", this::processDraft);
+	onInput(draft, idle, DraftCommand.class, "selectCard", this::processDraft);
 	onInput(building, idle, BuildCommand.class, "build", this::processuBuilding);
 	onInput(noop, idle, Object.class, "confirmNoop", e -> {
 	});
@@ -132,8 +128,8 @@ public class PlayerBoardFSM {
 	stateMachine.push(PlayerEvent.WAIT_FOR_DEPLOY);
     }
 
-    void waitForCard() {
-	stateMachine.push(PlayerEvent.WAIT_FOR_CARD);
+    void waitForDraft() {
+	stateMachine.push(PlayerEvent.WAIT_FOR_DRAFT);
     }
 
     void waitForInput() {

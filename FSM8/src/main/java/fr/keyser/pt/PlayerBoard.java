@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,7 +79,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     private final Board board;
 
-    public PlayerBoard(PlayerBoardModel model, Board board) {
+    private final UUID uuid;
+
+    public PlayerBoard(UUID uuid, PlayerBoardModel model, Board board) {
+	this.uuid = uuid;
 	this.model = model;
 	this.board = board;
     }
@@ -376,5 +380,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     public Stream<DeployedCard> units() {
 	return asDeployedCard(Stream.concat(front.stream(), back.stream()));
+    }
+
+    @Override
+    public UUID getUuid() {
+	return uuid;
     }
 }

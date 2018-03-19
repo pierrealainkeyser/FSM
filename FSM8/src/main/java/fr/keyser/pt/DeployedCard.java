@@ -47,6 +47,11 @@ public class DeployedCard {
 	resetCounters();
     }
 
+    @Override
+    public String toString() {
+	return card.getName();
+    }
+
     public void addInputAction(CardPositionSelector input) {
 	getPlayer().addInputAction(this, input);
 
@@ -167,6 +172,6 @@ public class DeployedCard {
     }
 
     public MetaCard getMeta() {
-        return meta;
+	return meta;
     }
 }

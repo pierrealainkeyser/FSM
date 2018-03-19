@@ -62,7 +62,7 @@ public class BoardFSM {
 	chainedSubByPlayers(age, checkEOG);
 
 	turn.onEntry(this.contract::resetCounters);
-	draft.onEntry(this.contract::distributeCards);
+	draft.onEntry(this::distributeAndWaitCard);
 
 	play.onEntry(this::waitForDeploy);
 
@@ -90,6 +90,15 @@ public class BoardFSM {
 	        .onTransition(this.contract::newTurn);
 
 	this.stateMachine = builder.build();
+    }
+
+    public void start() {
+	this.stateMachine.enterInitialState();
+    }
+
+    private void distributeAndWaitCard() {
+	contract.distributeCards();
+	players.forEach(PlayerBoardFSM::waitForDraft);
     }
 
     private void waitForInput() {
@@ -144,5 +153,9 @@ public class BoardFSM {
 
     void next() {
 	stateMachine.push(BoardEvent.NEXT);
+    }
+
+    public List<PlayerBoardFSM> getPlayers() {
+	return Collections.unmodifiableList(players);
     }
 }
