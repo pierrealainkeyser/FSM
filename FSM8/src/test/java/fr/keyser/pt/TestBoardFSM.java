@@ -16,11 +16,13 @@ public class TestBoardFSM {
 	board.addNewPlayer();
 
 	BoardFSM fsm = new BoardFSM(board);
-
-	PlayerBoardFSM fsm0 = fsm.getPlayers().get(0);
 	fsm.start();
+	PlayerBoardFSM fsm0 = fsm.getPlayers().get(0);
+	PlayerBoardFSM fsm1 = fsm.getPlayers().get(1);
 
+	Assert.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
 	Assert.assertEquals(DraftCommand.class, fsm0.getExpectedInput());
+	Assert.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
     }
 
 }

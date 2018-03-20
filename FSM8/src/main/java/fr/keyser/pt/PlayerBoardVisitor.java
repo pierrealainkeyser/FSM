@@ -5,8 +5,6 @@ import java.util.UUID;
 
 public interface PlayerBoardVisitor {
 
-    public void state(UUID uuid, String state);
-
     public void player(UUID uuid, int gold, int legend);
 
     public void victoriousWar(UUID player, int winned);

@@ -69,7 +69,6 @@ public class PlayerBoardFSM {
 
     public void visit(PlayerBoardVisitor visitor) {
 	contract.visit(visitor);
-	visitor.state(contract.getUuid(), appearance);
     }
 
     private SimpleAction expect(Class<?> expectedInput, String appearance) {

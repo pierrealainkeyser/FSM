@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import fr.keyser.fsm.DelayedEventConsumer;
+import fr.keyser.fsm.SimpleAction;
 import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
@@ -14,7 +15,12 @@ import fr.keyser.pt.BoardVisitor;
 
 public class BoardFSM {
 
-    private final static String DRAFT = "DRAFT";
+    public static final String AGE = "age";
+    public static final String BUILDING = "building";
+    public static final String GOLD = "gold";
+    public static final String WAR = "war";
+    public static final String DEPLOY = "deploy";
+    public static final String DRAFT = "draft";
     private final static String TURN = "TURN";
     private final static String CHECK_EOG = "CHECK_EOG";
     private final static String PLAY = "PLAY";
@@ -33,6 +39,8 @@ public class BoardFSM {
     private final StateMachine<String, BoardEvent> stateMachine;
 
     private final List<PlayerBoardFSM> players;
+
+    private String phase;
 
     public BoardFSM(BoardContract b) {
 	this.contract = b;
@@ -53,6 +61,13 @@ public class BoardFSM {
 	StateBuilder<String, BoardEvent> building = turn.sub(BUILDING_PHASE);
 	StateBuilder<String, BoardEvent> age = turn.sub(AGE_PHASE);
 
+	draft.onEntry(phase(DRAFT));
+	play.onEntry(phase(DEPLOY));
+	war.onEntry(phase(WAR));
+	gold.onEntry(phase(GOLD));
+	building.onEntry(phase(BUILDING));
+	age.onEntry(phase(AGE));
+
 	chainDraft(draft, play);
 
 	chainedSubByPlayers(play, deploy);
@@ -63,6 +78,7 @@ public class BoardFSM {
 	chainedSubByPlayers(age, checkEOG);
 
 	turn.onEntry(this.contract::resetCounters);
+
 	draft.onEntry(this::distributeAndWaitCard);
 
 	play.onEntry(this::waitForDeploy);
@@ -93,8 +109,12 @@ public class BoardFSM {
 	this.stateMachine = builder.build();
     }
 
+    private SimpleAction phase(String phase) {
+	return () -> this.phase = phase;
+    }
+
     public void visit(BoardVisitor visitor) {
-	visitor.turn(contract.getTurnValue(), "");
+	visitor.turn(contract.getTurnValue());
 	players.forEach(p -> p.visit(visitor));
     }
 
@@ -163,5 +183,9 @@ public class BoardFSM {
 
     public List<PlayerBoardFSM> getPlayers() {
 	return Collections.unmodifiableList(players);
+    }
+
+    public String getPhase() {
+        return phase;
     }
 }
