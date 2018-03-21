@@ -30,12 +30,13 @@ public final class CardSlot {
 	card = Optional.of(new DeployedCard(player, position, building, model));
     }
 
-    public void deploy(MetaCard unit, int turn) {
+    public DeployedCard deploy(MetaCard unit, int turn) {
 	CardModel model = new CardModel();
 	model.setPlayedTurn(turn);
 	model.setName(unit.getCard().getName());
 
 	card = Optional.of(new DeployedCard(player, position, unit, model));
+	return card.get();
     }
 
     public void clear() {

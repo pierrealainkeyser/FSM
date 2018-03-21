@@ -14,6 +14,11 @@ import java.util.stream.Stream;
 import fr.keyser.pt.BuildingConstruction.BuildType;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.SpecialEffectScope.When;
+import fr.keyser.pt.event.CardAgeChanged;
+import fr.keyser.pt.event.CardBuildingLevelChanged;
+import fr.keyser.pt.event.CardDeploymentChanged;
+import fr.keyser.pt.event.PlayerGoldChanged;
+import fr.keyser.pt.event.PlayerLegendChanged;
 
 /**
  * 
@@ -156,12 +161,16 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	    CardSlot slot = find(action.getTarget());
 
-	    slot.getCard().ifPresent(m -> board.moveToDiscard(m.getMeta()));
+	    slot.getCard().ifPresent(m -> {
+		board.moveToDiscard(m.getMeta());
+		forward(new CardDeploymentChanged(m, this, false));
+	    });
 
-	    slot.deploy(meta, board.getTurnValue());
+	    DeployedCard dc = slot.deploy(meta, board.getTurnValue());
+	    forward(new CardDeploymentChanged(dc, this, true));
 
 	    model.getToDeploy().remove(meta);
-	    model.addGold(-((Unit) meta.getCard()).getGoldCost());
+	    addGold(-((Unit) meta.getCard()).getGoldCost());
 	}
     }
 
@@ -180,9 +189,11 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	} else {
 	    CardSlot slot = building.stream().filter(CardSlot::isEmpty).findFirst().get();
-	    slot.build(meta, plan.getLevel());
+	    BuildingLevel level = plan.getLevel();
+	    slot.build(meta, level);
+	    forward(new CardBuildingLevelChanged(slot.getCard().get(), this, level));
 	}
-	model.addGold(plan.getGoldCost());
+	addGold(-plan.getGoldCost());
     }
 
     /*
@@ -263,16 +274,16 @@ public final class PlayerBoard implements PlayerBoardContract {
 	all().forEach(DeployedCard::computeDeployGain);
 	counters(all()).forEach(counters::sumDeployGain);
 
-	model.addGold(counters.getDeployGold());
-	model.addLegend(counters.getDeployLegend());
+	addGold(counters.getDeployGold());
+	addLegend(counters.getDeployLegend());
     }
 
     void computeDyingGain() {
 	all().forEach(DeployedCard::computeDyingGain);
 	counters(all()).forEach(counters::sumDyingGain);
 
-	model.addGold(counters.getDieGold());
-	model.addLegend(counters.getDieLegend());
+	addGold(counters.getDieGold());
+	addLegend(counters.getDieLegend());
     }
 
     void computeValues() {
@@ -293,8 +304,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	counters(all()).forEach(counters::sumWarGain);
 
-	model.addGold(counters.getWarGold());
-	model.addLegend(counters.getWarLegend());
+	addGold(counters.getWarGold());
+	addLegend(counters.getWarLegend());
     }
 
     private List<CardSlot> ctx(Position position, int number) {
@@ -331,7 +342,20 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     void gainGold() {
-	model.addGold(counters.getGoldGain());
+	addGold(counters.getGoldGain());
+    }
+
+    private void addGold(int gold) {
+	model.addGold(gold);
+	if (gold != 0)
+	    forward(new PlayerGoldChanged(this, model.getGold()));
+
+    }
+
+    private void addLegend(int legend) {
+	model.addLegend(legend);
+	if (legend != 0)
+	    forward(new PlayerLegendChanged(this, model.getLegend()));
     }
 
     int getCombat() {
@@ -392,10 +416,10 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     void cardHasAged(DeployedCard deployedCard) {
-
+	forward(new CardAgeChanged(deployedCard, this, deployedCard.getAgeToken()));
     }
 
     void buildingHasChanged(DeployedCard deployedCard) {
-
+	forward(new CardBuildingLevelChanged(deployedCard, this, deployedCard.getLevel()));
     }
 }
