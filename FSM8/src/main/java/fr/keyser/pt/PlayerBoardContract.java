@@ -17,7 +17,4 @@ public interface PlayerBoardContract {
     void doBuild(int index);
 
     UUID getUuid();
-
-    void visit(PlayerBoardVisitor visitor);
-
 }

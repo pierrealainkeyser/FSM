@@ -94,6 +94,7 @@ public class DeployedCard {
 
     public void doAge(int amount) {
 	model.setAgeToken(model.getAgeToken() + amount);
+	player.cardHasAged(this);
     }
 
     public Stream<DeployedCard> dyings() {
@@ -118,7 +119,7 @@ public class DeployedCard {
     public int getCombat() {
 	return counters.getCombat();
     }
-    
+
     public boolean isMayCombat() {
 	return counters.isMayCombat();
     }
@@ -161,6 +162,7 @@ public class DeployedCard {
 
     public void setLevel(BuildingLevel level) {
 	model.setLevel(level);
+	player.buildingHasChanged(this);
     }
 
     public Stream<DeployedCard> units() {

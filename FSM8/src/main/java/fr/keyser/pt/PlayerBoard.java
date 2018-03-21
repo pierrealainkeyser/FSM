@@ -1,7 +1,5 @@
 package fr.keyser.pt;
 
-import static java.util.Collections.unmodifiableList;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -89,26 +87,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 	this.board = board;
     }
 
-    @Override
-    public void visit(PlayerBoardVisitor visitor) {
-	visitor.player(uuid, model.getGold(), model.getLegend());
-
-	if (counters != null)
-	    visitor.victoriousWar(uuid, counters.getVictoriousWar());
-
-	units().forEach(d -> {
-	    Unit u = (Unit) d.getCard();
-	    visitor.unit(uuid, d.getPosition(), u, d.isInitialDeploy(), d.getAgeToken(), d.getCombat(), d.isMayCombat());
-	});
-
-	buildings().forEach(d -> {
-	    Building b = (Building) d.getCard();
-	    visitor.building(uuid, d.getPosition(), b, d.getLevel(), d.getCombat(), d.isMayCombat());
-	});
-
-	visitor.toDraft(uuid, unmodifiableList(model.getToDraft()));
-	visitor.toBuild(uuid, unmodifiableList(model.getBuildPlan()));
-	visitor.toDeploy(uuid, unmodifiableList(model.getToDeploy()));
+    private void forward(Object event) {
+	board.forward(event);
     }
 
     List<MetaCard> getToDraft() {
@@ -409,5 +389,13 @@ public final class PlayerBoard implements PlayerBoardContract {
     @Override
     public UUID getUuid() {
 	return uuid;
+    }
+
+    void cardHasAged(DeployedCard deployedCard) {
+
+    }
+
+    void buildingHasChanged(DeployedCard deployedCard) {
+
     }
 }

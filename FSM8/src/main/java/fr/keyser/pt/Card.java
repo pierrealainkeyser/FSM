@@ -41,12 +41,6 @@ public class Card {
 	this.deployLegend = e.deployLegend;
     }
 
-    public CardModel createModel() {
-	CardModel model = new CardModel();
-	model.setName(getName());
-	return model;
-    }
-
     public final IntValue getCombat() {
 	return combat;
     }

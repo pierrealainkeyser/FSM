@@ -11,7 +11,6 @@ import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.BoardContract;
-import fr.keyser.pt.BoardVisitor;
 
 public class BoardFSM {
 
@@ -113,11 +112,6 @@ public class BoardFSM {
 	return () -> this.phase = phase;
     }
 
-    public void visit(BoardVisitor visitor) {
-	visitor.turn(contract.getTurnValue());
-	players.forEach(p -> p.visit(visitor));
-    }
-
     public void start() {
 	this.stateMachine.enterInitialState();
     }
@@ -186,6 +180,6 @@ public class BoardFSM {
     }
 
     public String getPhase() {
-        return phase;
+	return phase;
     }
 }
