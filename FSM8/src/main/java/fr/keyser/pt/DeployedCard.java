@@ -7,15 +7,15 @@ import fr.keyser.pt.SpecialEffectScope.When;
 
 public class DeployedCard {
 
-    public static final SpecialEffectScope AGING_ASYNCHRONOUS = new SpecialEffectScope(2, When.AGING);
+    public static final SpecialEffectScope AGING_ASYNCHRONOUS = new SpecialEffectScope(2, When.AGING, true);
 
-    public static final SpecialEffectScope DEPLOY_ASYNCHRONOUS = new SpecialEffectScope(2, When.DEPLOYEMENT);
+    public static final SpecialEffectScope DEPLOY_ASYNCHRONOUS = new SpecialEffectScope(2, When.DEPLOYEMENT, true);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY_ASYNCHRONOUS = new SpecialEffectScope(2, When.INITIAL_DEPLOYEMENT);
+    public static final SpecialEffectScope INITIAL_DEPLOY_ASYNCHRONOUS = new SpecialEffectScope(2, When.INITIAL_DEPLOYEMENT, true);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY_SYNCHRONOUS_LAST = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT);
+    public static final SpecialEffectScope INITIAL_DEPLOY_SYNCHRONOUS_LAST = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT, false);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY_SYNCHRONOUS = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT);
+    public static final SpecialEffectScope INITIAL_DEPLOY_SYNCHRONOUS = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT, false);
 
     public static Predicate<DeployedCard> hasAgeToken(int i) {
 	return p -> p.getAgeToken() == i;
@@ -101,9 +101,9 @@ public class DeployedCard {
 	return getPlayer().dyings();
     }
 
-    public Stream<ScopedSpecialEffect> firedEffects(When when) {
+    public Stream<ScopedSpecialEffect> firedEffects(When when, boolean async) {
 	if (card instanceof Unit) {
-	    return ((Unit) card).getEffects().stream().filter(when(when));
+	    return ((Unit) card).getEffects().stream().filter(when(when, async));
 	} else
 	    return Stream.empty();
     }
@@ -169,8 +169,8 @@ public class DeployedCard {
 	return getPlayer().units();
     }
 
-    private Predicate<ScopedSpecialEffect> when(When when) {
-	return s -> when.match(s.getScope(), this);
+    private Predicate<ScopedSpecialEffect> when(When when, boolean async) {
+	return s -> when.match(s.getScope(), this) && s.getScope().isAsync() == async;
     }
 
     public boolean willDie() {

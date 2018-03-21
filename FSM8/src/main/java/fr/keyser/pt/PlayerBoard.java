@@ -252,9 +252,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 	}
     }
 
-    void fireEffect(When when) {
+    void fireEffect(When when, boolean async) {
 
-	List<FiredEffect> fired = units().flatMap(d -> d.firedEffects(when).map(e -> new FiredEffect(d, e))).collect(Collectors.toList());
+	List<FiredEffect> fired = units().flatMap(d -> d.firedEffects(when, async).map(e -> new FiredEffect(d, e)))
+	        .collect(Collectors.toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
 	fired.forEach(FiredEffect::fire);
 

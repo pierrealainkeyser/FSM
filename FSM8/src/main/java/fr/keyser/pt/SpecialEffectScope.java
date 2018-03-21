@@ -22,9 +22,12 @@ public class SpecialEffectScope {
 
     private final When when;
 
-    public SpecialEffectScope(int order, When when) {
+    private final boolean async;
+
+    public SpecialEffectScope(int order, When when, boolean async) {
 	this.order = order;
 	this.when = when;
+	this.async = async;
     }
 
     public int getOrder() {
@@ -33,5 +36,9 @@ public class SpecialEffectScope {
 
     public When getWhen() {
 	return when;
+    }
+
+    public boolean isAsync() {
+	return async;
     }
 }
