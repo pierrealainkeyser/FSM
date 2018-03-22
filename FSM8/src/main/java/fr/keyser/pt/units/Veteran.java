@@ -9,7 +9,7 @@ public final class Veteran extends Unit {
     public Veteran() {
 	super(essence(0)
 	        .combat(IntValue.constant(3))
-	        .effect(DeployedCard.INITIAL_DEPLOY_SYNCHRONOUS, DeployedCard::doAge));
+	        .effect(DeployedCard.INITIAL_DEPLOY, DeployedCard::doAge));
     }
 
 }

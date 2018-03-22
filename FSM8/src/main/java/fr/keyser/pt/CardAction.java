@@ -1,15 +1,17 @@
 package fr.keyser.pt;
 
+import java.util.Map;
+
 public class CardAction {
 
     private CardPosition source;
 
-    private CardPosition target;
+    private Map<String, CardPosition> target;
 
     public CardAction() {
     }
 
-    public CardAction(CardPosition source, CardPosition target) {
+    public CardAction(CardPosition source, Map<String, CardPosition> target) {
 	this.source = source;
 	this.target = target;
     }
@@ -18,7 +20,7 @@ public class CardAction {
 	return source;
     }
 
-    public CardPosition getTarget() {
+    public Map<String, CardPosition> getTarget() {
 	return target;
     }
 
@@ -26,7 +28,7 @@ public class CardAction {
 	this.source = source;
     }
 
-    public void setTarget(CardPosition target) {
+    public void setTarget(Map<String, CardPosition> target) {
 	this.target = target;
     }
 

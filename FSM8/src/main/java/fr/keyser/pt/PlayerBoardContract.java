@@ -17,4 +17,6 @@ public interface PlayerBoardContract {
     void doBuild(int index);
 
     UUID getUuid();
+
+    boolean hasInputActions();
 }

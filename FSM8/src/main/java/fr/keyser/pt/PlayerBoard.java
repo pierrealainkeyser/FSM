@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -102,10 +103,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     void setToDraft(List<MetaCard> toDraft) {
 	model.setToDraft(toDraft);
-    }
-
-    void addInputAction(DeployedCard ctx, CardPositionSelector input) {
-	model.getInputActions().put(ctx.getPosition(), input);
     }
 
     Stream<DeployedCard> all() {
@@ -221,8 +218,15 @@ public final class PlayerBoard implements PlayerBoardContract {
      */
     @Override
     public void processCardAction(CardAction action) {
-	CardPositionSelector selector = model.getInputActions().remove(action.getSource());
-	selector.process(this, action.getTarget());
+
+	CardPosition source = action.getSource();
+	model.getInputActions().remove(source);
+
+	DeployedCard from = find(source).getCard().get();
+	for (Entry<String, CardPosition> e : action.getTarget().entrySet()) {
+	    from.addPositionFor(e.getValue(), e.getKey());
+	}
+
     }
 
     Stream<DeployedCard> buildings() {
@@ -231,6 +235,11 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     void clearInputActions() {
 	model.getInputActions().clear();
+    }
+
+    @Override
+    public boolean hasInputActions() {
+	return !model.getInputActions().isEmpty();
     }
 
     private static class FiredEffect {
@@ -252,12 +261,17 @@ public final class PlayerBoard implements PlayerBoardContract {
 	}
     }
 
-    void fireEffect(When when, boolean async) {
-
-	List<FiredEffect> fired = units().flatMap(d -> d.firedEffects(when, async).map(e -> new FiredEffect(d, e)))
+    void fireEffect(When when) {
+	List<FiredEffect> fired = all().flatMap(d -> d.firedEffects(when).map(e -> new FiredEffect(d, e)))
 	        .collect(Collectors.toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
 	fired.forEach(FiredEffect::fire);
+    }
+
+    void fireAsyncEffect(When when) {
+	all().forEach(d -> d.firedEffects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
+	    model.getInputActions().put(d.getPosition(), e.asyncEffect(d));
+	}));
 
     }
 
@@ -324,7 +338,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return dying.stream();
     }
 
-    public CardSlot find(CardPosition position) {
+    CardSlot find(CardPosition position) {
 	List<CardSlot> list = null;
 	switch (position.getPosition()) {
 	case BACK:
@@ -383,7 +397,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return counters.getFood();
     }
 
-    public void preserveFromDeath(CardPosition position) {
+    void preserveFromDeath(CardPosition position) {
 	Iterator<DeployedCard> it = dying.iterator();
 	while (it.hasNext()) {
 	    DeployedCard next = it.next();

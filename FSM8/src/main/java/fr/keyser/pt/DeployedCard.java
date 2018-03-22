@@ -7,15 +7,13 @@ import fr.keyser.pt.SpecialEffectScope.When;
 
 public class DeployedCard {
 
-    public static final SpecialEffectScope AGING_ASYNCHRONOUS = new SpecialEffectScope(2, When.AGING, true);
+    public static final SpecialEffectScope AGING = new SpecialEffectScope(0, When.AGING);
 
-    public static final SpecialEffectScope DEPLOY_ASYNCHRONOUS = new SpecialEffectScope(2, When.DEPLOYEMENT, true);
+    public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(0, When.DEPLOYEMENT);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY_ASYNCHRONOUS = new SpecialEffectScope(2, When.INITIAL_DEPLOYEMENT, true);
+    public static final SpecialEffectScope INITIAL_DEPLOY_LAST = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY_SYNCHRONOUS_LAST = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT, false);
-
-    public static final SpecialEffectScope INITIAL_DEPLOY_SYNCHRONOUS = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT, false);
+    public static final SpecialEffectScope INITIAL_DEPLOY = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT);
 
     public static Predicate<DeployedCard> hasAgeToken(int i) {
 	return p -> p.getAgeToken() == i;
@@ -47,14 +45,25 @@ public class DeployedCard {
 	resetCounters();
     }
 
+    public void preserveFromDeath(CardPosition position) {
+	player.preserveFromDeath(position);
+    }
+
+    public DeployedCard find(CardPosition position) {
+	return player.find(position).getCard().get();
+    }
+
+    CardPosition positionFor(String name) {
+	return model.positionFor(name);
+    }
+    
+    void addPositionFor(CardPosition position, String name) {
+	model.addPositionFor(position, name);
+    }
+
     @Override
     public String toString() {
 	return card.getName();
-    }
-
-    public void addInputAction(CardPositionSelector input) {
-	getPlayer().addInputAction(this, input);
-
     }
 
     public Stream<DeployedCard> buildings() {
@@ -101,9 +110,16 @@ public class DeployedCard {
 	return getPlayer().dyings();
     }
 
-    public Stream<ScopedSpecialEffect> firedEffects(When when, boolean async) {
+    public Stream<ScopedSpecialEffect> firedInitialEffects() {
 	if (card instanceof Unit) {
-	    return ((Unit) card).getEffects().stream().filter(when(when, async));
+	    return ((Unit) card).getEffects().stream().filter(initialDrop());
+	} else
+	    return Stream.empty();
+    }
+
+    public Stream<ScopedSpecialEffect> firedEffects(When when) {
+	if (card instanceof Unit) {
+	    return ((Unit) card).getEffects().stream().filter(when(when));
 	} else
 	    return Stream.empty();
     }
@@ -169,8 +185,12 @@ public class DeployedCard {
 	return getPlayer().units();
     }
 
-    private Predicate<ScopedSpecialEffect> when(When when, boolean async) {
-	return s -> when.match(s.getScope(), this) && s.getScope().isAsync() == async;
+    private Predicate<ScopedSpecialEffect> when(When when) {
+	return s -> when.match(s.getScope(), this);
+    }
+
+    private Predicate<ScopedSpecialEffect> initialDrop() {
+	return s -> When.INITIAL_DEPLOYEMENT.match(s.getScope());
     }
 
     public boolean willDie() {

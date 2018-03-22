@@ -10,7 +10,7 @@ public final class Daemon extends Unit {
 	super(essence(2)
 	        .dieLegend(IntValue.choice(DeployedCard.hasAgeToken(1), IntValue.constant(-3), IntValue.ZERO))
 	        .combat(IntValue.constant(7))
-	        .effect(DeployedCard.INITIAL_DEPLOY_SYNCHRONOUS, DeployedCard::doAge));
+	        .effect(DeployedCard.INITIAL_DEPLOY, DeployedCard::doAge));
     }
 
 }

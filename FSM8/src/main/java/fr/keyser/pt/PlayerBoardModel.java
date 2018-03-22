@@ -11,7 +11,7 @@ public final class PlayerBoardModel {
 
     private int legend;
 
-    private Map<CardPosition, CardPositionSelector> inputActions = new HashMap<>();
+    private Map<CardPosition, List<TargetedEffectDescription>> inputActions = new HashMap<>();
 
     private List<MetaCard> toDraft = new ArrayList<>();
 
@@ -47,7 +47,7 @@ public final class PlayerBoardModel {
 	    this.gold = 0;
     }
 
-    public Map<CardPosition, CardPositionSelector> getInputActions() {
+    public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
 	return inputActions;
     }
 
@@ -68,11 +68,11 @@ public final class PlayerBoardModel {
     }
 
     public List<BuildingConstruction> getBuildPlan() {
-        return buildPlan;
+	return buildPlan;
     }
 
     public void setBuildPlan(List<BuildingConstruction> buildPlan) {
-        this.buildPlan = buildPlan;
+	this.buildPlan = buildPlan;
     }
 
 }

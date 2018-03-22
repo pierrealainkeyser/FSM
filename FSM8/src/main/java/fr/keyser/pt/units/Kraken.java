@@ -15,6 +15,6 @@ public final class Kraken extends Unit {
 	                        IntValue.constant(-3).mult(IntValue.LEVEL2_BUILDING),
 	                        IntValue.ZERO))
 	        .dieLegend(IntValue.DYING_AGE_TOKEN)
-	        .effect(DeployedCard.INITIAL_DEPLOY_SYNCHRONOUS, AgeEveryoneButMe.INSTANCE));
+	        .effect(DeployedCard.INITIAL_DEPLOY, AgeEveryoneButMe.INSTANCE));
     }
 }

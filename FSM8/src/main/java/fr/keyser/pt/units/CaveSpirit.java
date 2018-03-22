@@ -10,7 +10,7 @@ public final class CaveSpirit extends Unit {
 	super(essence(1)
 	        .crystal(IntValue.ONE)
 	        .combat(IntValue.constant(4))
-	        .effect(DeployedCard.INITIAL_DEPLOY_SYNCHRONOUS, DeployedCard::doAge));
+	        .effect(DeployedCard.INITIAL_DEPLOY, DeployedCard::doAge));
     }
 
 }

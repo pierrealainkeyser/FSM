@@ -10,7 +10,7 @@ public final class Golem extends Unit {
     public Golem() {
 	super(essence(2)
 	        .combat(IntValue.constant(3))
-	        .effect(DeployedCard.INITIAL_DEPLOY_SYNCHRONOUS_LAST, UpgradeBuildingToLevel2.INSTANCE));
+	        .effect(DeployedCard.INITIAL_DEPLOY_LAST, UpgradeBuildingToLevel2.INSTANCE));
     }
 
 }

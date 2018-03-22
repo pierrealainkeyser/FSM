@@ -1,5 +1,8 @@
 package fr.keyser.pt;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class CardModel {
 
     private String name;
@@ -9,6 +12,8 @@ public final class CardModel {
     private int playedTurn;
 
     private BuildingLevel level;
+
+    private Map<String, CardPosition> selected;
 
     public String getName() {
 	return name;
@@ -40,5 +45,30 @@ public final class CardModel {
 
     public void setLevel(BuildingLevel level) {
 	this.level = level;
+    }
+
+    public Map<String, CardPosition> getSelected() {
+	return selected;
+    }
+
+    public void addPositionFor(CardPosition position, String name) {
+	if (selected == null)
+	    selected = new HashMap<>();
+
+	selected.put(name, position);
+    }
+
+    public CardPosition positionFor(String name) {
+	if (selected == null) {
+	    CardPosition found = selected.remove(name);
+	    if (selected.isEmpty())
+		selected = null;
+	    return found;
+	} else
+	    return null;
+    }
+
+    public void setSelected(Map<String, CardPosition> selected) {
+	this.selected = selected;
     }
 }

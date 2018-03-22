@@ -5,8 +5,12 @@ public class SpecialEffectScope {
     public enum When {
 	AGING, DEPLOYEMENT, INITIAL_DEPLOYEMENT;
 
+	public boolean match(SpecialEffectScope scope) {
+	    return scope.getWhen() == this;
+	}
+
 	public boolean match(SpecialEffectScope scope, DeployedCard card) {
-	    boolean sameScope = scope.getWhen() == this;
+	    boolean sameScope = match(scope);
 	    if (AGING == this)
 		return sameScope;
 	    else if (DEPLOYEMENT == this)
@@ -22,12 +26,9 @@ public class SpecialEffectScope {
 
     private final When when;
 
-    private final boolean async;
-
-    public SpecialEffectScope(int order, When when, boolean async) {
+    public SpecialEffectScope(int order, When when) {
 	this.order = order;
 	this.when = when;
-	this.async = async;
     }
 
     public int getOrder() {
@@ -36,9 +37,5 @@ public class SpecialEffectScope {
 
     public When getWhen() {
 	return when;
-    }
-
-    public boolean isAsync() {
-	return async;
     }
 }

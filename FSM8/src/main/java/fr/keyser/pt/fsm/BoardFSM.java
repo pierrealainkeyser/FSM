@@ -28,6 +28,7 @@ public class BoardFSM {
     private final static String GOLD_PHASE = "GOLD_PHASE";
     private final static String BUILDING_PHASE = "BUILDING_PHASE";
     private final static String AGE_PHASE = "AGE_PHASE";
+    private final static String END_OF_TURN = "END_OF_TURN";
 
     private enum BoardEvent {
 	NEXT, END
@@ -59,6 +60,7 @@ public class BoardFSM {
 	StateBuilder<String, BoardEvent> gold = turn.sub(GOLD_PHASE);
 	StateBuilder<String, BoardEvent> building = turn.sub(BUILDING_PHASE);
 	StateBuilder<String, BoardEvent> age = turn.sub(AGE_PHASE);
+	StateBuilder<String, BoardEvent> endOfTurn = turn.sub(END_OF_TURN);
 
 	draft.onEntry(phase(DRAFT));
 	play.onEntry(phase(DEPLOY));
@@ -74,7 +76,8 @@ public class BoardFSM {
 	chainedSubByPlayers(war, gold);
 	chainedSubByPlayers(gold, building);
 	chainedSubByPlayers(building, age);
-	chainedSubByPlayers(age, checkEOG);
+	chainedSubByPlayers(age, endOfTurn);
+	chainedSubByPlayers(endOfTurn, checkEOG);
 
 	turn.onEntry(this.contract::resetCounters);
 
@@ -83,18 +86,20 @@ public class BoardFSM {
 	play.onEntry(this::waitForDeploy);
 
 	deploy.onEntry(this.contract::deployPhaseEffect)
-	        .onEntry(this::waitForInput)
+	        .onEntry(this::expectInput)
 	        .onExit(this.contract::endOfDeployPhase);
 
-	war.onEntry(this.contract::warPhase).onEntry(this::waitFor);
-	gold.onEntry(this.contract::goldPhase).onEntry(this::waitFor);
+	war.onEntry(this.contract::warPhase).onEntry(this::waitConfirm);
+	gold.onEntry(this.contract::goldPhase).onEntry(this::waitConfirm);
 	building.onEntry(this.contract::buildPhase)
 	        .onEntry(this::waitForBuilding)
 	        .onExit(this.contract::endBuildPhase);
 
 	age.onEntry(this.contract::agePhase)
-	        .onEntry(this::waitForInput)
+	        .onEntry(this::expectInput)
 	        .onExit(this.contract::endAgePhase);
+
+	endOfTurn.onEntry(this::waitConfirm);
 
 	checkEOG.onEntry(() -> {
 	    if (this.contract.isLastTurn())
@@ -121,8 +126,8 @@ public class BoardFSM {
 	players.forEach(PlayerBoardFSM::waitForDraft);
     }
 
-    private void waitForInput() {
-	players.forEach(PlayerBoardFSM::waitForInput);
+    private void expectInput() {
+	players.forEach(PlayerBoardFSM::expectInput);
     }
 
     private void waitForBuilding() {
@@ -133,8 +138,8 @@ public class BoardFSM {
 	players.forEach(PlayerBoardFSM::waitForDeploy);
     }
 
-    private void waitFor() {
-	players.forEach(PlayerBoardFSM::waitFor);
+    private void waitConfirm() {
+	players.forEach(PlayerBoardFSM::waitConfirm);
     }
 
     private void chainDraft(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {

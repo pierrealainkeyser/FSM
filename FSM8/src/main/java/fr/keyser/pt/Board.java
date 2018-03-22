@@ -50,7 +50,7 @@ public class Board implements BoardContract {
 	for (PlayerBoard player : players) {
 	    player.clearInputActions();
 	    player.collectDying();
-	    player.fireEffect(When.AGING, true);
+	    player.fireAsyncEffect(When.AGING);
 	}
     }
 
@@ -74,8 +74,9 @@ public class Board implements BoardContract {
     @Override
     public void deployPhaseEffect() {
 	for (PlayerBoard player : players) {
+	    player.computeValues();
 	    player.clearInputActions();
-	    player.fireEffect(When.DEPLOYEMENT, true);
+	    player.fireAsyncEffect(When.DEPLOYEMENT);
 	}
     }
 
@@ -105,6 +106,7 @@ public class Board implements BoardContract {
     public void endAgePhase() {
 	for (PlayerBoard player : players) {
 	    player.computeDyingGain();
+	    player.fireEffect(When.AGING);
 	    player.removeDead();
 	}
     }
@@ -123,7 +125,7 @@ public class Board implements BoardContract {
     @Override
     public void endOfDeployPhase() {
 	for (PlayerBoard player : players) {
-	    player.fireEffect(When.DEPLOYEMENT, false);
+	    player.fireEffect(When.DEPLOYEMENT);
 	    player.computeValues();
 	    player.computeDeployGain();
 	}

@@ -15,7 +15,7 @@ import fr.keyser.pt.PlayerBoardContract;
 public class PlayerBoardFSM {
 
     private enum PlayerEvent {
-	USER_INPUT, WAIT_FOR_BUILDING, WAIT_FOR_DEPLOY, WAIT_FOR_DRAFT, WAIT_FOR_INPUT, WAIT_NOOP
+	USER_INPUT, WAIT_FOR_BUILDING, WAIT_FOR_DEPLOY, WAIT_FOR_DRAFT, EXPECT_INPUT, WAIT_NOOP
     }
 
     private final static String BUILDING = "BUILDING";
@@ -52,7 +52,15 @@ public class PlayerBoardFSM {
 	StateBuilder<String, PlayerEvent> noop = waitingUser.sub(NOOP);
 
 	idle.transition(PlayerEvent.WAIT_FOR_DEPLOY, deploy);
-	idle.transition(PlayerEvent.WAIT_FOR_INPUT, input);
+	idle.transition(PlayerEvent.EXPECT_INPUT, input).guard(e -> {
+	    if (contract.hasInputActions())
+		return true;
+	    else {
+		boardFSM.next();
+		return false;
+	    }
+
+	});
 	idle.transition(PlayerEvent.WAIT_FOR_BUILDING, building);
 	idle.transition(PlayerEvent.WAIT_FOR_DRAFT, draft);
 	idle.transition(PlayerEvent.WAIT_NOOP, noop);
@@ -132,11 +140,11 @@ public class PlayerBoardFSM {
 	stateMachine.push(PlayerEvent.WAIT_FOR_DRAFT);
     }
 
-    void waitForInput() {
-	stateMachine.push(PlayerEvent.WAIT_FOR_INPUT);
+    void expectInput() {
+	stateMachine.push(PlayerEvent.EXPECT_INPUT);
     }
 
-    void waitFor() {
+    void waitConfirm() {
 	stateMachine.push(PlayerEvent.WAIT_NOOP);
     }
 
