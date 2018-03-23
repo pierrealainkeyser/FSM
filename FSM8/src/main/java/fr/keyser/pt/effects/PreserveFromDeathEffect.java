@@ -1,30 +1,35 @@
 package fr.keyser.pt.effects;
 
-import java.util.Arrays;
+import static java.util.Arrays.asList;
+
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.DeployedCard;
+import fr.keyser.pt.PlayerBoard;
 import fr.keyser.pt.TargetedEffectDescription;
 import fr.keyser.pt.TargetedSpecialEffect;
 
 public class PreserveFromDeathEffect implements TargetedSpecialEffect {
 
+    private static final String SAVE = "save";
+
     @Override
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source) {
-	List<CardPosition> dyings = source.dyings().map(DeployedCard::getPosition).collect(Collectors.toList());
-	if (dyings.isEmpty())
+	PlayerBoard player = source.getPlayer();
+	boolean present = player.dyings().findFirst().isPresent();
+	if (present)
+	    return asList(new TargetedEffectDescription(SAVE, player.dyings()));
+	else
 	    return null;
-	return Arrays.asList(new TargetedEffectDescription("save", dyings));
     }
 
     @Override
     public void apply(DeployedCard source, Map<String, CardPosition> positions) {
-	CardPosition saved = positions.get("save");
+	CardPosition saved = positions.get(SAVE);
 
-	source.preserveFromDeath(saved);
+	source.getPlayer().preserveFromDeath(saved);
 
     }
 

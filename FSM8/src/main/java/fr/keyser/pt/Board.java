@@ -29,6 +29,10 @@ public class Board implements BoardContract {
 	this.deck = deck;
     }
 
+    public MetaCard pickTopCard() {
+	return deck.getCards().remove(0);
+    }
+
     public void addNewPlayer() {
 	PlayerBoardModel model = new PlayerBoardModel();
 	model.setGold(3);

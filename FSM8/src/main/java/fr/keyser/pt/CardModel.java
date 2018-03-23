@@ -58,16 +58,6 @@ public final class CardModel {
 	selected.put(name, position);
     }
 
-    public CardPosition positionFor(String name) {
-	if (selected == null) {
-	    CardPosition found = selected.remove(name);
-	    if (selected.isEmpty())
-		selected = null;
-	    return found;
-	} else
-	    return null;
-    }
-
     public void setSelected(Map<String, CardPosition> selected) {
 	this.selected = selected;
     }

@@ -14,6 +14,6 @@ public class UpgradeBuildingToLevel2 implements SpecialEffect {
 
     @Override
     public void apply(DeployedCard card) {
-	card.buildings().filter(DeployedCard::isLevel1).forEach(b -> b.setLevel(BuildingLevel.LEVEL2));
+	card.getPlayer().buildings().filter(DeployedCard::isLevel1).forEach(b -> b.setLevel(BuildingLevel.LEVEL2));
     }
 }

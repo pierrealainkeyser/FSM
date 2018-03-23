@@ -1,5 +1,6 @@
 package fr.keyser.pt;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class CardAction {
@@ -9,6 +10,10 @@ public class CardAction {
     private Map<String, CardPosition> target;
 
     public CardAction() {
+    }
+
+    public CardAction(CardPosition source, String name, CardPosition target) {
+	this(source, Collections.singletonMap(name, target));
     }
 
     public CardAction(CardPosition source, Map<String, CardPosition> target) {

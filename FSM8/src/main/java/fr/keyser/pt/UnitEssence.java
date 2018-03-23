@@ -21,6 +21,10 @@ public final class UnitEssence extends CardEssence<UnitEssence> {
 	combat(IntValue.ONE);
     }
 
+    public UnitEssence effect(SpecialEffectScope scope, TargetedSpecialEffect targeter) {
+	return effect(scope, new AsyncSpecialEffect(targeter));
+    }
+
     public UnitEssence effect(SpecialEffectScope scope, SpecialEffect specialEffect) {
 	if (effects == null)
 	    effects = new ArrayList<>();

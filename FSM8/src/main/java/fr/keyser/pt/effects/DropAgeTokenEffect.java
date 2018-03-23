@@ -1,6 +1,7 @@
 package fr.keyser.pt.effects;
 
-import java.util.Arrays;
+import static java.util.Arrays.asList;
+
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import fr.keyser.pt.TargetedSpecialEffect;
 
 public class DropAgeTokenEffect implements TargetedSpecialEffect {
 
+    private static final String DROP_AGE = "dropAge";
     private final IntValue ageCount;
 
     public DropAgeTokenEffect(IntValue ageCount) {
@@ -22,14 +24,14 @@ public class DropAgeTokenEffect implements TargetedSpecialEffect {
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source) {
 	int age = ageCount.getValue(source);
 	if (age > 0) {
-	    return Arrays.asList(new TargetedEffectDescription("drop", null));
+	    return asList(new IntTargetedEffectDescription(DROP_AGE, age, source.getPlayer().units()));
 	}
 	return null;
     }
 
     @Override
     public void apply(DeployedCard source, Map<String, CardPosition> positions) {
-	CardPosition to = positions.get("drop");
+	CardPosition to = positions.get(DROP_AGE);
 	int age = ageCount.getValue(source);
 	source.find(to).doAge(age);
 

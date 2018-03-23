@@ -3,7 +3,7 @@ package fr.keyser.pt;
 public class SpecialEffectScope {
 
     public enum When {
-	AGING, DEPLOYEMENT, INITIAL_DEPLOYEMENT;
+	ON_PLAY, AGING, DEPLOYEMENT, INITIAL_DEPLOYEMENT;
 
 	public boolean match(SpecialEffectScope scope) {
 	    return scope.getWhen() == this;
@@ -11,7 +11,7 @@ public class SpecialEffectScope {
 
 	public boolean match(SpecialEffectScope scope, DeployedCard card) {
 	    boolean sameScope = match(scope);
-	    if (AGING == this)
+	    if (AGING == this || ON_PLAY == this)
 		return sameScope;
 	    else if (DEPLOYEMENT == this)
 		return sameScope || INITIAL_DEPLOYEMENT.match(scope, card);

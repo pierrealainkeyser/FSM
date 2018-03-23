@@ -1,5 +1,6 @@
 package fr.keyser.pt;
 
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -10,6 +11,8 @@ public class DeployedCard {
     public static final SpecialEffectScope AGING = new SpecialEffectScope(0, When.AGING);
 
     public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(0, When.DEPLOYEMENT);
+
+    public static final SpecialEffectScope PLAY = new SpecialEffectScope(0, When.ON_PLAY);
 
     public static final SpecialEffectScope INITIAL_DEPLOY_LAST = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT);
 
@@ -45,18 +48,20 @@ public class DeployedCard {
 	resetCounters();
     }
 
-    public void preserveFromDeath(CardPosition position) {
-	player.preserveFromDeath(position);
+    public DeployedCard withMeta(MetaCard meta) {
+	return new DeployedCard(player, position, meta, model);
     }
 
     public DeployedCard find(CardPosition position) {
 	return player.find(position).getCard().get();
     }
 
-    CardPosition positionFor(String name) {
-	return model.positionFor(name);
+    Map<String, CardPosition> getSelectedAndClear() {
+	Map<String, CardPosition> selected = model.getSelected();
+	model.setSelected(null);
+	return selected;
     }
-    
+
     void addPositionFor(CardPosition position, String name) {
 	model.addPositionFor(position, name);
     }
@@ -64,10 +69,6 @@ public class DeployedCard {
     @Override
     public String toString() {
 	return card.getName();
-    }
-
-    public Stream<DeployedCard> buildings() {
-	return getPlayer().buildings();
     }
 
     public void computeDeployGain() {
@@ -104,10 +105,6 @@ public class DeployedCard {
     public void doAge(int amount) {
 	model.setAgeToken(model.getAgeToken() + amount);
 	player.cardHasAged(this);
-    }
-
-    public Stream<DeployedCard> dyings() {
-	return getPlayer().dyings();
     }
 
     public Stream<ScopedSpecialEffect> firedInitialEffects() {
@@ -148,7 +145,7 @@ public class DeployedCard {
 	return model.getLevel();
     }
 
-    PlayerBoard getPlayer() {
+    public PlayerBoard getPlayer() {
 	return player;
     }
 
@@ -179,10 +176,6 @@ public class DeployedCard {
     public void setLevel(BuildingLevel level) {
 	model.setLevel(level);
 	player.buildingHasChanged(this);
-    }
-
-    public Stream<DeployedCard> units() {
-	return getPlayer().units();
     }
 
     private Predicate<ScopedSpecialEffect> when(When when) {

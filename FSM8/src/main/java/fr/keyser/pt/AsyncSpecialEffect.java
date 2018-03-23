@@ -1,8 +1,6 @@
 package fr.keyser.pt;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class AsyncSpecialEffect implements SpecialEffect {
 
@@ -14,16 +12,11 @@ public final class AsyncSpecialEffect implements SpecialEffect {
 
     @Override
     public void apply(DeployedCard card) {
-	Map<String, CardPosition> positions = new HashMap<>();
-	for (TargetedEffectDescription ta : asyncEffect(card)) {
+	apply(card, card);
+    }
 
-	    String name = ta.getName();
-	    CardPosition position = card.positionFor(name);
-	    positions.put(name, position);
-	}
-
-	targeter.apply(card, positions);
-
+    public void apply(DeployedCard target, DeployedCard sourceArgs) {
+	targeter.apply(target, sourceArgs.getSelectedAndClear());
     }
 
     public List<TargetedEffectDescription> asyncEffect(DeployedCard card) {

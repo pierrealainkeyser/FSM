@@ -39,6 +39,13 @@ public final class CardSlot {
 	return card.get();
     }
 
+    public DeployedCard redeploy(MetaCard unit) {
+	DeployedCard dc = card.get();
+	card = Optional.of(dc.withMeta(unit));
+	return dc;
+
+    }
+
     public void clear() {
 	card = Optional.empty();
     }

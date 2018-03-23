@@ -92,6 +92,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 	this.model = model;
 	this.board = board;
     }
+    
+    public Board getBoard() {
+	return board;
+    }
 
     private void forward(Object event) {
 	board.forward(event);
@@ -168,7 +172,16 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	    model.getToDeploy().remove(meta);
 	    addGold(-((Unit) meta.getCard()).getGoldCost());
+
+	    fireEffect(Stream.of(dc), When.ON_PLAY);
 	}
+    }
+
+    public void redeploy(MetaCard unit, CardPosition position) {
+	CardSlot slot = find(position);
+
+	DeployedCard dc = slot.redeploy(unit);
+	forward(new CardDeploymentChanged(dc, this, true));
     }
 
     void clearBuilding() {
@@ -229,7 +242,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     }
 
-    Stream<DeployedCard> buildings() {
+    public Stream<DeployedCard> buildings() {
 	return asDeployedCard(building.stream());
     }
 
@@ -262,7 +275,11 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     void fireEffect(When when) {
-	List<FiredEffect> fired = all().flatMap(d -> d.firedEffects(when).map(e -> new FiredEffect(d, e)))
+	fireEffect(all(), when);
+    }
+
+    void fireEffect(Stream<DeployedCard> cards, When when) {
+	List<FiredEffect> fired = cards.flatMap(d -> d.firedEffects(when).map(e -> new FiredEffect(d, e)))
 	        .collect(Collectors.toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
 	fired.forEach(FiredEffect::fire);
@@ -270,7 +287,9 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     void fireAsyncEffect(When when) {
 	all().forEach(d -> d.firedEffects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
-	    model.getInputActions().put(d.getPosition(), e.asyncEffect(d));
+	    List<TargetedEffectDescription> asyncEffect = e.asyncEffect(d);
+	    if (asyncEffect != null)
+		model.getInputActions().put(d.getPosition(), asyncEffect);
 	}));
 
     }
@@ -334,7 +353,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	units().forEach(DeployedCard::doAge);
     }
 
-    Stream<DeployedCard> dyings() {
+    public Stream<DeployedCard> dyings() {
 	return dying.stream();
     }
 
@@ -397,7 +416,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return counters.getFood();
     }
 
-    void preserveFromDeath(CardPosition position) {
+    public void preserveFromDeath(CardPosition position) {
 	Iterator<DeployedCard> it = dying.iterator();
 	while (it.hasNext()) {
 	    DeployedCard next = it.next();

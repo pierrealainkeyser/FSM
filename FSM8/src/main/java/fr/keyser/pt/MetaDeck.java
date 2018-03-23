@@ -2,6 +2,7 @@ package fr.keyser.pt;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import fr.keyser.pt.buildings.Casern;
@@ -41,11 +42,11 @@ public class MetaDeck {
 	return deck;
     }
 
-    private List<MetaCard> cards = new ArrayList<>();
+    private List<MetaCard> cards = new LinkedList<>();
 
-    private List<MetaCard> discarded = new ArrayList<>();
+    private List<MetaCard> discarded = new LinkedList<>();
 
-    private List<MetaCard> buildings = new ArrayList<>();
+    private List<MetaCard> buildings = new LinkedList<>();
 
     public void load(Unit card, int count) {
 	for (int i = 0; i < count; ++i) {

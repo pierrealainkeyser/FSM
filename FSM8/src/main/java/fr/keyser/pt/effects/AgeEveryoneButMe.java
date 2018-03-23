@@ -13,6 +13,6 @@ public class AgeEveryoneButMe implements SpecialEffect {
 
     @Override
     public void apply(DeployedCard card) {
-	card.units().filter(c -> c != card).forEach(DeployedCard::doAge);
+	card.getPlayer().units().filter(c -> c != card).forEach(DeployedCard::doAge);
     }
 }
