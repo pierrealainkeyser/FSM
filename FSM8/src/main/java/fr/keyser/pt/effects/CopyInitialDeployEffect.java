@@ -3,9 +3,12 @@ package fr.keyser.pt.effects;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import fr.keyser.pt.AsyncSpecialEffect;
@@ -23,6 +26,7 @@ public class CopyInitialDeployEffect implements TargetedSpecialEffect {
     @Override
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source) {
 
+	Set<CardPosition> direct = new HashSet<>();
 	Map<CardPosition, List<TargetedEffectDescription>> positions = new HashMap<>();
 
 	source.getPlayer().units().filter(d -> source != d).forEach(d -> {
@@ -37,9 +41,8 @@ public class CopyInitialDeployEffect implements TargetedSpecialEffect {
 	    boolean asyncsEmpty = asyncs.isEmpty();
 	    if (!(asyncsEmpty && syncs.isEmpty())) {
 		CardPosition position = d.getPosition();
-		if (asyncsEmpty) {
-		    positions.put(position, null);
-		} else {
+		direct.add(position);
+		if (!asyncsEmpty) {
 		    List<TargetedEffectDescription> subTargeted = asyncs.stream().flatMap(s -> s.asyncEffect(d).stream())
 		            .collect(Collectors.toList());
 		    positions.put(position, subTargeted);
@@ -47,7 +50,8 @@ public class CopyInitialDeployEffect implements TargetedSpecialEffect {
 	    }
 	});
 
-	return asList(new IntTargetedEffectDescription(COPY, 0, source.getPlayer().units()));
+	// TODO gestion des parametres
+	return asList(new TargetedEffectDescription(COPY, new ArrayList<>(direct)));
     }
 
     @Override
