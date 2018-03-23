@@ -2,6 +2,7 @@ package fr.keyser.pt;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public final class AsyncSpecialEffect implements SpecialEffect {
 
@@ -11,9 +12,13 @@ public final class AsyncSpecialEffect implements SpecialEffect {
 	this.targeter = targeter;
     }
 
+    public boolean testTargeter(Predicate<TargetedSpecialEffect> pred) {
+	return pred.test(targeter);
+    }
+
     @Override
     public void apply(DeployedCard card) {
-	apply(card, card.getSelectedAndClear());
+	apply(card, card.getSelected());
     }
 
     public void apply(DeployedCard target, Map<String, CardPosition> positions) {

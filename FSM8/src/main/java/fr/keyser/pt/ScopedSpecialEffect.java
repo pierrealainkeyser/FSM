@@ -1,6 +1,7 @@
 package fr.keyser.pt;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public final class ScopedSpecialEffect {
     private final SpecialEffectScope scope;
@@ -11,10 +12,15 @@ public final class ScopedSpecialEffect {
 	this.specialEffect = specialEffect;
     }
 
+    public boolean testTargeter(Predicate<TargetedSpecialEffect> pred) {
+	if (isAsync())
+	    return ((AsyncSpecialEffect) specialEffect).testTargeter(pred);
+	return false;
+    }
+
     public List<TargetedEffectDescription> asyncEffect(DeployedCard card) {
-	if (isAsync()) {
+	if (isAsync())
 	    return ((AsyncSpecialEffect) specialEffect).asyncEffect(card);
-	}
 	return null;
     }
 

@@ -58,10 +58,8 @@ public class DeployedCard {
 	return player.find(position).getCard().get();
     }
 
-    Map<String, CardPosition> getSelectedAndClear() {
-	Map<String, CardPosition> selected = model.getSelected();
-	model.setSelected(null);
-	return selected;
+    Map<String, CardPosition> getSelected() {
+	return model.getSelected();
     }
 
     void addPositionFor(CardPosition position, String name) {
@@ -76,6 +74,9 @@ public class DeployedCard {
     public void computeDeployGain() {
 	counters.setDeployLegend(card.getDeployLegend().getValue(this));
 	counters.setDeployGold(card.getDeployGold().getValue(this));
+
+	// clear all selected
+	model.setSelected(null);
     }
 
     public void computeDyingGain() {
@@ -109,7 +110,7 @@ public class DeployedCard {
 	player.cardHasAged(this);
     }
 
-    public Stream<ScopedSpecialEffect> firedInitialEffects() {
+    public Stream<ScopedSpecialEffect> intialDeployementEffect() {
 	return streamEffect(s -> When.INITIAL_DEPLOYEMENT.match(s.getScope()));
     }
 
@@ -121,7 +122,7 @@ public class DeployedCard {
 	    return Stream.empty();
     }
 
-    public Stream<ScopedSpecialEffect> firedEffects(When when) {
+    public Stream<ScopedSpecialEffect> effects(When when) {
 	return streamEffect(s -> when.match(s.getScope(), this));
     }
 

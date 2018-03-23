@@ -279,14 +279,14 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     void fireEffect(Stream<DeployedCard> cards, When when) {
-	List<FiredEffect> fired = cards.flatMap(d -> d.firedEffects(when).map(e -> new FiredEffect(d, e)))
+	List<FiredEffect> fired = cards.flatMap(d -> d.effects(when).map(e -> new FiredEffect(d, e)))
 	        .collect(Collectors.toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
 	fired.forEach(FiredEffect::fire);
     }
 
     void registerAsyncEffect(Stream<DeployedCard> cards, When when) {
-	cards.forEach(d -> d.firedEffects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
+	cards.forEach(d -> d.effects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
 	    List<TargetedEffectDescription> asyncEffect = e.asyncEffect(d);
 	    if (asyncEffect != null)
 		model.getInputActions().put(d.getPosition(), asyncEffect);
