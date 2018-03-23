@@ -54,7 +54,7 @@ public class Board implements BoardContract {
 	for (PlayerBoard player : players) {
 	    player.clearInputActions();
 	    player.collectDying();
-	    player.fireAsyncEffect(When.AGING);
+	    player.registerAsyncEffect(player.all(), When.AGING);
 	}
     }
 
@@ -80,7 +80,7 @@ public class Board implements BoardContract {
 	for (PlayerBoard player : players) {
 	    player.computeValues();
 	    player.clearInputActions();
-	    player.fireAsyncEffect(When.DEPLOYEMENT);
+	    player.registerAsyncEffect(player.all(), When.DEPLOYEMENT);
 	}
     }
 

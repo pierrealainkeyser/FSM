@@ -9,7 +9,7 @@ public final class TimeMistress extends Unit {
 
     public TimeMistress() {
 	super(essence(0)
-	        .effect(DeployedCard.INITIAL_DEPLOY, new DropAgeTokenEffect(IntValue.constant(2))));
+	        .effect(DeployedCard.INITIAL_DEPLOY_FIRST, new DropAgeTokenEffect(IntValue.constant(2))));
     }
 
 }

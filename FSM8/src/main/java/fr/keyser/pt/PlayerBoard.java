@@ -92,7 +92,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	this.model = model;
 	this.board = board;
     }
-    
+
     public Board getBoard() {
 	return board;
     }
@@ -285,8 +285,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 	fired.forEach(FiredEffect::fire);
     }
 
-    void fireAsyncEffect(When when) {
-	all().forEach(d -> d.firedEffects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
+    void registerAsyncEffect(Stream<DeployedCard> cards, When when) {
+	cards.forEach(d -> d.firedEffects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
 	    List<TargetedEffectDescription> asyncEffect = e.asyncEffect(d);
 	    if (asyncEffect != null)
 		model.getInputActions().put(d.getPosition(), asyncEffect);

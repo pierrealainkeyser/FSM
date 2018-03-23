@@ -1,6 +1,7 @@
 package fr.keyser.pt;
 
 import java.util.List;
+import java.util.Map;
 
 public final class AsyncSpecialEffect implements SpecialEffect {
 
@@ -12,11 +13,11 @@ public final class AsyncSpecialEffect implements SpecialEffect {
 
     @Override
     public void apply(DeployedCard card) {
-	apply(card, card);
+	apply(card, card.getSelectedAndClear());
     }
 
-    public void apply(DeployedCard target, DeployedCard sourceArgs) {
-	targeter.apply(target, sourceArgs.getSelectedAndClear());
+    public void apply(DeployedCard target, Map<String, CardPosition> positions) {
+	targeter.apply(target, positions);
     }
 
     public List<TargetedEffectDescription> asyncEffect(DeployedCard card) {

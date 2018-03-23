@@ -14,9 +14,11 @@ public class DeployedCard {
 
     public static final SpecialEffectScope PLAY = new SpecialEffectScope(0, When.ON_PLAY);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY_LAST = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT);
+    public static final SpecialEffectScope INITIAL_DEPLOY_LAST = new SpecialEffectScope(2, When.INITIAL_DEPLOYEMENT);
 
-    public static final SpecialEffectScope INITIAL_DEPLOY = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT);
+    public static final SpecialEffectScope INITIAL_DEPLOY = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT);
+
+    public static final SpecialEffectScope INITIAL_DEPLOY_FIRST = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT);
 
     public static Predicate<DeployedCard> hasAgeToken(int i) {
 	return p -> p.getAgeToken() == i;
@@ -108,17 +110,19 @@ public class DeployedCard {
     }
 
     public Stream<ScopedSpecialEffect> firedInitialEffects() {
+	return streamEffect(s -> When.INITIAL_DEPLOYEMENT.match(s.getScope()));
+    }
+
+    private Stream<ScopedSpecialEffect> streamEffect(Predicate<ScopedSpecialEffect> predicate) {
 	if (card instanceof Unit) {
-	    return ((Unit) card).getEffects().stream().filter(initialDrop());
+	    Stream<ScopedSpecialEffect> unitEffect = ((Unit) card).getEffects().stream();
+	    return unitEffect.filter(predicate);
 	} else
 	    return Stream.empty();
     }
 
     public Stream<ScopedSpecialEffect> firedEffects(When when) {
-	if (card instanceof Unit) {
-	    return ((Unit) card).getEffects().stream().filter(when(when));
-	} else
-	    return Stream.empty();
+	return streamEffect(s -> when.match(s.getScope(), this));
     }
 
     public int getAgeToken() {
@@ -176,14 +180,6 @@ public class DeployedCard {
     public void setLevel(BuildingLevel level) {
 	model.setLevel(level);
 	player.buildingHasChanged(this);
-    }
-
-    private Predicate<ScopedSpecialEffect> when(When when) {
-	return s -> when.match(s.getScope(), this);
-    }
-
-    private Predicate<ScopedSpecialEffect> initialDrop() {
-	return s -> When.INITIAL_DEPLOYEMENT.match(s.getScope());
     }
 
     public boolean willDie() {

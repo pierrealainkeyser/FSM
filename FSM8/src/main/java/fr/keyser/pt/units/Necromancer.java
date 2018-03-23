@@ -10,7 +10,7 @@ public final class Necromancer extends Unit {
     public Necromancer() {
 	super(essence(1)
 	        .combat(IntValue.constant(4))
-	        .effect(DeployedCard.INITIAL_DEPLOY, AgeEveryoneButMe.INSTANCE));
+	        .effect(DeployedCard.INITIAL_DEPLOY_FIRST, AgeEveryoneButMe.INSTANCE));
     }
 
 }
