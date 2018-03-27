@@ -15,6 +15,7 @@ import fr.keyser.pt.PlayerBoardContract;
 
 public class PlayerBoardFSM {
 
+    private static final String EVENT_ARGS = "args";
     private static final String PLAYED = "PLAYED";
     private static final String PLAY = "PLAY";
 
@@ -28,6 +29,9 @@ public class PlayerBoardFSM {
     private final static String BUILDING = "BUILDING";
     private final static String DEPLOY = "DEPLOY";
     private final static String AGE = "AGE";
+
+    private final static String END_OF_GAME = "EOG";
+    private final static String END_OF_TURN = "EOT";
 
     private final static String WAITING_USER = "WAITING_USER";
     private final static String DONE_USER = "DONE_USER";
@@ -52,6 +56,9 @@ public class PlayerBoardFSM {
 	DelayedEventConsumer<String, PlayerEvent> ec = builder.eventConsummer();
 
 	StateBuilder<String, PlayerEvent> init = builder.state(INIT);
+	StateBuilder<String, PlayerEvent> eog = builder.state(END_OF_GAME);
+	StateBuilder<String, PlayerEvent> eot = builder.state(END_OF_TURN);
+
 	StateBuilder<String, PlayerEvent> draft = builder.state(DRAFT);
 	StateBuilder<String, PlayerEvent> deploy = builder.state(DEPLOY);
 	StateBuilder<String, PlayerEvent> war = builder.state(WAR);
@@ -72,8 +79,12 @@ public class PlayerBoardFSM {
 
 	age.onEntry(contract::agePhase)
 	        .onExit(contract::endAgePhase);
+	waitAge(ec, age, eot);
 
 	init.transition(PlayerEvent.NEXT_PHASE, draft);
+
+	eot.transition(PlayerEvent.NEXT_PHASE, draft);
+	eot.transition(PlayerEvent.SKIP, eog);
 
 	stateMachine = builder.build();
     }
@@ -90,20 +101,19 @@ public class PlayerBoardFSM {
 	// NOOP
     }
 
-    private void waitDeploy(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> deploy,
-            StateBuilder<String, PlayerEvent> war) {
+    private void waitAge(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> age,
+            StateBuilder<String, PlayerEvent> eot) {
 
-	StateBuilder<String, PlayerEvent> play = deploy.sub(PLAY);
+	StateBuilder<String, PlayerEvent> done = age.sub(DONE_USER);
 
-	StateBuilder<String, PlayerEvent> played = deploy.sub(PLAYED);
-	StateBuilder<String, PlayerEvent> waitingEffect = played.sub(WAITING_USER);
-	StateBuilder<String, PlayerEvent> done = played.sub(DONE_USER);
+	conditionalInputProcessing(ec, age.sub(WAITING_USER), done);
 
-	play.onEntry(expect(DoDeployCardCommand.class, "deploy"))
-	        .transition(PlayerEvent.RECEIVE_INPUT, waitingEffect)
-	        .guard(this::validateArgs)
-	        .onTransition(wrapConsumer(this::processDeploy));
+	done.onEntry(boardFSM::next)
+	        .transition(PlayerEvent.NEXT_PHASE, eot);
+    }
 
+    public void conditionalInputProcessing(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> waitingEffect,
+            StateBuilder<String, PlayerEvent> done) {
 	waitingEffect.onEntry(() -> {
 	    if (!contract.hasInputActions()) {
 		ec.push(PlayerEvent.SKIP);
@@ -114,10 +124,26 @@ public class PlayerBoardFSM {
 	        .onExit(expect(null, null))
 	        .transition(PlayerEvent.RECEIVE_INPUT, done)
 	        .guard(this::validateArgs)
-	        .onTransition(wrapConsumer(this::processInput));
+	        .onTransition(withArgs(this::processInput));
+    }
+
+    private void waitDeploy(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> deploy,
+            StateBuilder<String, PlayerEvent> war) {
+
+	StateBuilder<String, PlayerEvent> play = deploy.sub(PLAY);
+	StateBuilder<String, PlayerEvent> played = deploy.sub(PLAYED);
+	StateBuilder<String, PlayerEvent> waitingEffect = played.sub(WAITING_USER);
+	StateBuilder<String, PlayerEvent> done = played.sub(DONE_USER);
+
+	play.onEntry(expect(DoDeployCardCommand.class, "deploy"))
+	        .transition(PlayerEvent.RECEIVE_INPUT, waitingEffect)
+	        .guard(this::validateArgs)
+	        .onTransition(withArgs(this::processDeploy));
 
 	played.onEntry(contract::deployPhase)
 	        .onExit(contract::endOfDeployPhase);
+
+	conditionalInputProcessing(ec, waitingEffect, done);
 
 	done.onEntry(boardFSM::next)
 	        .transition(PlayerEvent.NEXT_PHASE, war);
@@ -144,7 +170,7 @@ public class PlayerBoardFSM {
 	        .onExit(expect(null, null))
 	        .transition(PlayerEvent.RECEIVE_INPUT, done)
 	        .guard(this::validateArgs)
-	        .onTransition(wrapConsumer(consumer));
+	        .onTransition(withArgs(consumer));
 
 	done.onEntry(boardFSM::next)
 	        .transition(PlayerEvent.LOOP, waiting);
@@ -178,22 +204,22 @@ public class PlayerBoardFSM {
     }
 
     public void receiveInput(Object input) {
-	stateMachine.push(Event.create(PlayerEvent.RECEIVE_INPUT).put("args", input));
+	stateMachine.push(Event.create(PlayerEvent.RECEIVE_INPUT).put(EVENT_ARGS, input));
     }
 
     private boolean validateArgs(Event<PlayerEvent> event) {
-	Object args = event.get("args");
+	Object args = event.get(EVENT_ARGS);
 	if (args == null)
 	    return false;
 	else
 	    return expectedInput.isAssignableFrom(args.getClass());
     }
 
-    private <T> OnSimpleTransitionAction<PlayerEvent> wrapConsumer(Consumer<T> consumer) {
+    private <T> OnSimpleTransitionAction<PlayerEvent> withArgs(Consumer<T> consumer) {
 
 	return event -> {
 	    @SuppressWarnings("unchecked")
-	    T command = (T) event.get("args");
+	    T command = (T) event.get(EVENT_ARGS);
 	    consumer.accept(command);
 	};
     }
