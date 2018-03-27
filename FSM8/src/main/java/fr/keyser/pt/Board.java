@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fr.keyser.bus.Bus;
-import fr.keyser.pt.SpecialEffectScope.When;
 
 public class Board implements BoardContract {
 
@@ -33,55 +32,17 @@ public class Board implements BoardContract {
 	return deck.getCards().remove(0);
     }
 
-    public void addNewPlayer() {
+    public PlayerBoard addNewPlayer() {
 	PlayerBoardModel model = new PlayerBoardModel();
 	model.setGold(3);
 
-	players.add(new PlayerBoard(UUID.randomUUID(), model, this));
+	PlayerBoard player = new PlayerBoard(UUID.randomUUID(), model, this);
+	players.add(player);
+	return player;
     }
 
     public void addPlayer(UUID uuid, PlayerBoardModel model) {
 	players.add(new PlayerBoard(uuid, model, this));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#agePhase()
-     */
-    @Override
-    public void agePhase() {
-	for (PlayerBoard player : players) {
-	    player.clearInputActions();
-	    player.collectDying();
-	    player.registerAsyncEffect(player.all(), When.AGING);
-	}
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#buildPhase()
-     */
-    @Override
-    public void buildPhase() {
-	for (PlayerBoard player : players)
-	    player.collectBuilding(deck.getBuildings());
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#deployPhaseEffect()
-     */
-    @Override
-    public void deployPhaseEffect() {
-	for (PlayerBoard player : players) {
-	    player.computeValues();
-	    player.clearInputActions();
-	    player.registerAsyncEffect(player.all(), When.DEPLOYEMENT);
-	}
     }
 
     @Override
@@ -101,45 +62,6 @@ public class Board implements BoardContract {
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#endAgePhase()
-     */
-    @Override
-    public void endAgePhase() {
-	for (PlayerBoard player : players) {
-	    player.computeDyingGain();
-	    player.fireEffect(When.AGING);
-	    player.removeDead();
-	}
-    }
-
-    @Override
-    public void endBuildPhase() {
-	for (PlayerBoard player : players)
-	    player.clearBuilding();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#endOfDeployPhase()
-     */
-    @Override
-    public void endOfDeployPhase() {
-	for (PlayerBoard player : players) {
-	    player.fireEffect(When.DEPLOYEMENT);
-	    player.computeValues();
-	    player.computeDeployGain();
-	}
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#getPlayers()
-     */
     @Override
     public Stream<? extends PlayerBoardContract> getPlayers() {
 	return players.stream();
@@ -150,23 +72,6 @@ public class Board implements BoardContract {
 	return turn.getTurn();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#goldPhase()
-     */
-    @Override
-    public void goldPhase() {
-	for (PlayerBoard player : players)
-	    player.gainGold();
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#isLastTurn()
-     */
     @Override
     public boolean isLastTurn() {
 	return turn.getTurn() == 4;
@@ -176,11 +81,6 @@ public class Board implements BoardContract {
 	deck.getDiscarded().add(meta);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#newTurn()
-     */
     @Override
     public void newTurn() {
 	turn.setTurn(turn.getTurn() + 1);
@@ -197,11 +97,6 @@ public class Board implements BoardContract {
 	    players.get(i).setToDraft(next(toDraft, i, direction));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#resetCounters()
-     */
     @Override
     public void resetCounters() {
 	players.forEach(PlayerBoard::resetCounters);
@@ -211,11 +106,6 @@ public class Board implements BoardContract {
 	return turn.getTurn() == model.getPlayedTurn();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.BoardContract#warPhase()
-     */
     @Override
     public void warPhase() {
 	for (PlayerBoard player : players)
@@ -254,6 +144,10 @@ public class Board implements BoardContract {
 
     void forward(Object event) {
 	bus.forward(event);
+    }
+
+    List<MetaCard> getBuildings() {
+	return deck.getBuildings();
     }
 
 }

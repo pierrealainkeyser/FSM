@@ -117,22 +117,57 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return board.sameTurn(model);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.PlayerBoardContract#processDraft(int)
-     */
+    @Override
+    public void deployPhaseEffect() {
+	computeValues();
+	clearInputActions();
+	registerAsyncEffect(all(), When.DEPLOYEMENT);
+    }
+
+    @Override
+    public void endOfDeployPhase() {
+	fireEffect(When.DEPLOYEMENT);
+	computeValues();
+	computeDeployGain();
+    }
+
+    @Override
+    public void buildPhase() {
+	collectBuilding(board.getBuildings());
+
+    }
+
+    @Override
+    public void endBuildPhase() {
+	clearBuilding();
+    }
+
+    @Override
+    public void agePhase() {
+	clearInputActions();
+	collectDying();
+	registerAsyncEffect(all(), When.AGING);
+    }
+
+    @Override
+    public void endAgePhase() {
+	computeDyingGain();
+	fireEffect(When.AGING);
+	removeDead();
+    }
+
+    @Override
+    public void goldPhase() {
+	gainGold();
+
+    }
+
     @Override
     public void processDraft(int id) {
 	List<MetaCard> toDeploy = model.getToDeploy();
 	removeDrafted(id, toDeploy::add);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.PlayerBoardContract#processDiscard(int)
-     */
     @Override
     public void processDiscard(int id) {
 	removeDrafted(id, board::moveToDiscard);
@@ -148,12 +183,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.PlayerBoardContract#processDeployCardAction(fr.keyser.pt.
-     * DoDeployCard)
-     */
     @Override
     public void processDeployCardAction(DoDeployCard action) {
 	Optional<MetaCard> first = model.getToDeploy().stream().filter(MetaCard.sameId(action.getSource())).findFirst();
@@ -206,11 +235,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	addGold(-plan.getGoldCost());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see fr.keyser.pt.PlayerBoardContract#keepToDeploy(int)
-     */
     @Override
     public void keepToDeploy(int id) {
 	Iterator<MetaCard> it = model.getToDeploy().iterator();
@@ -223,12 +247,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * fr.keyser.pt.PlayerBoardContract#processCardAction(fr.keyser.pt.CardAction)
-     */
     @Override
     public void processCardAction(CardAction action) {
 
@@ -246,7 +264,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return asDeployedCard(building.stream());
     }
 
-    void clearInputActions() {
+    private void clearInputActions() {
 	model.getInputActions().clear();
     }
 

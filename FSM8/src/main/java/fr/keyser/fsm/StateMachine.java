@@ -1,5 +1,6 @@
 package fr.keyser.fsm;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -72,5 +73,9 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
 
     public State<S> getCurrent() {
 	return current;
+    }
+
+    public List<State<S>> getChildrens() {
+	return root.getChildrens();
     }
 }

@@ -14,23 +14,9 @@ public interface BoardContract {
 
     boolean isLastTurn();
 
-    void deployPhaseEffect();
-
-    void endOfDeployPhase();
-
     void warPhase();
 
-    void goldPhase();
-
-    void buildPhase();
-
-    void agePhase();
-
-    void endAgePhase();
-
     Stream<? extends PlayerBoardContract> getPlayers();
-
-    void endBuildPhase();
 
     int getTurnValue();
 

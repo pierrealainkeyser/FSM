@@ -19,4 +19,18 @@ public interface PlayerBoardContract {
     UUID getUuid();
 
     boolean hasInputActions();
+
+    void deployPhaseEffect();
+
+    void endOfDeployPhase();
+
+    void buildPhase();
+
+    void endBuildPhase();
+
+    void agePhase();
+
+    void endAgePhase();
+
+    void goldPhase();
 }

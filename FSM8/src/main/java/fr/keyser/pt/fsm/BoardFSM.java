@@ -22,13 +22,12 @@ public class BoardFSM {
     public static final String DRAFT = "draft";
     private final static String TURN = "TURN";
     private final static String CHECK_EOG = "CHECK_EOG";
-    private final static String PLAY = "PLAY";
+    private final static String DRAFT_PHASE = "DRAFT_PHASE";
     private final static String DEPLOY_PHASE = "DEPLOY_PHASE";
     private final static String WAR_PHASE = "WAR_PHASE";
     private final static String GOLD_PHASE = "GOLD_PHASE";
     private final static String BUILDING_PHASE = "BUILDING_PHASE";
     private final static String AGE_PHASE = "AGE_PHASE";
-    private final static String END_OF_TURN = "END_OF_TURN";
 
     private enum BoardEvent {
 	NEXT, END
@@ -50,56 +49,37 @@ public class BoardFSM {
 	DelayedEventConsumer<String, BoardEvent> ec = builder.eventConsummer();
 
 	StateBuilder<String, BoardEvent> turn = builder.state(TURN);
-
-	StateBuilder<String, BoardEvent> checkEOG = builder.state(CHECK_EOG);
-
-	StateBuilder<String, BoardEvent> draft = turn.sub(DRAFT);
-	StateBuilder<String, BoardEvent> play = turn.sub(PLAY);
+	StateBuilder<String, BoardEvent> draft = turn.sub(DRAFT_PHASE);
 	StateBuilder<String, BoardEvent> deploy = turn.sub(DEPLOY_PHASE);
 	StateBuilder<String, BoardEvent> war = turn.sub(WAR_PHASE);
 	StateBuilder<String, BoardEvent> gold = turn.sub(GOLD_PHASE);
 	StateBuilder<String, BoardEvent> building = turn.sub(BUILDING_PHASE);
 	StateBuilder<String, BoardEvent> age = turn.sub(AGE_PHASE);
-	StateBuilder<String, BoardEvent> endOfTurn = turn.sub(END_OF_TURN);
+
+	StateBuilder<String, BoardEvent> checkEOG = builder.state(CHECK_EOG);
 
 	draft.onEntry(phase(DRAFT));
-	play.onEntry(phase(DEPLOY));
+	deploy.onEntry(phase(DEPLOY));
 	war.onEntry(phase(WAR));
 	gold.onEntry(phase(GOLD));
 	building.onEntry(phase(BUILDING));
 	age.onEntry(phase(AGE));
 
-	chainDraft(draft, play);
-
-	chainedSubByPlayers(play, deploy);
+	chainDraft(draft, deploy);
 	chainedSubByPlayers(deploy, war);
 	chainedSubByPlayers(war, gold);
 	chainedSubByPlayers(gold, building);
 	chainedSubByPlayers(building, age);
-	chainedSubByPlayers(age, endOfTurn);
-	chainedSubByPlayers(endOfTurn, checkEOG);
+	chainedSubByPlayers(age, checkEOG);
 
 	turn.onEntry(this.contract::resetCounters);
 
 	draft.onEntry(this::distributeAndWaitCard);
-
-	play.onEntry(this::waitForDeploy);
-
-	deploy.onEntry(this.contract::deployPhaseEffect)
-	        .onEntry(this::expectInput)
-	        .onExit(this.contract::endOfDeployPhase);
-
-	war.onEntry(this.contract::warPhase).onEntry(this::waitConfirm);
-	gold.onEntry(this.contract::goldPhase).onEntry(this::waitConfirm);
-	building.onEntry(this.contract::buildPhase)
-	        .onEntry(this::waitForBuilding)
-	        .onExit(this.contract::endBuildPhase);
-
-	age.onEntry(this.contract::agePhase)
-	        .onEntry(this::expectInput)
-	        .onExit(this.contract::endAgePhase);
-
-	endOfTurn.onEntry(this::waitConfirm);
+	deploy.onEntry(this::nextPhase);
+	war.onEntry(this::nextPhase);
+	gold.onEntry(this::nextPhase);
+	building.onEntry(this::nextPhase);
+	age.onEntry(this::nextPhase);
 
 	checkEOG.onEntry(() -> {
 	    if (this.contract.isLastTurn())
@@ -123,41 +103,34 @@ public class BoardFSM {
 
     private void distributeAndWaitCard() {
 	contract.distributeCards();
-	players.forEach(PlayerBoardFSM::waitForDraft);
+	nextPhase();
     }
 
-    private void expectInput() {
-	players.forEach(PlayerBoardFSM::expectInput);
-    }
-
-    private void waitForBuilding() {
-	players.forEach(PlayerBoardFSM::waitForBuilding);
-    }
-
-    private void waitForDeploy() {
-	players.forEach(PlayerBoardFSM::waitForDeploy);
-    }
-
-    private void waitConfirm() {
-	players.forEach(PlayerBoardFSM::waitConfirm);
+    private void nextPhase() {
+	players.forEach(PlayerBoardFSM::nextPhase);
     }
 
     private void chainDraft(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
 	int count = 4;
 	for (int i = 0; i < count; ++i)
-	    buildingSub.add(from.sub("d" + i));
+	    buildingSub.add(from.sub("draft" + i));
 
 	for (int i = 0; i < count; ++i) {
 	    StateBuilder<String, BoardEvent> next = to;
 	    boolean notLast = i < count - 1;
-	    if (notLast)
+	    StateBuilder<String, BoardEvent> currentSub = buildingSub.get(i);
+	    if (notLast) {
 		next = buildingSub.get(i + 1);
+		currentSub.onExit(() -> players.forEach(PlayerBoardFSM::loop));
+	    }
 
-	    StateBuilder<String, BoardEvent> current = buildingSub.get(i);
+	    StateBuilder<String, BoardEvent> current = currentSub;
 	    chainedSubByPlayers(current, next);
 
 	    current.onExit(this.contract::passCardsToNext);
+	    if (!notLast)
+		current.onExit(this::nextPhase);
 	}
     }
 
@@ -165,7 +138,7 @@ public class BoardFSM {
 	int count = players.size();
 	List<StateBuilder<String, BoardEvent>> buildingSub = new ArrayList<>();
 	for (int i = 0; i < count; ++i)
-	    buildingSub.add(from.sub("" + i));
+	    buildingSub.add(from.sub("" + (count - i)));
 
 	for (int i = 0; i < count; ++i) {
 	    StateBuilder<String, BoardEvent> next = to;
