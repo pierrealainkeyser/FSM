@@ -200,7 +200,9 @@ public final class PlayerBoard implements PlayerBoardContract {
 	    forward(new CardDeploymentChanged(dc, this, true));
 
 	    model.getToDeploy().remove(meta);
-	    addGold(-((Unit) meta.getCard()).getGoldCost());
+
+	    int goldDelta = ((Unit) meta.getCard()).getGoldCost();
+	    counters.setDeployGold(counters.getDeployGold() - goldDelta);
 
 	    fireEffect(Stream.of(dc), When.ON_PLAY);
 	}

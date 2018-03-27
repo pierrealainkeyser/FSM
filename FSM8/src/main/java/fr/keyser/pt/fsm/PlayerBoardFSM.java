@@ -99,7 +99,7 @@ public class PlayerBoardFSM {
 	StateBuilder<String, PlayerEvent> waitingEffect = played.sub(WAITING_USER);
 	StateBuilder<String, PlayerEvent> done = played.sub(DONE_USER);
 
-	play.onEntry(expect(DoDeployCard.class, "deploy"))
+	play.onEntry(expect(DoDeployCardCommand.class, "deploy"))
 	        .transition(PlayerEvent.RECEIVE_INPUT, waitingEffect)
 	        .guard(this::validateArgs)
 	        .onTransition(wrapConsumer(this::processDeploy));
