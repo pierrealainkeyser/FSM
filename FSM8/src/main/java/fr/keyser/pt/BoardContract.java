@@ -17,7 +17,4 @@ public interface BoardContract {
     void warPhase();
 
     Stream<? extends PlayerBoardContract> getPlayers();
-
-    int getTurnValue();
-
 }

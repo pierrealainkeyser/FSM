@@ -9,24 +9,28 @@ public class DoDeployCard {
     public DoDeployCard() {
     }
 
+    public DoDeployCard(MetaCard card, CardPosition target) {
+	this(card.getId(), target);
+    }
+
     public DoDeployCard(int source, CardPosition target) {
 	this.source = source;
 	this.target = target;
     }
 
     public int getSource() {
-        return source;
+	return source;
     }
 
     public CardPosition getTarget() {
-        return target;
+	return target;
     }
 
     public void setSource(int source) {
-        this.source = source;
+	this.source = source;
     }
 
     public void setTarget(CardPosition target) {
-        this.target = target;
+	this.target = target;
     }
 }

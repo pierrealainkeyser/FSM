@@ -14,13 +14,13 @@ public interface PlayerBoardContract {
 
     void processCardAction(CardAction action);
 
-    void doBuild(int index);
+    void processBuild(int index);
 
     UUID getUuid();
 
     boolean hasInputActions();
 
-    void deployPhaseEffect();
+    void deployPhase();
 
     void endOfDeployPhase();
 

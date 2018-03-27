@@ -61,6 +61,25 @@ import fr.keyser.pt.event.PlayerLegendChanged;
  */
 public final class PlayerBoard implements PlayerBoardContract {
 
+    private static class FiredEffect {
+	private final DeployedCard card;
+
+	private final ScopedSpecialEffect effect;
+
+	public FiredEffect(DeployedCard card, ScopedSpecialEffect effect) {
+	    this.card = card;
+	    this.effect = effect;
+	}
+
+	public void fire() {
+	    effect.getSpecialEffect().apply(card);
+	}
+
+	public int getOrder() {
+	    return effect.getScope().getOrder();
+	}
+    }
+
     private static final int POINT_PER_VICTORY = 3;
 
     private final static Stream<DeployedCard> asDeployedCard(Stream<CardSlot> input) {
@@ -73,17 +92,17 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     private List<CardSlot> back = ctx(Position.BACK, 2);
 
+    private final Board board;
+
     private List<CardSlot> building = ctx(Position.BUILDING, 4);
 
-    private PlayerCounters counters;
+    private PlayerCounters counters = new PlayerCounters();
 
     private List<DeployedCard> dying = new ArrayList<>();
 
     private List<CardSlot> front = ctx(Position.FRONT, 3);
 
     private final PlayerBoardModel model;
-
-    private final Board board;
 
     private final UUID uuid;
 
@@ -93,53 +112,17 @@ public final class PlayerBoard implements PlayerBoardContract {
 	this.board = board;
     }
 
-    public Board getBoard() {
-	return board;
-    }
-
-    private void forward(Object event) {
-	board.forward(event);
-    }
-
-    List<MetaCard> getToDraft() {
-	return model.getToDraft();
-    }
-
-    void setToDraft(List<MetaCard> toDraft) {
-	model.setToDraft(toDraft);
-    }
-
-    Stream<DeployedCard> all() {
-	return Stream.concat(units(), buildings());
-    }
-
-    boolean sameTurn(CardModel model) {
-	return board.sameTurn(model);
-    }
-
-    @Override
-    public void deployPhaseEffect() {
-	computeValues();
-	clearInputActions();
-	registerAsyncEffect(all(), When.DEPLOYEMENT);
-    }
-
-    @Override
-    public void endOfDeployPhase() {
-	fireEffect(When.DEPLOYEMENT);
-	computeValues();
-	computeDeployGain();
-    }
-
-    @Override
-    public void buildPhase() {
-	collectBuilding(board.getBuildings());
+    private void addGold(int gold) {
+	model.addGold(gold);
+	if (gold != 0)
+	    forward(new PlayerGoldChanged(this, model.getGold()));
 
     }
 
-    @Override
-    public void endBuildPhase() {
-	clearBuilding();
+    private void addLegend(int legend) {
+	model.addLegend(legend);
+	if (legend != 0)
+	    forward(new PlayerLegendChanged(this, model.getLegend()));
     }
 
     @Override
@@ -149,169 +132,34 @@ public final class PlayerBoard implements PlayerBoardContract {
 	registerAsyncEffect(all(), When.AGING);
     }
 
-    @Override
-    public void endAgePhase() {
-	computeDyingGain();
-	fireEffect(When.AGING);
-	removeDead();
+    Stream<DeployedCard> all() {
+	return Stream.concat(units(), buildings());
     }
 
-    @Override
-    public void goldPhase() {
-	gainGold();
-
-    }
-
-    @Override
-    public void processDraft(int id) {
-	List<MetaCard> toDeploy = model.getToDeploy();
-	removeDrafted(id, toDeploy::add);
-    }
-
-    @Override
-    public void processDiscard(int id) {
-	removeDrafted(id, board::moveToDiscard);
-    }
-
-    private void removeDrafted(int id, Consumer<MetaCard> consumer) {
-	List<MetaCard> toDraft = model.getToDraft();
-	Optional<MetaCard> first = toDraft.stream().filter(MetaCard.sameId(id)).findFirst();
-	if (first.isPresent()) {
-	    MetaCard meta = first.get();
-	    toDraft.remove(meta);
-	    consumer.accept(meta);
-	}
-    }
-
-    @Override
-    public void processDeployCardAction(DoDeployCard action) {
-	Optional<MetaCard> first = model.getToDeploy().stream().filter(MetaCard.sameId(action.getSource())).findFirst();
-	if (first.isPresent()) {
-	    MetaCard meta = first.get();
-
-	    CardSlot slot = find(action.getTarget());
-
-	    slot.getCard().ifPresent(m -> {
-		board.moveToDiscard(m.getMeta());
-		forward(new CardDeploymentChanged(m, this, false));
-	    });
-
-	    DeployedCard dc = slot.deploy(meta, board.getTurnValue());
-	    forward(new CardDeploymentChanged(dc, this, true));
-
-	    model.getToDeploy().remove(meta);
-
-	    int goldDelta = ((Unit) meta.getCard()).getGoldCost();
-	    counters.setDeployGold(counters.getDeployGold() - goldDelta);
-
-	    fireEffect(Stream.of(dc), When.ON_PLAY);
-	}
-    }
-
-    public void redeploy(MetaCard unit, CardPosition position) {
-	CardSlot slot = find(position);
-
-	DeployedCard dc = slot.redeploy(unit);
-	forward(new CardDeploymentChanged(dc, this, true));
-    }
-
-    void clearBuilding() {
-	model.getBuildPlan().clear();
-    }
-
-    @Override
-    public void doBuild(int index) {
-	BuildingConstruction plan = model.getBuildPlan().get(index);
-	MetaCard meta = plan.getBuilding();
-
-	if (BuildType.UPGRADE == plan.getType()) {
-	    CardSlot slot = building.stream().filter(c -> c.isCard(meta)).findFirst().get();
-	    slot.upgrade();
-
-	} else {
-	    CardSlot slot = building.stream().filter(CardSlot::isEmpty).findFirst().get();
-	    BuildingLevel level = plan.getLevel();
-	    slot.build(meta, level);
-	    forward(new CardBuildingLevelChanged(slot.getCard().get(), this, level));
-	}
-	addGold(-plan.getGoldCost());
-    }
-
-    @Override
-    public void keepToDeploy(int id) {
-	Iterator<MetaCard> it = model.getToDeploy().iterator();
-	while (it.hasNext()) {
-	    MetaCard next = it.next();
-	    if (next.getId() != id) {
-		it.remove();
-		board.moveToDiscard(next);
-	    }
-	}
-    }
-
-    @Override
-    public void processCardAction(CardAction action) {
-
-	CardPosition source = action.getSource();
-	model.getInputActions().remove(source);
-
-	DeployedCard from = find(source).getCard().get();
-	for (Entry<String, CardPosition> e : action.getTarget().entrySet()) {
-	    from.addPositionFor(e.getValue(), e.getKey());
-	}
-
+    void buildingHasChanged(DeployedCard deployedCard) {
+	forward(new CardBuildingLevelChanged(deployedCard, this, deployedCard.getLevel()));
     }
 
     public Stream<DeployedCard> buildings() {
 	return asDeployedCard(building.stream());
     }
 
+    @Override
+    public void buildPhase() {
+	collectBuilding(board.getBuildings());
+
+    }
+
+    void cardHasAged(DeployedCard deployedCard) {
+	forward(new CardAgeChanged(deployedCard, this, deployedCard.getAgeToken()));
+    }
+
+    void clearBuilding() {
+	model.getBuildPlan().clear();
+    }
+
     private void clearInputActions() {
 	model.getInputActions().clear();
-    }
-
-    @Override
-    public boolean hasInputActions() {
-	return !model.getInputActions().isEmpty();
-    }
-
-    private static class FiredEffect {
-	public FiredEffect(DeployedCard card, ScopedSpecialEffect effect) {
-	    this.card = card;
-	    this.effect = effect;
-	}
-
-	private final DeployedCard card;
-
-	private final ScopedSpecialEffect effect;
-
-	public int getOrder() {
-	    return effect.getScope().getOrder();
-	}
-
-	public void fire() {
-	    effect.getSpecialEffect().apply(card);
-	}
-    }
-
-    void fireEffect(When when) {
-	fireEffect(all(), when);
-    }
-
-    void fireEffect(Stream<DeployedCard> cards, When when) {
-	List<FiredEffect> fired = cards.flatMap(d -> d.effects(when).map(e -> new FiredEffect(d, e)))
-	        .collect(Collectors.toList());
-	fired.sort(Comparator.comparing(FiredEffect::getOrder));
-	fired.forEach(FiredEffect::fire);
-    }
-
-    void registerAsyncEffect(Stream<DeployedCard> cards, When when) {
-	cards.forEach(d -> d.effects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
-	    List<TargetedEffectDescription> asyncEffect = e.asyncEffect(d);
-	    if (asyncEffect != null)
-		model.getInputActions().put(d.getPosition(), asyncEffect);
-	}));
-
     }
 
     void collectBuilding(List<MetaCard> bluePrints) {
@@ -341,7 +189,7 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     void computeValues() {
-	counters.setGoldGain(2);
+	counters.resetBasicCounters();
 
 	all().forEach(DeployedCard::computeGoldGain);
 	counters(all()).forEach(counters::sumGold);
@@ -365,8 +213,15 @@ public final class PlayerBoard implements PlayerBoardContract {
     private List<CardSlot> ctx(Position position, int number) {
 	CardSlot[] ctx = new CardSlot[number];
 	for (int i = 0; i < ctx.length; ++i)
-	    ctx[i] = new CardSlot(this, new CardPosition(position, i));
+	    ctx[i] = new CardSlot(this, position.index(i));
 	return Arrays.asList(ctx);
+    }
+
+    @Override
+    public void deployPhase() {
+	computeValues();
+	clearInputActions();
+	registerAsyncEffect(all(), When.DEPLOYEMENT);
     }
 
     void doAge() {
@@ -375,6 +230,25 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     public Stream<DeployedCard> dyings() {
 	return dying.stream();
+    }
+
+    @Override
+    public void endAgePhase() {
+	computeDyingGain();
+	fireEffect(When.AGING);
+	removeDead();
+    }
+
+    @Override
+    public void endBuildPhase() {
+	clearBuilding();
+    }
+
+    @Override
+    public void endOfDeployPhase() {
+	fireEffect(When.DEPLOYEMENT);
+	computeValues();
+	computeDeployGain();
     }
 
     CardSlot find(CardPosition position) {
@@ -395,21 +269,27 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return list.get(position.getIndex());
     }
 
+    void fireEffect(Stream<DeployedCard> cards, When when) {
+	List<FiredEffect> fired = cards.flatMap(d -> d.effects(when).map(e -> new FiredEffect(d, e)))
+	        .collect(Collectors.toList());
+	fired.sort(Comparator.comparing(FiredEffect::getOrder));
+	fired.forEach(FiredEffect::fire);
+    }
+
+    void fireEffect(When when) {
+	fireEffect(all(), when);
+    }
+
+    private void forward(Object event) {
+	board.forward(event);
+    }
+
     void gainGold() {
 	addGold(counters.getGoldGain());
     }
 
-    private void addGold(int gold) {
-	model.addGold(gold);
-	if (gold != 0)
-	    forward(new PlayerGoldChanged(this, model.getGold()));
-
-    }
-
-    private void addLegend(int legend) {
-	model.addLegend(legend);
-	if (legend != 0)
-	    forward(new PlayerLegendChanged(this, model.getLegend()));
+    public Board getBoard() {
+	return board;
     }
 
     int getCombat() {
@@ -428,12 +308,44 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return counters.getGoldGain();
     }
 
+    List<MetaCard> getToDraft() {
+	return model.getToDraft();
+    }
+
+    @Override
+    public UUID getUuid() {
+	return uuid;
+    }
+
     int getVictoriousWar() {
 	return counters.getVictoriousWar();
     }
 
     int getWood() {
-	return counters.getFood();
+	return counters.getWood();
+    }
+
+    @Override
+    public void goldPhase() {
+	gainGold();
+
+    }
+
+    @Override
+    public boolean hasInputActions() {
+	return !model.getInputActions().isEmpty();
+    }
+
+    @Override
+    public void keepToDeploy(int id) {
+	Iterator<MetaCard> it = model.getToDeploy().iterator();
+	while (it.hasNext()) {
+	    MetaCard next = it.next();
+	    if (next.getId() != id) {
+		it.remove();
+		board.moveToDiscard(next);
+	    }
+	}
     }
 
     public void preserveFromDeath(CardPosition position) {
@@ -446,14 +358,115 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     }
 
+    @Override
+    public void processBuild(int index) {
+	BuildingConstruction plan = model.getBuildPlan().get(index);
+	MetaCard meta = plan.getBuilding();
+
+	if (BuildType.UPGRADE == plan.getType()) {
+	    CardSlot slot = building.stream().filter(c -> c.isCard(meta)).findFirst().get();
+	    slot.upgrade();
+
+	} else {
+	    CardSlot slot = building.stream().filter(CardSlot::isEmpty).findFirst().get();
+	    BuildingLevel level = plan.getLevel();
+	    slot.build(meta, level);
+	    forward(new CardBuildingLevelChanged(slot.getCard().get(), this, level));
+	}
+	addGold(-plan.getGoldCost());
+    }
+
+    @Override
+    public void processCardAction(CardAction action) {
+
+	CardPosition source = action.getSource();
+	model.getInputActions().remove(source);
+
+	DeployedCard from = find(source).getCard().get();
+	for (Entry<String, CardPosition> e : action.getTarget().entrySet()) {
+	    from.addPositionFor(e.getValue(), e.getKey());
+	}
+
+    }
+
+    @Override
+    public void processDeployCardAction(DoDeployCard action) {
+	Optional<MetaCard> first = model.getToDeploy().stream().filter(MetaCard.sameId(action.getSource())).findFirst();
+	if (first.isPresent()) {
+	    MetaCard meta = first.get();
+
+	    CardSlot slot = find(action.getTarget());
+
+	    slot.getCard().ifPresent(m -> {
+		board.moveToDiscard(m.getMeta());
+		forward(new CardDeploymentChanged(m, this, false));
+	    });
+
+	    DeployedCard dc = slot.deploy(meta, board.getTurnValue());
+	    forward(new CardDeploymentChanged(dc, this, true));
+
+	    model.getToDeploy().remove(meta);
+
+	    int goldDelta = ((Unit) meta.getCard()).getGoldCost();
+	    counters.setDeployGold(counters.getDeployGold() - goldDelta);
+
+	    fireEffect(Stream.of(dc), When.ON_PLAY);
+	}
+    }
+
+    @Override
+    public void processDiscard(int id) {
+	removeDrafted(id, board::moveToDiscard);
+    }
+
+    @Override
+    public void processDraft(int id) {
+	List<MetaCard> toDeploy = model.getToDeploy();
+	removeDrafted(id, toDeploy::add);
+    }
+
+    public void redeploy(MetaCard unit, CardPosition position) {
+	CardSlot slot = find(position);
+
+	DeployedCard dc = slot.redeploy(unit);
+	forward(new CardDeploymentChanged(dc, this, true));
+    }
+
+    void registerAsyncEffect(Stream<DeployedCard> cards, When when) {
+	cards.forEach(d -> d.effects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
+	    List<TargetedEffectDescription> asyncEffect = e.asyncEffect(d);
+	    if (asyncEffect != null)
+		model.getInputActions().put(d.getPosition(), asyncEffect);
+	}));
+
+    }
+
     void removeDead() {
 	dyings().map(DeployedCard::getPosition).map(this::find).forEach(CardSlot::clear);
 	dying.clear();
     }
 
+    private void removeDrafted(int id, Consumer<MetaCard> consumer) {
+	List<MetaCard> toDraft = model.getToDraft();
+	Optional<MetaCard> first = toDraft.stream().filter(MetaCard.sameId(id)).findFirst();
+	if (first.isPresent()) {
+	    MetaCard meta = first.get();
+	    toDraft.remove(meta);
+	    consumer.accept(meta);
+	}
+    }
+
     void resetCounters() {
 	counters = new PlayerCounters();
 	all().forEach(DeployedCard::resetCounters);
+    }
+
+    boolean sameTurn(CardModel model) {
+	return board.sameTurn(model);
+    }
+
+    void setToDraft(List<MetaCard> toDraft) {
+	model.setToDraft(toDraft);
     }
 
     void setVictoriousWar(int victoriousWar) {
@@ -462,18 +475,5 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     public Stream<DeployedCard> units() {
 	return asDeployedCard(Stream.concat(front.stream(), back.stream()));
-    }
-
-    @Override
-    public UUID getUuid() {
-	return uuid;
-    }
-
-    void cardHasAged(DeployedCard deployedCard) {
-	forward(new CardAgeChanged(deployedCard, this, deployedCard.getAgeToken()));
-    }
-
-    void buildingHasChanged(DeployedCard deployedCard) {
-	forward(new CardBuildingLevelChanged(deployedCard, this, deployedCard.getLevel()));
     }
 }

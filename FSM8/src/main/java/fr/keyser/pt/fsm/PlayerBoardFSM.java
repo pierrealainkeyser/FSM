@@ -116,7 +116,7 @@ public class PlayerBoardFSM {
 	        .guard(this::validateArgs)
 	        .onTransition(wrapConsumer(this::processInput));
 
-	played.onEntry(contract::deployPhaseEffect)
+	played.onEntry(contract::deployPhase)
 	        .onExit(contract::endOfDeployPhase);
 
 	done.onEntry(boardFSM::next)
@@ -160,7 +160,7 @@ public class PlayerBoardFSM {
     private void processBuilding(BuildCommand command) {
 	Integer index = command.getIndex();
 	if (index != null)
-	    contract.doBuild(index);
+	    contract.processBuild(index);
     }
 
     private void processDraft(DraftCommand command) {

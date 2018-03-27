@@ -30,13 +30,13 @@ public class TestBoardFSM {
 	    Assert.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
 
 	    List<MetaCard> d0 = p0.getToDraft();
-	    fsm0.receiveInput(new DraftCommand(d0.get(0).getId(), d0.get(1).getId()));
+	    fsm0.receiveInput(new DraftCommand(d0.get(0), d0.get(1)));
 	    Assert.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
 	    Assert.assertNull(fsm0.getExpectedInput());
 	    Assert.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
 
 	    List<MetaCard> d1 = p1.getToDraft();
-	    fsm1.receiveInput(new DraftCommand(d1.get(0).getId(), d1.get(1).getId()));
+	    fsm1.receiveInput(new DraftCommand(d1.get(0), d1.get(1)));
 	}
 
 	Assert.assertEquals(BoardFSM.DEPLOY, fsm.getPhase());

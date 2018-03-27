@@ -76,7 +76,8 @@ public class BoardFSM {
 
 	draft.onEntry(this::distributeAndWaitCard);
 	deploy.onEntry(this::nextPhase);
-	war.onEntry(this::nextPhase);
+	war.onEntry(this::nextPhase)
+	        .onEntry(this.contract::warPhase);
 	gold.onEntry(this::nextPhase);
 	building.onEntry(this::nextPhase);
 	age.onEntry(this::nextPhase);

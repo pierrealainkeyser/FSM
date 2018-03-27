@@ -18,6 +18,14 @@ public final class PlayerCounters extends Counters {
 	goldGain += card.goldGain;
     }
 
+    public void resetBasicCounters() {
+	goldGain = 2;
+	combat = 0;
+	crystal = 0;
+	food = 0;
+	wood = 0;
+    }
+
     public void sumValues(CardCounters card) {
 	if (card.isMayCombat())
 	    combat += card.combat;

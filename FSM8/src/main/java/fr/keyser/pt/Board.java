@@ -25,6 +25,11 @@ public class Board implements BoardContract {
     private Bus bus;
 
     public Board(MetaDeck deck) {
+	this(new Bus(), deck);
+    }
+
+    public Board(Bus bus, MetaDeck deck) {
+	this.bus = bus;
 	this.deck = deck;
     }
 
@@ -41,8 +46,14 @@ public class Board implements BoardContract {
 	return player;
     }
 
-    public void addPlayer(UUID uuid, PlayerBoardModel model) {
-	players.add(new PlayerBoard(uuid, model, this));
+    public PlayerBoard addPlayer(UUID uuid, PlayerBoardModel model) {
+	PlayerBoard player = new PlayerBoard(uuid, model, this);
+	players.add(player);
+	return player;
+    }
+
+    PlayerBoard addPlayer(PlayerBoardModel model) {
+	return addPlayer(UUID.randomUUID(), model);
     }
 
     @Override
@@ -67,8 +78,7 @@ public class Board implements BoardContract {
 	return players.stream();
     }
 
-    @Override
-    public int getTurnValue() {
+    int getTurnValue() {
 	return turn.getTurn();
     }
 
