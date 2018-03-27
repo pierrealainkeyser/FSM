@@ -188,7 +188,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	addLegend(counters.getDieLegend());
     }
 
-    void computeValues() {
+    private void computeValues() {
 	counters.resetBasicCounters();
 
 	all().forEach(DeployedCard::computeGoldGain);

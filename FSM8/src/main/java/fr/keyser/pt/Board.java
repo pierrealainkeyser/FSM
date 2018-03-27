@@ -118,9 +118,6 @@ public class Board implements BoardContract {
 
     @Override
     public void warPhase() {
-	for (PlayerBoard player : players)
-	    player.computeValues();
-
 	for (int i = 0, size = players.size(); i < size; ++i) {
 	    PlayerBoard p = players.get(i);
 	    p.setVictoriousWar(warWinned(i));
