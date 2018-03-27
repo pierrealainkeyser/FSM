@@ -108,8 +108,7 @@ public class PlayerBoardFSM {
 
 	conditionalInputProcessing(ec, age.sub(WAITING_USER), done);
 
-	done.onEntry(boardFSM::next)
-	        .transition(PlayerEvent.NEXT_PHASE, eot);
+	signalBoardAndTransitionNextPhaseTo(eot, done);
     }
 
     public void conditionalInputProcessing(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> waitingEffect,
@@ -145,8 +144,7 @@ public class PlayerBoardFSM {
 
 	conditionalInputProcessing(ec, waitingEffect, done);
 
-	done.onEntry(boardFSM::next)
-	        .transition(PlayerEvent.NEXT_PHASE, war);
+	signalBoardAndTransitionNextPhaseTo(war, done);
     }
 
     private SimpleAction expect(Class<?> expectedInput, String appearance) {
@@ -172,10 +170,14 @@ public class PlayerBoardFSM {
 	        .guard(this::validateArgs)
 	        .onTransition(withArgs(consumer));
 
-	done.onEntry(boardFSM::next)
-	        .transition(PlayerEvent.LOOP, waiting);
-	done.transition(PlayerEvent.NEXT_PHASE, to);
+	signalBoardAndTransitionNextPhaseTo(to, done);
+	done.transition(PlayerEvent.LOOP, waiting);
 
+    }
+
+    public void signalBoardAndTransitionNextPhaseTo(StateBuilder<String, PlayerEvent> to, StateBuilder<String, PlayerEvent> done) {
+	done.onEntry(boardFSM::next)
+	        .transition(PlayerEvent.NEXT_PHASE, to);
     }
 
     private void processInput(CardActionCommand command) {
