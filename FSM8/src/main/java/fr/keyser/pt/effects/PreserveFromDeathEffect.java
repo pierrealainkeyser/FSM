@@ -13,7 +13,7 @@ import fr.keyser.pt.TargetedSpecialEffect;
 
 public class PreserveFromDeathEffect implements TargetedSpecialEffect {
 
-    private static final String SAVE = "save";
+    public static final String SAVE = "save";
 
     @Override
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source) {
@@ -27,9 +27,11 @@ public class PreserveFromDeathEffect implements TargetedSpecialEffect {
 
     @Override
     public void apply(DeployedCard source, Map<String, CardPosition> positions) {
-	CardPosition saved = positions.get(SAVE);
+	CardPosition position = positions.get(SAVE);
+	if (position == null)
+	    throw new IllegalStateException(SAVE + " position's not registered");
 
-	source.getPlayer().preserveFromDeath(saved);
+	source.getPlayer().preserveFromDeath(position);
 
     }
 

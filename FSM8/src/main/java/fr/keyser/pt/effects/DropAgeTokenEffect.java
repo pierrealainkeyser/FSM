@@ -13,7 +13,7 @@ import fr.keyser.pt.TargetedSpecialEffect;
 
 public class DropAgeTokenEffect implements TargetedSpecialEffect {
 
-    private static final String DROP_AGE = "dropAge";
+    public static final String DROP_AGE = "dropAge";
     private final IntValue ageCount;
 
     public DropAgeTokenEffect(IntValue ageCount) {
@@ -32,6 +32,8 @@ public class DropAgeTokenEffect implements TargetedSpecialEffect {
     @Override
     public void apply(DeployedCard source, Map<String, CardPosition> positions) {
 	CardPosition to = positions.get(DROP_AGE);
+	if (to == null)
+	    throw new IllegalStateException(DROP_AGE + " position's not registered");
 	int age = ageCount.getValue(source);
 	source.find(to).doAge(age);
 

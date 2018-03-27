@@ -21,7 +21,7 @@ import fr.keyser.pt.TargetedSpecialEffect;
 
 public class CopyInitialDeployEffect implements TargetedSpecialEffect {
 
-    private static final String COPY = "copy";
+    public static final String COPY = "copy";
 
     @Override
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source) {
@@ -57,7 +57,12 @@ public class CopyInitialDeployEffect implements TargetedSpecialEffect {
     @Override
     public void apply(DeployedCard source, Map<String, CardPosition> positions) {
 
-	DeployedCard target = source.find(positions.get(COPY));
+	CardPosition position = positions.get(COPY);
+	if (position == null)
+	    throw new IllegalStateException(COPY + " position's not registered");
+	
+	
+	DeployedCard target = source.find(position);
 
 	target.intialDeployementEffect().forEach(s -> {
 
