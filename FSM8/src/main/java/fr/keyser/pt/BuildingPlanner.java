@@ -44,11 +44,11 @@ public class BuildingPlanner {
 
     private final Set<String> buildLevel2 = new HashSet<>();
 
-    BuildingPlanner(PlayerBoardModel model, PlayerCounters counters, Stream<DeployedCard> cards) {
-	this(counters.getCrystal(), counters.getFood(), counters.getWood(), model.getGold(), cards);
+    BuildingPlanner(PlayerBoardModel model, PlayerCounters counters, Stream<? extends InstalledCardBuildPlanner> infos) {
+	this(counters.getCrystal(), counters.getFood(), counters.getWood(), model.getGold(), infos);
     }
 
-    BuildingPlanner(int crystal, int food, int wood, int gold, Stream<DeployedCard> cards) {
+    BuildingPlanner(int crystal, int food, int wood, int gold, Stream<? extends InstalledCardBuildPlanner> infos) {
 	available = new RawBuildingCost()
 	        .crystal(crystal)
 	        .food(food)
@@ -57,8 +57,8 @@ public class BuildingPlanner {
 
 	AtomicInteger buildingCount = new AtomicInteger(0);
 
-	cards.forEach(c -> {
-	    Card u = c.getCard();
+	infos.forEach(dc -> {
+	    Card u = dc.getCard();
 	    if (u instanceof IgnoreBuildingBaseCost)
 		ignoreBuildingBaseCost = true;
 	    else if (u instanceof ProvideAnyResourceForGold)
@@ -68,7 +68,7 @@ public class BuildingPlanner {
 
 	    if (u instanceof Building) {
 		buildingCount.incrementAndGet();
-		if (BuildingLevel.LEVEL1 == c.getLevel())
+		if (BuildingLevel.LEVEL1 == dc.getLevel())
 		    buildLevel1.add(u.getName());
 		else
 		    buildLevel2.add(u.getName());

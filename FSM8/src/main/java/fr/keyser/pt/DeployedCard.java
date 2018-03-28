@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import fr.keyser.pt.SpecialEffectScope.When;
 import fr.keyser.pt.effects.NotifyShiftShapeEffect;
 
-public class DeployedCard {
+public class DeployedCard implements InstalledCardBuildPlanner {
 
     public static final SpecialEffectScope AGING = new SpecialEffectScope(0, When.AGING);
 
@@ -137,7 +137,8 @@ public class DeployedCard {
 	return model.getAgeToken();
     }
 
-    Card getCard() {
+    @Override
+    public Card getCard() {
 	return card;
     }
 
@@ -153,6 +154,7 @@ public class DeployedCard {
 	return counters;
     }
 
+    @Override
     public BuildingLevel getLevel() {
 	return model.getLevel();
     }

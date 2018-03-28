@@ -18,6 +18,42 @@ import fr.keyser.pt.buildings.Town;
 
 public class TestBuildingPlanner {
 
+    private static class MockInfo implements InstalledCardBuildPlanner {
+
+	private final Card card;
+
+	private final BuildingLevel level;
+
+	public MockInfo(Unit unit) {
+	    this.card = unit;
+	    this.level = null;
+	}
+
+	public MockInfo(Building building, BuildingLevel level) {
+	    this.card = building;
+	    this.level = level;
+	}
+
+	@Override
+	public Card getCard() {
+	    return card;
+	}
+
+	@Override
+	public BuildingLevel getLevel() {
+	    return level;
+	}
+
+    }
+
+    private static MockInfo level1(Building b) {
+	return new MockInfo(b, BuildingLevel.LEVEL1);
+    }
+
+    private static MockInfo level2(Building b) {
+	return new MockInfo(b, BuildingLevel.LEVEL2);
+    }
+
     @Test
     public void testNominal() {
 
@@ -30,17 +66,15 @@ public class TestBuildingPlanner {
 	MetaCard temple = bluePrints.get(3);
 	MetaCard mine = bluePrints.get(4);
 
-	BuildingPlanner planner = new BuildingPlanner(0, 1, 2, 5, Stream.empty());
+	BuildingPlanner planner = new BuildingPlanner(0, 1, 3, 6, Stream.of(level1(new Town()), level2(new Mine())));
 	List<BuildingConstruction> buildable = planner.compute(bluePrints);
 
 	Set<BuildingConstruction> expected = new HashSet<>();
-	expected.add(new BuildingConstruction(town, 0, BuildType.BUILD, BuildingLevel.LEVEL1));
-	expected.add(new BuildingConstruction(tavern, 0, BuildType.BUILD, BuildingLevel.LEVEL1));
-	expected.add(new BuildingConstruction(casern, 0, BuildType.BUILD, BuildingLevel.LEVEL1));
-	expected.add(new BuildingConstruction(casern, 0, BuildType.BUILD, BuildingLevel.LEVEL2));
-	expected.add(new BuildingConstruction(temple, 2, BuildType.BUILD, BuildingLevel.LEVEL1));
-	expected.add(new BuildingConstruction(temple, 5, BuildType.BUILD, BuildingLevel.LEVEL2));
-	expected.add(new BuildingConstruction(mine, 0, BuildType.BUILD, BuildingLevel.LEVEL1));
+	expected.add(new BuildingConstruction(town, 0, BuildType.UPGRADE, BuildingLevel.LEVEL2));
+	expected.add(new BuildingConstruction(tavern, 4, BuildType.BUILD, BuildingLevel.LEVEL1));
+	expected.add(new BuildingConstruction(casern, 4, BuildType.BUILD, BuildingLevel.LEVEL1));
+	expected.add(new BuildingConstruction(casern, 4, BuildType.BUILD, BuildingLevel.LEVEL2));
+	expected.add(new BuildingConstruction(temple, 6, BuildType.BUILD, BuildingLevel.LEVEL1));
 
 	Assert.assertTrue(buildable.containsAll(expected));
 	Assert.assertTrue(expected.containsAll(buildable));
