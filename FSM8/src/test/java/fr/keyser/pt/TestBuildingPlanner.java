@@ -64,7 +64,6 @@ public class TestBuildingPlanner {
 	MetaCard tavern = bluePrints.get(1);
 	MetaCard casern = bluePrints.get(2);
 	MetaCard temple = bluePrints.get(3);
-	MetaCard mine = bluePrints.get(4);
 
 	BuildingPlanner planner = new BuildingPlanner(0, 1, 3, 6, Stream.of(level1(new Town()), level2(new Mine())));
 	List<BuildingConstruction> buildable = planner.compute(bluePrints);
