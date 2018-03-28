@@ -20,16 +20,16 @@ public class MetaDeck {
 
     private List<MetaCard> buildings = new LinkedList<>();
 
+    private final MetaCardBuilder builder = new MetaCardBuilder();
+
     public void load(Unit card, int count) {
 	for (int i = 0; i < count; ++i) {
-	    int size = cards.size();
-	    cards.add(new MetaCard(size, card));
+	    cards.add(builder.meta(card));
 	}
     }
 
     public void load(Building building) {
-	int size = buildings.size();
-	buildings.add(new MetaCard(size, building));
+	buildings.add(builder.meta(building));
     }
 
     public List<MetaCard> getCards() {

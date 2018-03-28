@@ -93,25 +93,27 @@ public class Bus {
 	private void doClear(boolean clear) {
 	    suscriptions.forEach(s -> s.cancel(clear));
 	}
+
+	@SuppressWarnings("unchecked")
+	private <T> void listenTo(Class<T> type, Consumer<? extends T> consumer) {
+	    Listener<T> listener = (Listener<T>) listeners.get(type);
+	    if (listener == null)
+		listeners.put(type, listener = new Listener<>(type));
+
+	    ListenerSuscription<T> sub = listener.add((Consumer<T>) consumer);
+	    suscriptions.add(sub);
+	}
     }
 
     private final SequentialExecutor executor = new SequentialExecutor();
 
     private final Map<Class<?>, Listener<?>> listeners = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
     public <T> Suscription listenTo(Class<T> type, Consumer<? extends T> consumer) {
 
 	Suscription s = new Suscription();
 
-	executor.execute(() -> {
-	    Listener<T> listener = (Listener<T>) listeners.get(type);
-	    if (listener == null)
-		listeners.put(type, listener = new Listener<>(type));
-
-	    ListenerSuscription<T> sub = listener.add((Consumer<T>) consumer);
-	    s.suscriptions.add(sub);
-	});
+	executor.execute(() -> s.listenTo(type, consumer));
 
 	return s;
 
@@ -120,15 +122,22 @@ public class Bus {
     public void forward(Object event) {
 	executor.execute(() -> {
 	    Class<? extends Object> type = event.getClass();
-	    Listener<?> listener = listeners.get(type);
-	    if (listener != null) {
-		@SuppressWarnings("unchecked")
-		Listener<Object> l = (Listener<Object>) listener;
-		boolean ok = l.forward(event);
-		if (!ok)
-		    listeners.remove(type);
-	    }
+
+	    // TODO all classes and interfaces
+
+	    forwardEventTo(event, type);
 	});
+    }
+
+    private void forwardEventTo(Object event, Class<?> type) {
+	Listener<?> listener = listeners.get(type);
+	if (listener != null) {
+	    @SuppressWarnings("unchecked")
+	    Listener<Object> l = (Listener<Object>) listener;
+	    boolean ok = l.forward(event);
+	    if (!ok)
+		listeners.remove(type);
+	}
     }
 
 }

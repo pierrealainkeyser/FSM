@@ -21,9 +21,10 @@ public class TestPlayerBoard {
 	Board board = new Board(null);
 
 	PlayerBoardModel model = new PlayerBoardModel();
-	MetaCard caveSpirit0 = new MetaCard(0, new CaveSpirit());
-	MetaCard necromancer = new MetaCard(1, new Necromancer());
-	MetaCard lumberjack = new MetaCard(2, new Lumberjack());
+	MetaCardBuilder b = new MetaCardBuilder();
+	MetaCard caveSpirit0 = b.meta(new CaveSpirit());
+	MetaCard necromancer = b.meta(new Necromancer());
+	MetaCard lumberjack = b.meta(new Lumberjack());
 	model.getToDeploy().add(caveSpirit0);
 	model.getToDeploy().add(necromancer);
 	model.getToDeploy().add(lumberjack);
@@ -53,9 +54,10 @@ public class TestPlayerBoard {
 	Board board = new Board(null);
 
 	PlayerBoardModel model = new PlayerBoardModel();
-	MetaCard timeMistress = new MetaCard(0, new TimeMistress());
-	MetaCard mercenary = new MetaCard(1, new Mercenary());
-	MetaCard farmer = new MetaCard(2, new Farmer());
+	MetaCardBuilder b = new MetaCardBuilder();
+	MetaCard timeMistress = b.meta(new TimeMistress());
+	MetaCard mercenary = b.meta(new Mercenary());
+	MetaCard farmer = b.meta(new Farmer());
 	model.getToDeploy().add(timeMistress);
 	model.getToDeploy().add(mercenary);
 	model.getToDeploy().add(farmer);
