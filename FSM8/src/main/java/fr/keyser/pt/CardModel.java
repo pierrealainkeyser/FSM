@@ -5,7 +5,7 @@ import java.util.Map;
 
 public final class CardModel {
 
-    private String name;
+    private MetaCard meta;
 
     private int ageToken;
 
@@ -15,12 +15,14 @@ public final class CardModel {
 
     private Map<String, CardPosition> selected;
 
-    public String getName() {
-	return name;
+    private boolean shapeShifted;
+
+    public MetaCard getMeta() {
+	return meta;
     }
 
-    public void setName(String name) {
-	this.name = name;
+    public void setMeta(MetaCard meta) {
+	this.meta = meta;
     }
 
     public int getAgeToken() {
@@ -60,5 +62,13 @@ public final class CardModel {
 
     public void setSelected(Map<String, CardPosition> selected) {
 	this.selected = selected;
+    }
+
+    public boolean isShapeShifted() {
+        return shapeShifted;
+    }
+
+    public void setShapeShifted(boolean shapeShifted) {
+        this.shapeShifted = shapeShifted;
     }
 }

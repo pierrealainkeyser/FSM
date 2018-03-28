@@ -35,4 +35,8 @@ public final class ScopedSpecialEffect {
     public SpecialEffect getSpecialEffect() {
 	return specialEffect;
     }
+
+    public String getName() {
+	return specialEffect.getName();
+    }
 }

@@ -1,5 +1,8 @@
 package fr.keyser.pt;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class CardEssence<E extends CardEssence<E>> {
 
     IntValue dieLegend = IntValue.ZERO;
@@ -26,7 +29,20 @@ public abstract class CardEssence<E extends CardEssence<E>> {
 
     BooleanValue mayCombat = BooleanValue.FALSE;
 
+    List<ScopedSpecialEffect> effects;
+
     CardEssence() {
+    }
+
+    public E effect(SpecialEffectScope scope, TargetedSpecialEffect targeter) {
+	return effect(scope, new AsyncSpecialEffect(targeter));
+    }
+
+    public E effect(SpecialEffectScope scope, SpecialEffect specialEffect) {
+	if (effects == null)
+	    effects = new ArrayList<>();
+	effects.add(new ScopedSpecialEffect(scope, specialEffect));
+	return getThis();
     }
 
     public E food(IntValue food) {

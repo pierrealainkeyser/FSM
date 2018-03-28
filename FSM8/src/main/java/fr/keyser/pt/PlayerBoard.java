@@ -61,22 +61,30 @@ import fr.keyser.pt.event.PlayerLegendChanged;
  */
 public final class PlayerBoard implements PlayerBoardContract {
 
-    private static class FiredEffect {
+    public final static class FiredEffect {
 	private final DeployedCard card;
 
 	private final ScopedSpecialEffect effect;
 
-	public FiredEffect(DeployedCard card, ScopedSpecialEffect effect) {
+	private FiredEffect(DeployedCard card, ScopedSpecialEffect effect) {
 	    this.card = card;
 	    this.effect = effect;
 	}
 
-	public void fire() {
+	private void fire() {
 	    effect.getSpecialEffect().apply(card);
 	}
 
-	public int getOrder() {
+	private int getOrder() {
 	    return effect.getScope().getOrder();
+	}
+
+	public DeployedCard getCard() {
+	    return card;
+	}
+
+	public String getName() {
+	    return effect.getName();
 	}
     }
 
@@ -188,7 +196,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	addLegend(counters.getDieLegend());
     }
 
-    private void computeValues() {
+    void computeValues() {
 	counters.resetBasicCounters();
 
 	all().forEach(DeployedCard::computeGoldGain);
@@ -251,6 +259,16 @@ public final class PlayerBoard implements PlayerBoardContract {
 	computeDeployGain();
     }
 
+    /**
+     * Test only
+     * 
+     * @param position
+     * @param cardModel
+     */
+    void useCard(CardPosition position, CardModel cardModel) {
+	find(position).withModel(cardModel);
+    }
+
     CardSlot find(CardPosition position) {
 	List<CardSlot> list = null;
 	switch (position.getPosition()) {
@@ -273,7 +291,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 	List<FiredEffect> fired = cards.flatMap(d -> d.effects(when).map(e -> new FiredEffect(d, e)))
 	        .collect(Collectors.toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
-	fired.forEach(FiredEffect::fire);
+	for (FiredEffect f : fired) {
+	    forward(f);
+	    f.fire();
+	}
     }
 
     void fireEffect(When when) {
@@ -429,6 +450,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	CardSlot slot = find(position);
 
 	DeployedCard dc = slot.redeploy(unit);
+	dc.shapeShifted();
 	forward(new CardDeploymentChanged(dc, this, true));
     }
 

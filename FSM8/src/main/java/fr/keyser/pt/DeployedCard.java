@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.SpecialEffectScope.When;
+import fr.keyser.pt.effects.NotifyShiftShapeEffect;
 
 public class DeployedCard {
 
@@ -50,7 +51,11 @@ public class DeployedCard {
 	resetCounters();
     }
 
-    public DeployedCard withMeta(MetaCard meta) {
+    void shapeShifted() {
+	model.setShapeShifted(true);
+    }
+
+    DeployedCard withMeta(MetaCard meta) {
 	return new DeployedCard(player, position, meta, model);
     }
 
@@ -71,24 +76,25 @@ public class DeployedCard {
 	return card.getName();
     }
 
-    public void computeDeployGain() {
+    void computeDeployGain() {
 	counters.setDeployLegend(card.getDeployLegend().getValue(this));
 	counters.setDeployGold(card.getDeployGold().getValue(this));
 
 	// clear all selected
 	model.setSelected(null);
+	model.setShapeShifted(false);
     }
 
-    public void computeDyingGain() {
+    void computeDyingGain() {
 	counters.setDieLegend(card.getDieLegend().getValue(this));
 	counters.setDieGold(card.getDieGold().getValue(this));
     }
 
-    public void computeGoldGain() {
+    void computeGoldGain() {
 	counters.setGoldGain(card.getGold().getValue(this));
     }
 
-    public void computeValues() {
+    void computeValues() {
 	counters.setFood(card.getFood().getValue(this));
 	counters.setWood(card.getWood().getValue(this));
 	counters.setCrystal(card.getCrystal().getValue(this));
@@ -96,7 +102,7 @@ public class DeployedCard {
 	counters.setMayCombat(card.getMayCombat().getValue(this));
     }
 
-    public void computeWarGain() {
+    void computeWarGain() {
 	counters.setWarLegend(card.getWarLegend().getValue(this));
 	counters.setWarGold(card.getWarGold().getValue(this));
     }
@@ -115,11 +121,12 @@ public class DeployedCard {
     }
 
     private Stream<ScopedSpecialEffect> streamEffect(Predicate<ScopedSpecialEffect> predicate) {
-	if (card instanceof Unit) {
-	    Stream<ScopedSpecialEffect> unitEffect = ((Unit) card).getEffects().stream();
-	    return unitEffect.filter(predicate);
-	} else
-	    return Stream.empty();
+	Stream<ScopedSpecialEffect> effects = card.getEffects().stream();
+	if (model.isShapeShifted()) {
+	    effects = Stream.concat(effects, Stream.of(new ScopedSpecialEffect(INITIAL_DEPLOY_FIRST, NotifyShiftShapeEffect.INSTANCE)));
+	}
+
+	return effects.filter(predicate);
     }
 
     public Stream<ScopedSpecialEffect> effects(When when) {
@@ -174,7 +181,7 @@ public class DeployedCard {
 	return getPosition().isOnFrontLine();
     }
 
-    public void resetCounters() {
+    void resetCounters() {
 	counters = new CardCounters();
     }
 
@@ -184,7 +191,10 @@ public class DeployedCard {
     }
 
     public boolean willDie() {
-	return ((Unit) card).getDeathCondition().getValue(this);
+	if (card instanceof Unit)
+	    return ((Unit) card).getDeathCondition().getValue(this);
+	else
+	    return false;
     }
 
     public MetaCard getMeta() {

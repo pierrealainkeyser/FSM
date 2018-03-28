@@ -8,7 +8,6 @@ public final class ShapeShifter extends Unit {
 
     public ShapeShifter() {
 	super(essence(0)
-	        .effect(DeployedCard.PLAY, DeployedCard::doAge)
 	        .effect(DeployedCard.PLAY, ShiftShapeEffect.INSTANCE));
     }
 

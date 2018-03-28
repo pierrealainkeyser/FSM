@@ -1,5 +1,9 @@
 package fr.keyser.pt;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Card {
 
     private final IntValue combat;
@@ -26,6 +30,8 @@ public class Card {
 
     private final IntValue wood;
 
+    private final List<ScopedSpecialEffect> effects;
+
     Card(CardEssence<?> e) {
 	this.food = e.food;
 	this.wood = e.wood;
@@ -39,6 +45,11 @@ public class Card {
 	this.mayCombat = e.mayCombat;
 	this.deployGold = e.deployGold;
 	this.deployLegend = e.deployLegend;
+	this.effects = e.effects == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(e.effects));
+    }
+
+    public final List<ScopedSpecialEffect> getEffects() {
+	return effects;
     }
 
     public final IntValue getCombat() {

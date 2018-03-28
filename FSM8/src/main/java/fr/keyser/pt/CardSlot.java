@@ -22,28 +22,32 @@ public final class CardSlot {
 	return meta.equals(card.map(DeployedCard::getMeta).orElse(null));
     }
 
-    public void build(MetaCard building, BuildingLevel level) {
+    public DeployedCard build(MetaCard building, BuildingLevel level) {
 	CardModel model = new CardModel();
 	model.setLevel(level);
-	model.setName(building.getCard().getName());
+	model.setMeta(building);
 
-	card = Optional.of(new DeployedCard(player, position, building, model));
+	withModel(model);
+	return card.get();
     }
 
     public DeployedCard deploy(MetaCard unit, int turn) {
 	CardModel model = new CardModel();
 	model.setPlayedTurn(turn);
-	model.setName(unit.getCard().getName());
+	model.setMeta(unit);
 
-	card = Optional.of(new DeployedCard(player, position, unit, model));
+	withModel(model);
 	return card.get();
+    }
+
+    void withModel(CardModel model) {
+	card = Optional.of(new DeployedCard(player, position, model.getMeta(), model));
     }
 
     public DeployedCard redeploy(MetaCard unit) {
 	DeployedCard dc = card.get();
 	card = Optional.of(dc.withMeta(unit));
 	return dc;
-
     }
 
     public void clear() {
