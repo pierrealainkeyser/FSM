@@ -55,4 +55,9 @@ public class BuildingConstruction {
     public void setType(BuildType type) {
 	this.type = type;
     }
+
+    @Override
+    public String toString() {
+	return "BuildingConstruction [building=" + building + ", goldCost=" + goldCost + ", level=" + level + ", type=" + type + "]";
+    }
 }

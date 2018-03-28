@@ -44,11 +44,15 @@ public class BuildingPlanner {
     private final Set<String> buildLevel2 = new HashSet<>();
 
     BuildingPlanner(PlayerBoardModel model, PlayerCounters counters, Stream<DeployedCard> cards) {
+	this(counters.getCrystal(), counters.getFood(), counters.getWood(), model.getGold(), cards);
+    }
+
+    BuildingPlanner(int crystal, int food, int wood, int gold, Stream<DeployedCard> cards) {
 	available = new RawBuildingCost()
-	        .crystal(counters.getCrystal())
-	        .food(counters.getFood())
-	        .wood(counters.getFood())
-	        .gold(model.getGold());
+	        .crystal(crystal)
+	        .food(food)
+	        .wood(wood)
+	        .gold(gold);
 
 	AtomicInteger buildingCount = new AtomicInteger(0);
 
