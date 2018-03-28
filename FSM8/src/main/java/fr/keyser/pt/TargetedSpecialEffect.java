@@ -7,4 +7,8 @@ public interface TargetedSpecialEffect {
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source);
 
     public void apply(DeployedCard source, Map<String, CardPosition> positions);
+
+    public default String getName() {
+	return getClass().getSimpleName();
+    }
 }

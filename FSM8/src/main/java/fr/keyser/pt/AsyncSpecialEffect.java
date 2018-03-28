@@ -17,6 +17,11 @@ public final class AsyncSpecialEffect implements SpecialEffect {
     }
 
     @Override
+    public String getName() {
+	return targeter.getName();
+    }
+
+    @Override
     public void apply(DeployedCard card) {
 	apply(card, card.getSelected());
     }
