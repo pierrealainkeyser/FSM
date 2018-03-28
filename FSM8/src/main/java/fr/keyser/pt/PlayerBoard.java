@@ -2,6 +2,7 @@ package fr.keyser.pt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -170,7 +171,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	model.getInputActions().clear();
     }
 
-    void collectBuilding(List<MetaCard> bluePrints) {
+    void collectBuilding(Collection<MetaCard> bluePrints) {
 	List<BuildingConstruction> buildPlan = new BuildingPlanner(model, counters, all()).compute(bluePrints);
 	model.setBuildPlan(buildPlan);
     }

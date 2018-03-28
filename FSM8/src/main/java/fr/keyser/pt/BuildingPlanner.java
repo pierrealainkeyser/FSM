@@ -1,6 +1,7 @@
 package fr.keyser.pt;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +77,7 @@ public class BuildingPlanner {
 	baseCost = 2 * buildingCount.get();
     }
 
-    List<BuildingConstruction> compute(List<MetaCard> bluePrints) {
+    List<BuildingConstruction> compute(Collection<MetaCard> bluePrints) {
 	List<BuildingConstruction> plan = new ArrayList<>();
 	for (MetaCard meta : bluePrints) {
 	    Building bluePrint = (Building) meta.getCard();

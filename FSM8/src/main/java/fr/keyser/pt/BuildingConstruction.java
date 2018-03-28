@@ -60,4 +60,38 @@ public class BuildingConstruction {
     public String toString() {
 	return "BuildingConstruction [building=" + building + ", goldCost=" + goldCost + ", level=" + level + ", type=" + type + "]";
     }
+
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((building == null) ? 0 : building.hashCode());
+	result = prime * result + goldCost;
+	result = prime * result + ((level == null) ? 0 : level.hashCode());
+	result = prime * result + ((type == null) ? 0 : type.hashCode());
+	return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	BuildingConstruction other = (BuildingConstruction) obj;
+	if (building == null) {
+	    if (other.building != null)
+		return false;
+	} else if (!building.equals(other.building))
+	    return false;
+	if (goldCost != other.goldCost)
+	    return false;
+	if (level != other.level)
+	    return false;
+	if (type != other.type)
+	    return false;
+	return true;
+    }
 }
