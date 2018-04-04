@@ -134,6 +134,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 	    forward(new PlayerLegendChanged(this, model.getLegend()));
     }
 
+    public List<DeployedCardInfo> getInfos() {
+	return all().map(DeployedCard::getInfo).collect(Collectors.toList());
+    }
+
     @Override
     public void agePhase() {
 	clearInputActions();

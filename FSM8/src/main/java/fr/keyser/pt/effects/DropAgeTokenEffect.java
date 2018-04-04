@@ -23,10 +23,7 @@ public class DropAgeTokenEffect implements TargetedSpecialEffect {
     @Override
     public List<TargetedEffectDescription> asyncEffect(DeployedCard source) {
 	int age = ageCount.getValue(source);
-	if (age > 0) {
-	    return asList(new IntTargetedEffectDescription(DROP_AGE, age, source.getPlayer().units()));
-	}
-	return null;
+	return asList(new IntTargetedEffectDescription(DROP_AGE, age, source.getPlayer().units()));
     }
 
     @Override

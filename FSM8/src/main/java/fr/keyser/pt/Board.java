@@ -53,7 +53,16 @@ public class Board implements BoardContract {
     }
 
     PlayerBoard addPlayer(PlayerBoardModel model) {
-	return addPlayer(UUID.randomUUID(), model);
+	return addPlayer(model, null);
+    }
+
+    PlayerBoard addPlayer(PlayerBoardModel model, List<DeployedCardInfo> cards) {
+	PlayerBoard player = addPlayer(UUID.randomUUID(), model);
+	if (cards != null) {
+	    for (DeployedCardInfo dci : cards)
+		player.find(dci.getPosition()).withModel(dci.getModel());
+	}
+	return player;
     }
 
     @Override

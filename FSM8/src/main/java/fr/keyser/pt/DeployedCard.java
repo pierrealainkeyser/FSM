@@ -11,7 +11,7 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     public static final SpecialEffectScope AGING = new SpecialEffectScope(0, When.AGING);
 
-    public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(0, When.DEPLOYEMENT);
+    public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(2, When.DEPLOYEMENT);
 
     public static final SpecialEffectScope PLAY = new SpecialEffectScope(0, When.ON_PLAY);
 
@@ -49,6 +49,10 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 	this.model = model;
 
 	resetCounters();
+    }
+
+    public DeployedCardInfo getInfo() {
+	return new DeployedCardInfo(position, model);
     }
 
     void shapeShifted() {

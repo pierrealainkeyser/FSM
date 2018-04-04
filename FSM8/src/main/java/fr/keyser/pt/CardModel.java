@@ -5,52 +5,30 @@ import java.util.Map;
 
 public final class CardModel {
 
-    private MetaCard meta;
-
     private int ageToken;
 
-    private int playedTurn;
-
     private BuildingLevel level;
+
+    private MetaCard meta;
+
+    private int playedTurn;
 
     private Map<String, CardPosition> selected;
 
     private boolean shapeShifted;
 
-    public MetaCard getMeta() {
-	return meta;
+    public CardModel() {
     }
 
-    public void setMeta(MetaCard meta) {
+    public CardModel(MetaCard meta, BuildingLevel level) {
 	this.meta = meta;
-    }
-
-    public int getAgeToken() {
-	return ageToken;
-    }
-
-    public void setAgeToken(int ageToken) {
-	this.ageToken = ageToken;
-    }
-
-    public int getPlayedTurn() {
-	return playedTurn;
-    }
-
-    public void setPlayedTurn(int playedTurn) {
-	this.playedTurn = playedTurn;
-    }
-
-    public BuildingLevel getLevel() {
-	return level;
-    }
-
-    public void setLevel(BuildingLevel level) {
 	this.level = level;
     }
 
-    public Map<String, CardPosition> getSelected() {
-	return selected;
+    public CardModel(MetaCard meta, int ageToken, int playedTurn) {
+	this.meta = meta;
+	this.ageToken = ageToken;
+	this.playedTurn = playedTurn;
     }
 
     public void addPositionFor(CardPosition position, String name) {
@@ -60,12 +38,48 @@ public final class CardModel {
 	selected.put(name, position);
     }
 
-    public void setSelected(Map<String, CardPosition> selected) {
-	this.selected = selected;
+    public int getAgeToken() {
+	return ageToken;
+    }
+
+    public BuildingLevel getLevel() {
+	return level;
+    }
+
+    public MetaCard getMeta() {
+	return meta;
+    }
+
+    public int getPlayedTurn() {
+	return playedTurn;
+    }
+
+    public Map<String, CardPosition> getSelected() {
+	return selected;
     }
 
     public boolean isShapeShifted() {
         return shapeShifted;
+    }
+
+    public void setAgeToken(int ageToken) {
+	this.ageToken = ageToken;
+    }
+
+    public void setLevel(BuildingLevel level) {
+	this.level = level;
+    }
+
+    public void setMeta(MetaCard meta) {
+	this.meta = meta;
+    }
+
+    public void setPlayedTurn(int playedTurn) {
+	this.playedTurn = playedTurn;
+    }
+
+    public void setSelected(Map<String, CardPosition> selected) {
+	this.selected = selected;
     }
 
     public void setShapeShifted(boolean shapeShifted) {

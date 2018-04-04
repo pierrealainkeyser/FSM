@@ -2,10 +2,13 @@ package fr.keyser.pt;
 
 import static fr.keyser.pt.CardPosition.Position.BACK;
 import static fr.keyser.pt.CardPosition.Position.FRONT;
+import static java.util.Arrays.asList;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import fr.keyser.pt.CardPosition.Position;
+import fr.keyser.pt.buildings.Town;
 import fr.keyser.pt.effects.DropAgeTokenEffect;
 import fr.keyser.pt.units.CaveSpirit;
 import fr.keyser.pt.units.Farmer;
@@ -17,25 +20,46 @@ import fr.keyser.pt.units.TimeMistress;
 public class TestPlayerBoard {
 
     @Test
+    public void testBasicRestore() {
+	Board board = new Board(null);
+
+	PlayerBoardModel model = new PlayerBoardModel();
+
+	MetaCardBuilder b = new MetaCardBuilder();
+	MetaCard caveSpirit = b.meta(new CaveSpirit());
+	MetaCard town = b.meta(new Town());
+
+	PlayerBoard p0 = board.addPlayer(model,
+	        asList(new DeployedCardInfo(Position.FRONT.index(0), new CardModel(caveSpirit, 0, 0)),
+	                new DeployedCardInfo(Position.BUILDING.index(0), new CardModel(town, BuildingLevel.LEVEL2))));
+
+	p0.computeValues();
+	
+	Assert.assertEquals(4, p0.getCombat());
+	Assert.assertEquals(2, p0.getCrystal());
+
+    }
+
+    @Test
     public void testDeploy() {
 	Board board = new Board(null);
 
 	PlayerBoardModel model = new PlayerBoardModel();
 	MetaCardBuilder b = new MetaCardBuilder();
-	MetaCard caveSpirit0 = b.meta(new CaveSpirit());
+	MetaCard caveSpirit = b.meta(new CaveSpirit());
 	MetaCard necromancer = b.meta(new Necromancer());
 	MetaCard lumberjack = b.meta(new Lumberjack());
-	model.getToDeploy().add(caveSpirit0);
+	model.getToDeploy().add(caveSpirit);
 	model.getToDeploy().add(necromancer);
 	model.getToDeploy().add(lumberjack);
 	model.addGold(2);
 
 	PlayerBoard p0 = board.addPlayer(model);
-	p0.processDeployCardAction(new DoDeployCard(caveSpirit0, FRONT.index(0)));
+	p0.processDeployCardAction(new DoDeployCard(caveSpirit, FRONT.index(0)));
 	p0.processDeployCardAction(new DoDeployCard(necromancer, FRONT.index(1)));
 	p0.processDeployCardAction(new DoDeployCard(lumberjack, BACK.index(0)));
 
-	DeployedCard u = p0.units().filter(d -> d.getMeta() == caveSpirit0).findFirst().get();
+	DeployedCard u = p0.units().filter(d -> d.getMeta() == caveSpirit).findFirst().get();
 
 	p0.deployPhase();
 	p0.endOfDeployPhase();
