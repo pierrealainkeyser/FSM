@@ -16,5 +16,5 @@ public interface BoardContract {
 
     void warPhase();
 
-    Stream<? extends PlayerBoardContract> getPlayers();
+    Stream<PlayerBoardContract> getPlayers();
 }

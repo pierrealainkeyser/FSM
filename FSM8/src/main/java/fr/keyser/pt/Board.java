@@ -83,8 +83,8 @@ public class Board implements BoardContract {
     }
 
     @Override
-    public Stream<? extends PlayerBoardContract> getPlayers() {
-	return players.stream();
+    public Stream<PlayerBoardContract> getPlayers() {
+	return players.stream().map(p -> (PlayerBoardContract) p);
     }
 
     int getTurnValue() {

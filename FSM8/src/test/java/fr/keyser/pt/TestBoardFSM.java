@@ -1,13 +1,17 @@
 package fr.keyser.pt;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import fr.keyser.pt.fsm.BoardFSM;
+import fr.keyser.pt.fsm.BuildCommand;
 import fr.keyser.pt.fsm.DoDeployCardCommand;
 import fr.keyser.pt.fsm.DraftCommand;
+import fr.keyser.pt.fsm.NoopCommand;
 import fr.keyser.pt.fsm.PlayerBoardFSM;
 
 public class TestBoardFSM {
@@ -43,6 +47,57 @@ public class TestBoardFSM {
 	Assertions.assertEquals(DoDeployCardCommand.class, fsm0.getExpectedInput());
 	Assertions.assertEquals(DoDeployCardCommand.class, fsm1.getExpectedInput());
 
+    }
+
+    @Test
+    public void testFullTurn() {
+	BoardContract board = Mockito.mock(BoardContract.class);
+
+	List<PlayerBoardContract> ps = new ArrayList<>();
+	for (int i = 0; i < 3; ++i)
+	    ps.add(Mockito.mock(PlayerBoardContract.class));
+
+	for (PlayerBoardContract p : ps)
+	    Mockito.when(p.hasInputActions()).thenReturn(false);
+
+	Mockito.when(board.getPlayers()).thenReturn(ps.stream());
+
+	BoardFSM fsm = new BoardFSM(board);
+	Assertions.assertEquals(3, fsm.getPlayers().size());
+	fsm.start();
+
+	Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
+
+	for (int i = 0; i < 5; ++i) {
+	    for (PlayerBoardFSM p : fsm.getPlayers())
+		p.receiveInput(new DraftCommand(0));
+	}
+
+	Assertions.assertEquals(BoardFSM.DEPLOY, fsm.getPhase());
+
+	receiveAll(fsm, new DoDeployCardCommand(new ArrayList<>(), -1));
+
+	Assertions.assertEquals(BoardFSM.WAR, fsm.getPhase());
+
+	receiveAll(fsm, new NoopCommand());
+
+	Assertions.assertEquals(BoardFSM.GOLD, fsm.getPhase());
+
+	receiveAll(fsm, new NoopCommand());
+
+	Assertions.assertEquals(BoardFSM.BUILDING, fsm.getPhase());
+
+	receiveAll(fsm, new BuildCommand());
+	
+	Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
+
+    }
+
+    private void receiveAll(BoardFSM fsm, Object cmd) {
+	for (PlayerBoardFSM p : fsm.getPlayers()) {
+	    Assertions.assertEquals(cmd.getClass(), p.getExpectedInput());
+	    p.receiveInput(cmd);
+	}
     }
 
 }
