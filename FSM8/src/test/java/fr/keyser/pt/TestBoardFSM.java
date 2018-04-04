@@ -2,6 +2,7 @@ package fr.keyser.pt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,11 @@ public class TestBoardFSM {
 
     }
 
+    private void verify(List<PlayerBoardContract> players, Consumer<PlayerBoardContract> action) {
+	for (PlayerBoardContract p : players)
+	    action.accept(Mockito.verify(p));
+    }
+
     @Test
     public void testFullTurn() {
 	BoardContract board = Mockito.mock(BoardContract.class);
@@ -85,21 +91,32 @@ public class TestBoardFSM {
 
 	receiveAll(fsm, new DoDeployCardCommand(new ArrayList<>(), -1));
 
+	verify(ps, PlayerBoardContract::deployPhase);
+	verify(ps, PlayerBoardContract::endOfDeployPhase);
+
 	Mockito.verify(board).warPhase();
 	Assertions.assertEquals(BoardFSM.WAR, fsm.getPhase());
 
 	receiveAll(fsm, new NoopCommand());
 
+	verify(ps, PlayerBoardContract::goldPhase);
+
 	Assertions.assertEquals(BoardFSM.GOLD, fsm.getPhase());
 
 	receiveAll(fsm, new NoopCommand());
+
+	verify(ps, PlayerBoardContract::buildPhase);
 
 	Assertions.assertEquals(BoardFSM.BUILDING, fsm.getPhase());
 
 	receiveAll(fsm, new BuildCommand());
 
-	Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
+	verify(ps, PlayerBoardContract::endBuildPhase);
 
+	verify(ps, PlayerBoardContract::agePhase);
+	verify(ps, PlayerBoardContract::endAgePhase);
+
+	Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
     }
 
     private void receiveAll(BoardFSM fsm, Object cmd) {
