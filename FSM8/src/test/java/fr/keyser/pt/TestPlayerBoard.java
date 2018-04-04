@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 
 import fr.keyser.bus.Bus;
 import fr.keyser.pt.CardPosition.Position;
-import fr.keyser.pt.buildings.Town;
+import fr.keyser.pt.buildings.Mine;
 import fr.keyser.pt.effects.DropAgeTokenEffect;
 import fr.keyser.pt.event.PlayerLegendChanged;
 import fr.keyser.pt.units.CaveSpirit;
@@ -33,7 +33,7 @@ public class TestPlayerBoard {
 
 	MetaCardBuilder b = new MetaCardBuilder();
 	MetaCard caveSpirit = b.meta(new CaveSpirit());
-	MetaCard town = b.meta(new Town());
+	MetaCard town = b.meta(new Mine());
 
 	PlayerBoard p0 = board.addPlayer(model,
 	        asList(new DeployedCardInfo(Position.FRONT.index(0), new CardModel(caveSpirit, 0, 0)),
@@ -50,7 +50,9 @@ public class TestPlayerBoard {
 	Mockito.verify(bus).forward(Mockito.argThat(a -> {
 	    if (a instanceof PlayerLegendChanged) {
 		PlayerLegendChanged plc = (PlayerLegendChanged) a;
-		return plc.getLegend() == 6;
+		int base = 3 * 2;
+		int fromMine = 2 * 2;
+		return plc.getLegend() == base + fromMine;
 	    }
 	    return false;
 	}));
