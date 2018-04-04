@@ -109,7 +109,8 @@ public class TestBoardFSM {
 
 	Assertions.assertEquals(BoardFSM.BUILDING, fsm.getPhase());
 
-	receiveAll(fsm, new BuildCommand());
+	receiveAll(fsm, new BuildCommand(0));
+	verify(ps, p -> p.processBuild(0));
 
 	verify(ps, PlayerBoardContract::endBuildPhase);
 

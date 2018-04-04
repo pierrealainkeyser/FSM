@@ -4,6 +4,13 @@ public class BuildCommand {
 
     private Integer index;
 
+    public BuildCommand() {
+    }
+
+    public BuildCommand(Integer index) {
+	this.index = index;
+    }
+
     public Integer getIndex() {
         return index;
     }
