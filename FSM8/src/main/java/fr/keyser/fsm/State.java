@@ -63,6 +63,6 @@ public final class State<S> {
 
     @Override
     public String toString() {
-	return "State" + states;
+	return states + "";
     }
 }

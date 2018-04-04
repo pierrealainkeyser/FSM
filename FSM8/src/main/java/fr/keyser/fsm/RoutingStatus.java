@@ -68,4 +68,9 @@ public class RoutingStatus<S, E> {
     public State<S> getTo() {
 	return to;
     }
+
+    @Override
+    public String toString() {
+	return "from=" + from + ", event=" + event + ", " + result + ", to=" + to;
+    }
 }

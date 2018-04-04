@@ -129,10 +129,14 @@ public class BoardFSM {
 	    StateBuilder<String, BoardEvent> current = currentSub;
 	    chainedSubByPlayers(current, next);
 
-	    current.onExit(this.contract::passCardsToNext);
+	    current.onExit(this::passCardsToNext);
 	    if (!notLast)
 		current.onExit(this::nextPhase);
 	}
+    }
+
+    private void passCardsToNext() {
+	this.contract.passCardsToNext();
     }
 
     private void chainedSubByPlayers(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {

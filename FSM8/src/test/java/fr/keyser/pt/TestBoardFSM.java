@@ -66,6 +66,9 @@ public class TestBoardFSM {
 	Assertions.assertEquals(3, fsm.getPlayers().size());
 	fsm.start();
 
+	Mockito.verify(board).resetCounters();
+	Mockito.verify(board).distributeCards();
+
 	Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
 
 	for (int i = 0; i < 5; ++i) {
@@ -73,10 +76,16 @@ public class TestBoardFSM {
 		p.receiveInput(new DraftCommand(0));
 	}
 
+	Mockito.verify(board, Mockito.times(4)).passCardsToNext();
+
+	for (PlayerBoardContract p : ps)
+	    Mockito.verify(p, Mockito.times(4)).processDraft(Mockito.anyInt());
+
 	Assertions.assertEquals(BoardFSM.DEPLOY, fsm.getPhase());
 
 	receiveAll(fsm, new DoDeployCardCommand(new ArrayList<>(), -1));
 
+	Mockito.verify(board).warPhase();
 	Assertions.assertEquals(BoardFSM.WAR, fsm.getPhase());
 
 	receiveAll(fsm, new NoopCommand());
@@ -88,7 +97,7 @@ public class TestBoardFSM {
 	Assertions.assertEquals(BoardFSM.BUILDING, fsm.getPhase());
 
 	receiveAll(fsm, new BuildCommand());
-	
+
 	Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
 
     }

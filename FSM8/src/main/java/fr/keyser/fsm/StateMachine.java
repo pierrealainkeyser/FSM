@@ -5,7 +5,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
+
 public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
+
+    private static final Logger logger = LoggerFactory.getLogger(StateMachine.class);
 
     private State<S> current;
 
@@ -22,14 +28,23 @@ public class StateMachine<S, E> implements DelayedEventConsumer<S, E> {
     @Override
     public CompletionStage<RoutingStatus<S, E>> push(Event<E> event) {
 	CompletionStage<RoutingStatus<S, E>> cs = CompletableFuture.supplyAsync(() -> {
+
+	    if (logger.isDebugEnabled())
+		logger.debug("{} -> before routing : {}", ObjectUtils.getIdentityHexString(StateMachine.this), event.getValue());
+
 	    NodeState<S, E> working = root.lookup(current);
+	    RoutingStatus<S, E> status = null;
 	    if (working == null)
-		return RoutingStatus.noStateFound(current);
+		status = RoutingStatus.noStateFound(current);
 	    else {
-		RoutingStatus<S, E> status = working.onEvent(event);
+		status = working.onEvent(event);
 		processStatus(status);
-		return status;
 	    }
+
+	    if (logger.isDebugEnabled())
+		logger.debug("{} -> after routing : {}", ObjectUtils.getIdentityHexString(StateMachine.this), status);
+
+	    return status;
 
 	}, executor);
 	return cs.thenApply(this::merge);
