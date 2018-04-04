@@ -15,6 +15,7 @@ import fr.keyser.pt.buildings.Mine;
 import fr.keyser.pt.buildings.Tavern;
 import fr.keyser.pt.buildings.Temple;
 import fr.keyser.pt.buildings.Town;
+import fr.keyser.pt.units.Notable;
 
 public class TestBuildingPlanner {
 
@@ -52,6 +53,27 @@ public class TestBuildingPlanner {
 
     private static MockInfo level2(Building b) {
 	return new MockInfo(b, BuildingLevel.LEVEL2);
+    }
+
+    @Test
+    public void testNotable() {
+
+	MetaCardBuilder b = new MetaCardBuilder();
+	List<MetaCard> bluePrints = Stream.of(new Town(), new Mine()).map(b::meta)
+	        .collect(Collectors.toList());
+
+	MetaCard mine = bluePrints.get(1);
+
+	BuildingPlanner planner = new BuildingPlanner(1, 0, 2, 0, Stream.of(level1(new Town()), new MockInfo(new Notable())));
+	List<BuildingConstruction> buildable = planner.compute(bluePrints);
+
+	Set<BuildingConstruction> expected = new HashSet<>();
+	expected.add(new BuildingConstruction(mine, 0, BuildType.BUILD, BuildingLevel.LEVEL1));
+	expected.add(new BuildingConstruction(mine, 0, BuildType.BUILD, BuildingLevel.LEVEL2));
+
+	Assertions.assertTrue(buildable.containsAll(expected));
+	Assertions.assertTrue(expected.containsAll(buildable));
+
     }
 
     @Test
