@@ -6,10 +6,13 @@ import static java.util.Arrays.asList;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import fr.keyser.bus.Bus;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.buildings.Town;
 import fr.keyser.pt.effects.DropAgeTokenEffect;
+import fr.keyser.pt.event.PlayerLegendChanged;
 import fr.keyser.pt.units.CaveSpirit;
 import fr.keyser.pt.units.Farmer;
 import fr.keyser.pt.units.Lumberjack;
@@ -21,7 +24,10 @@ public class TestPlayerBoard {
 
     @Test
     public void testBasicRestore() {
-	Board board = new Board(null);
+
+	Bus bus = Mockito.mock(Bus.class);
+
+	Board board = new Board(bus, null);
 
 	PlayerBoardModel model = new PlayerBoardModel();
 
@@ -37,6 +43,17 @@ public class TestPlayerBoard {
 
 	Assertions.assertEquals(4, p0.getCombat());
 	Assertions.assertEquals(2, p0.getCrystal());
+
+	p0.setVictoriousWar(2);
+	p0.computeWarGain();
+
+	Mockito.verify(bus).forward(Mockito.argThat(a -> {
+	    if (a instanceof PlayerLegendChanged) {
+		PlayerLegendChanged plc = (PlayerLegendChanged) a;
+		return plc.getLegend() == 6;
+	    }
+	    return false;
+	}));
 
     }
 
