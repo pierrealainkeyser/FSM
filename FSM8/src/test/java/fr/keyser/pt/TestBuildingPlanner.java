@@ -64,7 +64,7 @@ public class TestBuildingPlanner {
 
 	MetaCard mine = bluePrints.get(1);
 
-	BuildingPlanner planner = new BuildingPlanner(1, 0, 2, 0, Stream.of(level1(new Town()), new MockInfo(new Notable())));
+	BuildingPlanner planner = new BuildingPlanner(1, 0, 2, 0, Stream.of(level2(new Town()), new MockInfo(new Notable())));
 	List<BuildingConstruction> buildable = planner.compute(bluePrints);
 
 	Set<BuildingConstruction> expected = new HashSet<>();
