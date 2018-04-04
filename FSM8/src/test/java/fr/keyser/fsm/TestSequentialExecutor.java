@@ -2,8 +2,8 @@ package fr.keyser.fsm;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestSequentialExecutor {
 
@@ -15,7 +15,7 @@ public class TestSequentialExecutor {
 	int nb = 10;
 	for (int i = 0; i < nb; ++i)
 	    seq.execute(() -> count.getAndIncrement());
-	Assert.assertEquals(nb, count.get());
+	Assertions.assertEquals(nb, count.get());
     }
 
     @Test
@@ -28,9 +28,9 @@ public class TestSequentialExecutor {
 	for (int i = 0; i < nb; ++i)
 	    seq.execute(() -> count.getAndIncrement());
 
-	Assert.assertEquals(0, count.get());
+	Assertions.assertEquals(0, count.get());
 	seq.unbuffer();
-	Assert.assertEquals(nb, count.get());
+	Assertions.assertEquals(nb, count.get());
     }
 
     @Test
@@ -46,6 +46,6 @@ public class TestSequentialExecutor {
 	for (int i = 0; i < nb; ++i)
 	    seq.execute(() -> count.getAndIncrement());
 
-	Assert.assertEquals(nb, count.get());
+	Assertions.assertEquals(nb, count.get());
     }
 }

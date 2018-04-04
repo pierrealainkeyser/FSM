@@ -5,15 +5,9 @@ import static fr.keyser.fsm.Event.create;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import fr.keyser.fsm.DelayedEventConsumer;
-import fr.keyser.fsm.Event;
-import fr.keyser.fsm.RoutingStatus;
-import fr.keyser.fsm.State;
-import fr.keyser.fsm.StateMachine;
-import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 
 public class TestStateMachineBuilder {
@@ -43,13 +37,13 @@ public class TestStateMachineBuilder {
 	StateMachine<String, String> machine = builder.build();
 	State<String> lockedState = new State<>("locked");
 
-	Assert.assertEquals(lockedState, machine.getCurrent());
+	Assertions.assertEquals(lockedState, machine.getCurrent());
 	machine.push("push");
-	Assert.assertEquals(lockedState, machine.getCurrent());
+	Assertions.assertEquals(lockedState, machine.getCurrent());
 
 	CompletionStage<RoutingStatus<String, String>> last = machine.push("coin");
-	Assert.assertEquals(lockedState, machine.getCurrent());
-	Assert.assertEquals(lockedState, last.toCompletableFuture().join().getTo());
+	Assertions.assertEquals(lockedState, machine.getCurrent());
+	Assertions.assertEquals(lockedState, last.toCompletableFuture().join().getTo());
     }
 
     private static class TimerModel {
@@ -130,34 +124,34 @@ public class TestStateMachineBuilder {
 
 	StateMachine<String, String> machine = builder.build();
 	machine.enterInitialState();
-	Assert.assertEquals(new State<>("idle", "off"), machine.getCurrent());
+	Assertions.assertEquals(new State<>("idle", "off"), machine.getCurrent());
 
 	machine.push("online");
-	Assert.assertEquals(new State<>("idle", "on"), machine.getCurrent());
+	Assertions.assertEquals(new State<>("idle", "on"), machine.getCurrent());
 
 	machine.push(TimerModel.timer(create("arm"), 10, "go"));
-	Assert.assertTrue(model.armed);
-	Assert.assertEquals(10, model.value);
-	Assert.assertEquals("go", model.timeoutEvent);
+	Assertions.assertTrue(model.armed);
+	Assertions.assertEquals(10, model.value);
+	Assertions.assertEquals("go", model.timeoutEvent);
 
 	machine.push(create("timeout").put("numlock", 1));
-	Assert.assertFalse(model.armed);
-	Assert.assertEquals(1, fireCount.get());
+	Assertions.assertFalse(model.armed);
+	Assertions.assertEquals(1, fireCount.get());
 
 	machine.push("offline");
 	machine.push(TimerModel.timer(create("arm"), 15, "timeout"));
 
-	Assert.assertFalse(model.armed);
-	Assert.assertEquals(15, model.value);
-	Assert.assertEquals("timeout", model.timeoutEvent);
+	Assertions.assertFalse(model.armed);
+	Assertions.assertEquals(15, model.value);
+	Assertions.assertEquals("timeout", model.timeoutEvent);
 
 	machine.push("online");
-	Assert.assertTrue(model.armed);
-	Assert.assertEquals(15, model.value);
+	Assertions.assertTrue(model.armed);
+	Assertions.assertEquals(15, model.value);
 
 	machine.push("offline");
 	machine.push("timeout");
-	Assert.assertFalse(model.armed);
-	Assert.assertEquals(1, fireCount.get());
+	Assertions.assertFalse(model.armed);
+	Assertions.assertEquals(1, fireCount.get());
     }
 }

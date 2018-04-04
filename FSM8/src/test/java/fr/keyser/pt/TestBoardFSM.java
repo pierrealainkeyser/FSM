@@ -2,8 +2,8 @@ package fr.keyser.pt;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import fr.keyser.pt.fsm.BoardFSM;
 import fr.keyser.pt.fsm.DoDeployCardCommand;
@@ -25,23 +25,23 @@ public class TestBoardFSM {
 
 	for (int i = 0; i < 4; ++i) {
 
-	    Assert.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
-	    Assert.assertEquals(DraftCommand.class, fsm0.getExpectedInput());
-	    Assert.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
+	    Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
+	    Assertions.assertEquals(DraftCommand.class, fsm0.getExpectedInput());
+	    Assertions.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
 
 	    List<MetaCard> d0 = p0.getToDraft();
 	    fsm0.receiveInput(new DraftCommand(d0.get(0), d0.get(1)));
-	    Assert.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
-	    Assert.assertNull(fsm0.getExpectedInput());
-	    Assert.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
+	    Assertions.assertEquals(BoardFSM.DRAFT, fsm.getPhase());
+	    Assertions.assertNull(fsm0.getExpectedInput());
+	    Assertions.assertEquals(DraftCommand.class, fsm1.getExpectedInput());
 
 	    List<MetaCard> d1 = p1.getToDraft();
 	    fsm1.receiveInput(new DraftCommand(d1.get(0), d1.get(1)));
 	}
 
-	Assert.assertEquals(BoardFSM.DEPLOY, fsm.getPhase());
-	Assert.assertEquals(DoDeployCardCommand.class, fsm0.getExpectedInput());
-	Assert.assertEquals(DoDeployCardCommand.class, fsm1.getExpectedInput());
+	Assertions.assertEquals(BoardFSM.DEPLOY, fsm.getPhase());
+	Assertions.assertEquals(DoDeployCardCommand.class, fsm0.getExpectedInput());
+	Assertions.assertEquals(DoDeployCardCommand.class, fsm1.getExpectedInput());
 
     }
 

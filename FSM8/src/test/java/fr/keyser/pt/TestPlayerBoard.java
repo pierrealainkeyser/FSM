@@ -4,8 +4,8 @@ import static fr.keyser.pt.CardPosition.Position.BACK;
 import static fr.keyser.pt.CardPosition.Position.FRONT;
 import static java.util.Arrays.asList;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.buildings.Town;
@@ -34,9 +34,9 @@ public class TestPlayerBoard {
 	                new DeployedCardInfo(Position.BUILDING.index(0), new CardModel(town, BuildingLevel.LEVEL2))));
 
 	p0.computeValues();
-	
-	Assert.assertEquals(4, p0.getCombat());
-	Assert.assertEquals(2, p0.getCrystal());
+
+	Assertions.assertEquals(4, p0.getCombat());
+	Assertions.assertEquals(2, p0.getCrystal());
 
     }
 
@@ -64,13 +64,13 @@ public class TestPlayerBoard {
 	p0.deployPhase();
 	p0.endOfDeployPhase();
 
-	Assert.assertEquals(4, u.getCombat());
-	Assert.assertEquals(2, u.getAgeToken());
+	Assertions.assertEquals(4, u.getCombat());
+	Assertions.assertEquals(2, u.getAgeToken());
 
-	Assert.assertEquals(0, model.getGold());
-	Assert.assertEquals(8, p0.getCombat());
-	Assert.assertEquals(1, p0.getCrystal());
-	Assert.assertEquals(1, p0.getWood());
+	Assertions.assertEquals(0, model.getGold());
+	Assertions.assertEquals(8, p0.getCombat());
+	Assertions.assertEquals(1, p0.getCrystal());
+	Assertions.assertEquals(1, p0.getWood());
     }
 
     @Test
@@ -98,17 +98,17 @@ public class TestPlayerBoard {
 
 	p0.deployPhase();
 
-	Assert.assertEquals(1, model.getInputActions().size());
+	Assertions.assertEquals(1, model.getInputActions().size());
 	p0.processCardAction(new CardAction(front1, DropAgeTokenEffect.DROP_AGE, front0));
-	Assert.assertEquals(0, model.getInputActions().size());
+	Assertions.assertEquals(0, model.getInputActions().size());
 	p0.endOfDeployPhase();
 
-	Assert.assertEquals(4, u.getCombat());
-	Assert.assertEquals(2, u.getAgeToken());
+	Assertions.assertEquals(4, u.getCombat());
+	Assertions.assertEquals(2, u.getAgeToken());
 
-	Assert.assertEquals(2, model.getGold());
-	Assert.assertEquals(5, p0.getCombat());
-	Assert.assertEquals(1, p0.getFood());
+	Assertions.assertEquals(2, model.getGold());
+	Assertions.assertEquals(5, p0.getCombat());
+	Assertions.assertEquals(1, p0.getFood());
     }
 
 }

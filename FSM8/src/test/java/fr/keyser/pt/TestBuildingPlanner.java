@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import fr.keyser.pt.BuildingConstruction.BuildType;
 import fr.keyser.pt.buildings.Casern;
@@ -75,8 +75,8 @@ public class TestBuildingPlanner {
 	expected.add(new BuildingConstruction(casern, 4, BuildType.BUILD, BuildingLevel.LEVEL2));
 	expected.add(new BuildingConstruction(temple, 6, BuildType.BUILD, BuildingLevel.LEVEL1));
 
-	Assert.assertTrue(buildable.containsAll(expected));
-	Assert.assertTrue(expected.containsAll(buildable));
+	Assertions.assertTrue(buildable.containsAll(expected));
+	Assertions.assertTrue(expected.containsAll(buildable));
 
     }
 
