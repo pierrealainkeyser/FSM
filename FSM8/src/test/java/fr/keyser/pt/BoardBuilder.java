@@ -55,7 +55,9 @@ public class BoardBuilder {
 	}
 
 	public PlayerBoard build() {
-	    return board.addPlayer(model, cards);
+	    PlayerBoard player = board.addPlayer(model, cards);
+	    player.computeValues();
+	    return player;
 	}
 
 	public PlayerBuilder front(MetaCard meta) {
@@ -103,6 +105,10 @@ public class BoardBuilder {
 
     public <T> Suscription listenTo(Class<T> type, Consumer<? extends T> consumer) {
 	return bus.listenTo(type, consumer);
+    }
+
+    public Board getBoard() {
+        return board;
     }
 
 }

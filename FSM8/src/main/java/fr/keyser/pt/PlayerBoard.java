@@ -512,4 +512,8 @@ public final class PlayerBoard implements PlayerBoardContract {
     void useCard(CardPosition position, CardModel cardModel) {
 	find(position).withModel(cardModel);
     }
+
+    public int getLegend() {
+	return model.getLegend();
+    }
 }

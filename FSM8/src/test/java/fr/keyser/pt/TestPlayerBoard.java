@@ -11,11 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import fr.keyser.pt.buildings.Mine;
+import fr.keyser.pt.buildings.Town;
 import fr.keyser.pt.effects.DropAgeTokenEffect;
 import fr.keyser.pt.event.PlayerLegendChanged;
 import fr.keyser.pt.units.Alchimist;
 import fr.keyser.pt.units.CaveSpirit;
+import fr.keyser.pt.units.Colossus;
 import fr.keyser.pt.units.Farmer;
+import fr.keyser.pt.units.Knigth;
 import fr.keyser.pt.units.Leviathan;
 import fr.keyser.pt.units.Lumberjack;
 import fr.keyser.pt.units.Mercenary;
@@ -23,6 +26,32 @@ import fr.keyser.pt.units.Necromancer;
 import fr.keyser.pt.units.TimeMistress;
 
 public class TestPlayerBoard {
+
+    @Test
+    public void test3PlayerComplexWar() {
+
+	BoardBuilder builder = new BoardBuilder();
+
+	PlayerBoard p0 = builder.player()
+	        .front(builder.meta(new Farmer()))
+	        .build();
+
+	PlayerBoard p1 = builder.player()
+	        .front(builder.meta(new Knigth()))
+	        .build();
+
+	PlayerBoard p2 = builder.player()
+	        .front(builder.meta(new Colossus()))
+	        .front(builder.meta(new Alchimist()))
+	        .level2(builder.meta(new Town()))
+	        .build();
+
+	builder.getBoard().warPhase();
+
+	Assertions.assertEquals(0, p0.getLegend());
+	Assertions.assertEquals(3, p1.getLegend());
+	Assertions.assertEquals(5, p2.getLegend());
+    }
 
     @Test
     public void testBasicWar() {
@@ -41,19 +70,20 @@ public class TestPlayerBoard {
 	        .level2(mine)
 	        .build();
 
-	p0.computeValues();
-
-	Assertions.assertEquals(4, p0.getCombat());
 	Assertions.assertEquals(2, p0.getCrystal());
 
 	p0.setVictoriousWar(2);
 	p0.computeWarGain();
 
+	int base = 3 * 2;
+	int fromMine = 2 * 2;
+	int expectedLegend = base + fromMine;
+
 	Mockito.verify(listener).accept(Mockito.argThat(plc -> {
-	    int base = 3 * 2;
-	    int fromMine = 2 * 2;
-	    return plc.getLegend() == base + fromMine;
+	    return plc.getLegend() == expectedLegend;
 	}));
+
+	Assertions.assertEquals(expectedLegend, p0.getLegend());
     }
 
     @Test
