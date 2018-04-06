@@ -2,6 +2,7 @@ package fr.keyser.pt;
 
 import static fr.keyser.pt.CardPosition.Position.BACK;
 import static fr.keyser.pt.CardPosition.Position.FRONT;
+import static fr.keyser.pt.DeployedCard.meta;
 
 import java.util.function.Consumer;
 
@@ -12,8 +13,10 @@ import org.mockito.Mockito;
 import fr.keyser.pt.buildings.Mine;
 import fr.keyser.pt.effects.DropAgeTokenEffect;
 import fr.keyser.pt.event.PlayerLegendChanged;
+import fr.keyser.pt.units.Alchimist;
 import fr.keyser.pt.units.CaveSpirit;
 import fr.keyser.pt.units.Farmer;
+import fr.keyser.pt.units.Leviathan;
 import fr.keyser.pt.units.Lumberjack;
 import fr.keyser.pt.units.Mercenary;
 import fr.keyser.pt.units.Necromancer;
@@ -51,7 +54,6 @@ public class TestPlayerBoard {
 	    int fromMine = 2 * 2;
 	    return plc.getLegend() == base + fromMine;
 	}));
-
     }
 
     @Test
@@ -75,7 +77,7 @@ public class TestPlayerBoard {
 	p0.processDeployCardAction(new DoDeployCard(necromancer, FRONT.index(1)));
 	p0.processDeployCardAction(new DoDeployCard(lumberjack, BACK.index(0)));
 
-	DeployedCard u = p0.units().filter(d -> d.getMeta() == caveSpirit).findFirst().get();
+	DeployedCard u = p0.units().filter(meta(caveSpirit)).findFirst().get();
 
 	p0.endOfDeployPhase();
 
@@ -109,7 +111,7 @@ public class TestPlayerBoard {
 	p0.processDeployCardAction(new DoDeployCard(timeMistress, front1));
 	p0.processDeployCardAction(new DoDeployCard(farmer, BACK.index(0)));
 
-	DeployedCard u = p0.units().filter(d -> d.getMeta() == mercenary).findFirst().get();
+	DeployedCard u = p0.units().filter(meta(mercenary)).findFirst().get();
 
 	p0.deployPhase();
 
@@ -124,6 +126,35 @@ public class TestPlayerBoard {
 	Assertions.assertEquals(2, p0.getGold());
 	Assertions.assertEquals(5, p0.getCombat());
 	Assertions.assertEquals(1, p0.getFood());
+    }
+
+    @Test
+    public void testAlchmistLeviathanNecromancer() {
+	BoardBuilder builder = new BoardBuilder();
+
+	MetaCard alchimist = builder.meta(new Alchimist());
+	MetaCard leviathan = builder.meta(new Leviathan());
+	MetaCard necromancer = builder.meta(new Necromancer());
+
+	PlayerBoard p0 = builder.player()
+	        .front(alchimist)
+	        .front(necromancer)
+	        .front(leviathan)
+	        .build();
+
+	CardPosition front0 = FRONT.index(0);
+
+	DeployedCard alchimistCard = p0.units().filter(meta(alchimist)).findFirst().get();
+
+	p0.deployPhase();
+
+	Assertions.assertEquals(1, p0.getInputActions().size());
+	p0.processCardAction(new CardAction(front0, DropAgeTokenEffect.DROP_AGE, front0));
+	Assertions.assertEquals(0, p0.getInputActions().size());
+	p0.endOfDeployPhase();
+
+	Assertions.assertEquals(3, alchimistCard.getAgeToken());
+	Assertions.assertEquals(2, p0.getFood());
     }
 
 }

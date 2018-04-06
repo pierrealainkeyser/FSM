@@ -71,7 +71,7 @@ public class BoardBuilder {
 	}
 
 	private CardPosition position(Position p) {
-	    Integer index = positions.merge(p, 1, (oldValue, newValue) -> (oldValue == null ? 0 : oldValue) + newValue);
+	    Integer index = positions.merge(p, 0, (oldValue, newValue) -> (oldValue == null ? 0 : oldValue) + 1);
 	    return p.index(index);
 	}
 

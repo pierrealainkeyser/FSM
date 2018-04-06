@@ -11,7 +11,7 @@ public final class Alchimist extends Unit {
 	super(essence(2)
 	        .gold(IntValue.WOOD)
 	        .warLegend(IntValue.CRYSTAL)
-	        .effect(DeployedCard.DEPLOY, new DropAgeTokenEffect(IntValue.FOOD)));
+	        .effect(DeployedCard.DEPLOY_LAST, new DropAgeTokenEffect(IntValue.FOOD)));
     }
 
 }

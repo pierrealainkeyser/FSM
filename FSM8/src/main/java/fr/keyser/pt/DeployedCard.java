@@ -11,6 +11,8 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     public static final SpecialEffectScope AGING = new SpecialEffectScope(0, When.AGING);
 
+    public static final SpecialEffectScope DEPLOY_LAST = new SpecialEffectScope(3, When.DEPLOYEMENT);
+    
     public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(2, When.DEPLOYEMENT);
 
     public static final SpecialEffectScope PLAY = new SpecialEffectScope(0, When.ON_PLAY);
@@ -20,6 +22,10 @@ public class DeployedCard implements InstalledCardBuildPlanner {
     public static final SpecialEffectScope INITIAL_DEPLOY = new SpecialEffectScope(1, When.INITIAL_DEPLOYEMENT);
 
     public static final SpecialEffectScope INITIAL_DEPLOY_FIRST = new SpecialEffectScope(0, When.INITIAL_DEPLOYEMENT);
+
+    public static Predicate<DeployedCard> meta(MetaCard meta) {
+	return p -> p.getMeta().getId() == meta.getId();
+    }
 
     public static Predicate<DeployedCard> hasAgeToken(int i) {
 	return p -> p.getAgeToken() == i;
@@ -205,5 +211,9 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     public MetaCard getMeta() {
 	return meta;
+    }
+
+    public void recomputeValues() {
+	player.computeValues();
     }
 }
