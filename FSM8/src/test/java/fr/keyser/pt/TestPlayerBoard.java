@@ -22,7 +22,7 @@ import fr.keyser.pt.units.TimeMistress;
 public class TestPlayerBoard {
 
     @Test
-    public void testBasicRestore() {
+    public void testBasicWar() {
 
 	@SuppressWarnings("unchecked")
 	Consumer<PlayerLegendChanged> listener = Mockito.mock(Consumer.class);
@@ -56,32 +56,33 @@ public class TestPlayerBoard {
 
     @Test
     public void testDeploy() {
-	Board board = new Board(null);
+	BoardBuilder builder = new BoardBuilder();
 
-	PlayerBoardModel model = new PlayerBoardModel();
-	MetaCardBuilder b = new MetaCardBuilder();
-	MetaCard caveSpirit = b.meta(new CaveSpirit());
-	MetaCard necromancer = b.meta(new Necromancer());
-	MetaCard lumberjack = b.meta(new Lumberjack());
-	model.getToDeploy().add(caveSpirit);
-	model.getToDeploy().add(necromancer);
-	model.getToDeploy().add(lumberjack);
-	model.addGold(2);
+	MetaCard caveSpirit = builder.meta(new CaveSpirit());
+	MetaCard necromancer = builder.meta(new Necromancer());
+	MetaCard lumberjack = builder.meta(new Lumberjack());
 
-	PlayerBoard p0 = board.addPlayer(model);
+	PlayerBoard p0 = builder.player()
+	        .toDeploy(caveSpirit)
+	        .toDeploy(necromancer)
+	        .toDeploy(lumberjack)
+	        .addGold(2)
+	        .build();
+
+	p0.deployPhase();
+
 	p0.processDeployCardAction(new DoDeployCard(caveSpirit, FRONT.index(0)));
 	p0.processDeployCardAction(new DoDeployCard(necromancer, FRONT.index(1)));
 	p0.processDeployCardAction(new DoDeployCard(lumberjack, BACK.index(0)));
 
 	DeployedCard u = p0.units().filter(d -> d.getMeta() == caveSpirit).findFirst().get();
 
-	p0.deployPhase();
 	p0.endOfDeployPhase();
 
 	Assertions.assertEquals(4, u.getCombat());
 	Assertions.assertEquals(2, u.getAgeToken());
 
-	Assertions.assertEquals(0, model.getGold());
+	Assertions.assertEquals(0, p0.getGold());
 	Assertions.assertEquals(8, p0.getCombat());
 	Assertions.assertEquals(1, p0.getCrystal());
 	Assertions.assertEquals(1, p0.getWood());
@@ -89,21 +90,21 @@ public class TestPlayerBoard {
 
     @Test
     public void testDeployTarget() {
-	Board board = new Board(null);
+	BoardBuilder builder = new BoardBuilder();
 
-	PlayerBoardModel model = new PlayerBoardModel();
-	MetaCardBuilder b = new MetaCardBuilder();
-	MetaCard timeMistress = b.meta(new TimeMistress());
-	MetaCard mercenary = b.meta(new Mercenary());
-	MetaCard farmer = b.meta(new Farmer());
-	model.getToDeploy().add(timeMistress);
-	model.getToDeploy().add(mercenary);
-	model.getToDeploy().add(farmer);
-	model.addGold(2);
+	MetaCard timeMistress = builder.meta(new TimeMistress());
+	MetaCard mercenary = builder.meta(new Mercenary());
+	MetaCard farmer = builder.meta(new Farmer());
+
+	PlayerBoard p0 = builder.player()
+	        .toDeploy(timeMistress)
+	        .toDeploy(mercenary)
+	        .toDeploy(farmer)
+	        .addGold(2)
+	        .build();
 
 	CardPosition front1 = FRONT.index(1);
 	CardPosition front0 = FRONT.index(0);
-	PlayerBoard p0 = board.addPlayer(model);
 	p0.processDeployCardAction(new DoDeployCard(mercenary, front0));
 	p0.processDeployCardAction(new DoDeployCard(timeMistress, front1));
 	p0.processDeployCardAction(new DoDeployCard(farmer, BACK.index(0)));
@@ -112,15 +113,15 @@ public class TestPlayerBoard {
 
 	p0.deployPhase();
 
-	Assertions.assertEquals(1, model.getInputActions().size());
+	Assertions.assertEquals(1, p0.getInputActions().size());
 	p0.processCardAction(new CardAction(front1, DropAgeTokenEffect.DROP_AGE, front0));
-	Assertions.assertEquals(0, model.getInputActions().size());
+	Assertions.assertEquals(0, p0.getInputActions().size());
 	p0.endOfDeployPhase();
 
 	Assertions.assertEquals(4, u.getCombat());
 	Assertions.assertEquals(2, u.getAgeToken());
 
-	Assertions.assertEquals(2, model.getGold());
+	Assertions.assertEquals(2, p0.getGold());
 	Assertions.assertEquals(5, p0.getCombat());
 	Assertions.assertEquals(1, p0.getFood());
     }

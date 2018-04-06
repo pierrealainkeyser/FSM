@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,16 +77,16 @@ public final class PlayerBoard implements PlayerBoardContract {
 	    effect.getSpecialEffect().apply(card);
 	}
 
-	private int getOrder() {
-	    return effect.getScope().getOrder();
-	}
-
 	public DeployedCard getCard() {
 	    return card;
 	}
 
 	public String getName() {
 	    return effect.getName();
+	}
+
+	private int getOrder() {
+	    return effect.getScope().getOrder();
 	}
     }
 
@@ -132,10 +133,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	model.addLegend(legend);
 	if (legend != 0)
 	    forward(new PlayerLegendChanged(this, model.getLegend()));
-    }
-
-    public List<DeployedCardInfo> getInfos() {
-	return all().map(DeployedCard::getInfo).collect(Collectors.toList());
     }
 
     @Override
@@ -264,16 +261,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	computeDeployGain();
     }
 
-    /**
-     * Test only
-     * 
-     * @param position
-     * @param cardModel
-     */
-    void useCard(CardPosition position, CardModel cardModel) {
-	find(position).withModel(cardModel);
-    }
-
     CardSlot find(CardPosition position) {
 	List<CardSlot> list = null;
 	switch (position.getPosition()) {
@@ -330,8 +317,20 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return counters.getFood();
     }
 
+    public int getGold() {
+	return model.getGold();
+    }
+
     int getGoldGain() {
 	return counters.getGoldGain();
+    }
+
+    public List<DeployedCardInfo> getInfos() {
+	return all().map(DeployedCard::getInfo).collect(Collectors.toList());
+    }
+
+    public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
+	return model.getInputActions();
     }
 
     List<MetaCard> getToDraft() {
@@ -502,5 +501,15 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     public Stream<DeployedCard> units() {
 	return asDeployedCard(Stream.concat(front.stream(), back.stream()));
+    }
+
+    /**
+     * Test only
+     * 
+     * @param position
+     * @param cardModel
+     */
+    void useCard(CardPosition position, CardModel cardModel) {
+	find(position).withModel(cardModel);
     }
 }

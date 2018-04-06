@@ -19,6 +19,16 @@ public class BoardBuilder {
 
 	private final Map<Position, Integer> positions = new EnumMap<>(Position.class);
 
+	public PlayerBuilder toDeploy(MetaCard meta) {
+	    model.getToDeploy().add(meta);
+	    return this;
+	}
+
+	public PlayerBuilder addGold(int gold) {
+	    model.addGold(gold);
+	    return this;
+	}
+
 	public PlayerBuilder building(MetaCard meta, BuildingLevel level) {
 	    cards.add(new DeployedCardInfo(position(Position.BUILDING), new CardModel(meta, level)));
 	    return this;
@@ -88,7 +98,7 @@ public class BoardBuilder {
     }
 
     public Bus getBus() {
-        return bus;
+	return bus;
     }
 
     public <T> Suscription listenTo(Class<T> type, Consumer<? extends T> consumer) {
