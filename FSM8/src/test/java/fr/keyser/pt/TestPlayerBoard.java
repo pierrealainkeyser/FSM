@@ -2,14 +2,13 @@ package fr.keyser.pt;
 
 import static fr.keyser.pt.CardPosition.Position.BACK;
 import static fr.keyser.pt.CardPosition.Position.FRONT;
-import static java.util.Arrays.asList;
+
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import fr.keyser.bus.Bus;
-import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.buildings.Mine;
 import fr.keyser.pt.effects.DropAgeTokenEffect;
 import fr.keyser.pt.event.PlayerLegendChanged;
@@ -25,19 +24,19 @@ public class TestPlayerBoard {
     @Test
     public void testBasicRestore() {
 
-	Bus bus = Mockito.mock(Bus.class);
+	@SuppressWarnings("unchecked")
+	Consumer<PlayerLegendChanged> listener = Mockito.mock(Consumer.class);
 
-	Board board = new Board(bus, null);
+	BoardBuilder builder = new BoardBuilder();
+	builder.listenTo(PlayerLegendChanged.class, listener);
 
-	PlayerBoardModel model = new PlayerBoardModel();
+	MetaCard caveSpirit = builder.meta(new CaveSpirit());
+	MetaCard mine = builder.meta(new Mine());
 
-	MetaCardBuilder b = new MetaCardBuilder();
-	MetaCard caveSpirit = b.meta(new CaveSpirit());
-	MetaCard town = b.meta(new Mine());
-
-	PlayerBoard p0 = board.addPlayer(model,
-	        asList(new DeployedCardInfo(Position.FRONT.index(0), new CardModel(caveSpirit, 0, 0)),
-	                new DeployedCardInfo(Position.BUILDING.index(0), new CardModel(town, BuildingLevel.LEVEL2))));
+	PlayerBoard p0 = builder.player()
+	        .front(caveSpirit)
+	        .level2(mine)
+	        .build();
 
 	p0.computeValues();
 
@@ -47,14 +46,10 @@ public class TestPlayerBoard {
 	p0.setVictoriousWar(2);
 	p0.computeWarGain();
 
-	Mockito.verify(bus).forward(Mockito.argThat(a -> {
-	    if (a instanceof PlayerLegendChanged) {
-		PlayerLegendChanged plc = (PlayerLegendChanged) a;
-		int base = 3 * 2;
-		int fromMine = 2 * 2;
-		return plc.getLegend() == base + fromMine;
-	    }
-	    return false;
+	Mockito.verify(listener).accept(Mockito.argThat(plc -> {
+	    int base = 3 * 2;
+	    int fromMine = 2 * 2;
+	    return plc.getLegend() == base + fromMine;
 	}));
 
     }
