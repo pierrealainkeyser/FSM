@@ -49,7 +49,7 @@ public class TestPlayerBoard {
 	builder.getBoard().warPhase();
 
 	Assertions.assertEquals(0, p0.getLegend());
-	Assertions.assertEquals(3, p1.getLegend());
+	Assertions.assertEquals(6, p1.getLegend());
 	Assertions.assertEquals(5, p2.getLegend());
     }
 
