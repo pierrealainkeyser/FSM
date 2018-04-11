@@ -10,6 +10,8 @@ public abstract class CardEssence<E extends CardEssence<E>> {
     IntValue warLegend = IntValue.ZERO;
 
     IntValue deployLegend = IntValue.ZERO;
+    
+    IntValue endOfGameLegend = IntValue.ZERO;
 
     IntValue food = IntValue.ZERO;
 
@@ -49,6 +51,11 @@ public abstract class CardEssence<E extends CardEssence<E>> {
 	this.food = food;
 	return getThis();
     }
+    
+    public E endOfGameLegend(IntValue endOfGameLegend) {
+ 	this.endOfGameLegend = endOfGameLegend;
+ 	return getThis();
+     }
 
     public E warLegend(IntValue warLegend) {
 	this.warLegend = warLegend;
