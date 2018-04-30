@@ -7,5 +7,5 @@ public class CardRefreshInfo extends DeployedCardEvent {
 
     public CardRefreshInfo(DeployedCard card, PlayerBoard board) {
 	super(card, board);
-    }
+    }  
 }

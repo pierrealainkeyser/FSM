@@ -2,7 +2,6 @@ package fr.keyser.pt.view;
 
 import fr.keyser.bus.Bus;
 import fr.keyser.bus.SynchronousBus;
-import fr.keyser.pt.DeployedCard;
 import fr.keyser.pt.event.CardAgeChanged;
 import fr.keyser.pt.event.CardBuildingLevelChanged;
 import fr.keyser.pt.event.CardDeploymentChanged;
@@ -11,7 +10,7 @@ import fr.keyser.pt.event.DeployedCardEvent;
 import fr.keyser.pt.event.PlayerEvent;
 import fr.keyser.pt.event.PlayerGoldChanged;
 import fr.keyser.pt.event.PlayerLegendChanged;
-import fr.keyser.pt.fsm.PlayerBoardFSM;
+import fr.keyser.pt.fsm.PlayerBoardAcces;
 
 class BoardViewUpdater implements Bus {
 
@@ -19,17 +18,17 @@ class BoardViewUpdater implements Bus {
 
     private final BoardView view;
 
-    private final PlayerBoardFSM fsm;
+    private final PlayerBoardAcces player;
 
-    public BoardViewUpdater(PlayerBoardFSM fsm) {
-	this.fsm = fsm;
-	this.view = new BoardView(this.fsm.getUuid());
+    public BoardViewUpdater(PlayerBoardAcces player) {
+	this.player = player;
+	this.view = new BoardView(this.player.getUUID());
 	initBus();
     }
 
     public void done() {
-	view.setAppeareance(fsm.getAppearance());
-	view.setInputActions(fsm.getInputActions());
+	view.setAppeareance(player.getAppearance());
+	view.setInputActions(player.getInputActions());
     }
 
     private void initBus() {
@@ -42,15 +41,14 @@ class BoardViewUpdater implements Bus {
     }
 
     private void cardRefreshInfo(CardRefreshInfo cari) {
-	DeployedCard dc = cari.getCard();
 
 	CardView card = card(cari);
 
-	if (dc.isInitialDeploy())
+	if (cari.isInitialDeploy())
 	    registerName(cari, card);
 
-	card.setCombat(dc.getCombat());
-	card.setMayCombat(dc.isMayCombat());
+	card.setCombat(cari.getCombat());
+	card.setMayCombat(cari.isMayCombat());
     }
 
     private void cardBuildingLevelChanged(CardBuildingLevelChanged cblc) {
@@ -64,7 +62,7 @@ class BoardViewUpdater implements Bus {
     private void cardDeployementChanged(CardDeploymentChanged cdc) {
 	CardView card = card(cdc);
 	if (cdc.isDeployed()) {
-	    boolean samePlayer = cdc.getPlayer().equals(fsm.getUuid());
+	    boolean samePlayer = cdc.getPlayer().equals(player.getUUID());
 	    if (samePlayer)
 		registerName(cdc, card);
 
@@ -74,7 +72,7 @@ class BoardViewUpdater implements Bus {
     }
 
     private void registerName(DeployedCardEvent dce, CardView card) {
-	card.setName(dce.getCard().getMeta().getName());
+	card.setName(dce.getCardName());
     }
 
     private CardView card(DeployedCardEvent dce) {

@@ -18,7 +18,7 @@ import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.PlayerBoardContract;
 import fr.keyser.pt.TargetedEffectDescription;
 
-public class PlayerBoardFSM {
+public class PlayerBoardFSM implements PlayerBoardAcces {
 
     private static final String EVENT_ARGS = "args";
     private static final String PLAYED = "PLAYED";
@@ -210,6 +210,7 @@ public class PlayerBoardFSM {
 	contract.keepToDeploy(command.getKeep());
     }
 
+    @Override
     public void receiveInput(Object input) {
 	stateMachine.push(Event.create(PlayerEvent.RECEIVE_INPUT).put(EVENT_ARGS, input));
     }
@@ -231,14 +232,17 @@ public class PlayerBoardFSM {
 	};
     }
 
+    @Override
     public String getAppearance() {
 	return appearance;
     }
 
-    public UUID getUuid() {
-	return contract.getUuid();
+    @Override
+    public UUID getUUID() {
+	return contract.getUUID();
     }
 
+    @Override
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
 	return contract.getInputActions();
     }

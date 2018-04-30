@@ -8,32 +8,32 @@ import java.util.UUID;
 
 import fr.keyser.bus.BroadcastingBus;
 import fr.keyser.bus.PluggableBus;
-import fr.keyser.pt.fsm.PlayerBoardFSM;
+import fr.keyser.pt.fsm.PlayerBoardAcces;
 
 public class BoardViewsBuilderHub {
 
     private final PluggableBus bus;
 
-    private final List<PlayerBoardFSM> players;
+    private final List<PlayerBoardAcces> players;
 
-    public BoardViewsBuilderHub(PluggableBus bus, List<PlayerBoardFSM> players) {
+    public BoardViewsBuilderHub(PluggableBus bus, List<PlayerBoardAcces> players) {
 	this.bus = bus;
 	this.players = players;
     }
 
-    private List<BoardViewUpdater> asUpdater() {
+    private List<BoardViewUpdater> updaters() {
 	return players.stream().map(BoardViewUpdater::new).collect(toList());
     }
 
-    private Optional<PlayerBoardFSM> findMatching(UUID player) {
-	return players.stream().filter(p -> p.getUuid().equals(player)).findFirst();
+    private Optional<PlayerBoardAcces> findMatching(UUID player) {
+	return players.stream().filter(p -> p.getUUID().equals(player)).findFirst();
     }
 
     public List<BoardView> receive(UUID player, Object input) {
-	Optional<PlayerBoardFSM> matching = findMatching(player);
+	Optional<PlayerBoardAcces> matching = findMatching(player);
 	if (matching.isPresent()) {
 	    try {
-		List<BoardViewUpdater> delegateds = asUpdater();
+		List<BoardViewUpdater> delegateds = updaters();
 		bus.setDelegated(new BroadcastingBus(delegateds));
 
 		matching.get().receiveInput(input);

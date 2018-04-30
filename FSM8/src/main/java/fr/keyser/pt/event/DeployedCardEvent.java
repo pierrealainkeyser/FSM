@@ -13,12 +13,27 @@ public abstract class DeployedCardEvent extends PlayerEvent {
 	this.card = card;
     }
 
+    public final boolean isInitialDeploy() {
+	return card.isInitialDeploy();
+    }
+
+    public final int getAgeToken() {
+	return card.getAgeToken();
+    }
+
+    public final int getCombat() {
+	return card.getCombat();
+    }
+
+    public final boolean isMayCombat() {
+	return card.isMayCombat();
+    }
+
+    public final String getCardName() {
+	return card.getMeta().getName();
+    }
+
     public CardPosition getPosition() {
 	return card.getPosition();
     }
-
-    public DeployedCard getCard() {
-	return card;
-    }
-
 }

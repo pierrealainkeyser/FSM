@@ -18,7 +18,7 @@ public interface PlayerBoardContract {
 
     void processBuild(int index);
 
-    UUID getUuid();
+    UUID getUUID();
 
     boolean hasInputActions();
 

@@ -343,7 +343,7 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     @Override
-    public UUID getUuid() {
+    public UUID getUUID() {
 	return uuid;
     }
 
