@@ -20,7 +20,10 @@ public class BoardView {
 
     private Integer turn;
 
-    public BoardView() {
+    private final UUID local;
+
+    public BoardView(UUID local) {
+	this.local = local;
 
     }
 
@@ -62,7 +65,7 @@ public class BoardView {
     }
 
     public void setInputActions(Map<CardPosition, List<TargetedEffectDescription>> inputActions) {
-        this.inputActions = inputActions;
+	this.inputActions = inputActions;
     }
 
     public void setPhase(String phase) {
@@ -75,5 +78,9 @@ public class BoardView {
 
     public void setTurn(Integer turn) {
 	this.turn = turn;
+    }
+
+    public UUID getLocal() {
+        return local;
     }
 }

@@ -1,7 +1,6 @@
 package fr.keyser.pt.view;
 
-import java.util.UUID;
-
+import fr.keyser.bus.Bus;
 import fr.keyser.bus.SynchronousBus;
 import fr.keyser.pt.DeployedCard;
 import fr.keyser.pt.event.CardAgeChanged;
@@ -14,21 +13,21 @@ import fr.keyser.pt.event.PlayerGoldChanged;
 import fr.keyser.pt.event.PlayerLegendChanged;
 import fr.keyser.pt.fsm.PlayerBoardFSM;
 
-public class BoardViewUpdater {
+class BoardViewUpdater implements Bus {
 
     private final SynchronousBus bus = new SynchronousBus();
 
-    private final UUID local;
-
     private final BoardView view;
 
-    public BoardViewUpdater(UUID local, BoardView view) {
-	this.local = local;
-	this.view = view;
+    private final PlayerBoardFSM fsm;
+
+    public BoardViewUpdater(PlayerBoardFSM fsm) {
+	this.fsm = fsm;
+	this.view = new BoardView(this.fsm.getUuid());
 	initBus();
     }
 
-    public void done(PlayerBoardFSM fsm) {
+    public void done() {
 	view.setAppeareance(fsm.getAppearance());
 	view.setInputActions(fsm.getInputActions());
     }
@@ -71,7 +70,7 @@ public class BoardViewUpdater {
 	    card.setRemoved(true);
 	else {
 	    // swapp and remove
-	    if (cdc.getPlayer().equals(local))
+	    if (cdc.getPlayer().equals(fsm.getUuid()))
 		registerNewDeployedCard(card, newCard);
 	    else
 		card.setHidden(true);
@@ -100,4 +99,12 @@ public class BoardViewUpdater {
 	view.getPlayer(pgc.getPlayer()).setGold(pgc.getGold());
     }
 
+    @Override
+    public void forward(Object event) {
+	bus.forward(event);
+    }
+
+    public BoardView getView() {
+	return view;
+    }
 }

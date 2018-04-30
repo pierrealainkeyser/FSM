@@ -29,8 +29,8 @@ public class Board implements BoardContract {
 	this(new NoopBus(), deck);
     }
 
-    public Board(Bus synchronousBus, MetaDeck deck) {
-	this.bus = synchronousBus;
+    public Board(Bus bus, MetaDeck deck) {
+	this.bus = bus;
 	this.deck = deck;
     }
 

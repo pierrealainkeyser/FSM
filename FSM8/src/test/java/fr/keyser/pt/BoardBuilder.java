@@ -84,13 +84,13 @@ public class BoardBuilder {
 	}
     }
 
-    private final SynchronousBus synchronousBus = new SynchronousBus();
+    private final SynchronousBus bus = new SynchronousBus();
 
     private final MetaCardBuilder cardBuilder = new MetaCardBuilder();
 
     private final MetaDeck deck = new MetaDeck();
 
-    private final Board board = new Board(synchronousBus, deck);
+    private final Board board = new Board(bus, deck);
 
     public PlayerBuilder player() {
 	return new PlayerBuilder();
@@ -101,11 +101,11 @@ public class BoardBuilder {
     }
 
     public Bus getBus() {
-	return synchronousBus;
+	return bus;
     }
 
     public <T> Suscription listenTo(Class<T> type, Consumer<? extends T> consumer) {
-	return synchronousBus.listenTo(type, consumer);
+	return bus.listenTo(type, consumer);
     }
 
     public Board getBoard() {
