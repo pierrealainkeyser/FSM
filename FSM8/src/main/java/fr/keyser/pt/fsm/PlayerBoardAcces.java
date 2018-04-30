@@ -17,4 +17,6 @@ public interface PlayerBoardAcces {
 
     void receiveInput(Object input);
 
+    void refresh();
+
 }

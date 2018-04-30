@@ -37,4 +37,6 @@ public interface PlayerBoardContract {
     void goldPhase();
 
     Map<CardPosition, List<TargetedEffectDescription>> getInputActions();
+
+    void refresh();
 }

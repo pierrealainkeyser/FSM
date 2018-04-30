@@ -34,6 +34,10 @@ public class Board implements BoardContract {
 	this.deck = deck;
     }
 
+    void refreshAll() {
+	players.forEach(PlayerBoard::doRefresh);
+    }
+
     public MetaCard pickTopCard() {
 	return deck.getCards().remove(0);
     }

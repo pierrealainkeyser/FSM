@@ -13,32 +13,35 @@ public class DefaultPlayerBoardAcces implements PlayerBoardAcces {
     private final UUID uuid;
 
     public DefaultPlayerBoardAcces() {
-        this(UUID.randomUUID());
+	this(UUID.randomUUID());
     }
 
     public DefaultPlayerBoardAcces(UUID uuid) {
-        this.uuid = uuid;
+	this.uuid = uuid;
     }
 
     @Override
     public String getAppearance() {
-
-        return null;
+	return null;
     }
 
     @Override
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
-        // TODO Auto-generated method stub
-        return null;
+	return null;
     }
 
     @Override
     public UUID getUUID() {
-        return uuid;
+	return uuid;
     }
 
     @Override
     public void receiveInput(Object input) {
+
+    }
+
+    @Override
+    public void refresh() {
 
     }
 }

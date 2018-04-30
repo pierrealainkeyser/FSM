@@ -238,6 +238,12 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     }
 
     @Override
+    public void refresh() {
+	contract.refresh();
+
+    }
+
+    @Override
     public UUID getUUID() {
 	return contract.getUUID();
     }

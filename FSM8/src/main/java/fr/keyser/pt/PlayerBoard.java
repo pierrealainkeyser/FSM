@@ -123,6 +123,20 @@ public final class PlayerBoard implements PlayerBoardContract {
 	this.board = board;
     }
 
+    void doRefresh() {
+	all().forEach(dc -> forward(new CardDeploymentChanged(dc, this, true)));
+	buildings().forEach(this::buildingHasChanged);
+	all().forEach(dc -> forward(new CardRefreshInfo(dc, this)));
+
+	forward(new PlayerGoldChanged(this, getGold()));
+	forward(new PlayerLegendChanged(this, getLegend()));
+    }
+
+    @Override
+    public void refresh() {
+	board.refreshAll();
+    }
+
     private void addGold(int gold) {
 	model.addGold(gold);
 	if (gold != 0)
