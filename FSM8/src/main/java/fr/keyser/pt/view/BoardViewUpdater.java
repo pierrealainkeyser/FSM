@@ -59,17 +59,27 @@ public class BoardViewUpdater {
 
     private void cardDeployementChanged(CardDeploymentChanged cdc) {
 	CardView card = card(cdc);
-	if (cdc.isDeployed()) {
-	    DeployedCard dc = cdc.getCard();
-	    card.setName(dc.getMeta().getName());
+	if (cdc.isDeployed())
+	    registerNewDeployedCard(card, cdc.getCard());
+	else
+	    onRemoval(cdc, card);
+    }
 
-	} else {
-	    if (cdc.getNewCard() == null)
-		card.setRemoved(true);
+    private void onRemoval(CardDeploymentChanged cdc, CardView card) {
+	DeployedCard newCard = cdc.getNewCard();
+	if (newCard == null)
+	    card.setRemoved(true);
+	else {
+	    // swapp and remove
+	    if (cdc.getPlayer().equals(local))
+		registerNewDeployedCard(card, newCard);
 	    else
 		card.setHidden(true);
 	}
+    }
 
+    private void registerNewDeployedCard(CardView card, DeployedCard dc) {
+	card.setName(dc.getMeta().getName());
     }
 
     private CardView card(DeployedCardEvent dce) {
