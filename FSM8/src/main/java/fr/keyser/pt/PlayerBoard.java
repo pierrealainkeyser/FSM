@@ -18,9 +18,9 @@ import fr.keyser.pt.BuildingConstruction.BuildType;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.SpecialEffectScope.When;
 import fr.keyser.pt.event.CardAgeChanged;
-import fr.keyser.pt.event.CardAgeRefreshInfo;
 import fr.keyser.pt.event.CardBuildingLevelChanged;
 import fr.keyser.pt.event.CardDeploymentChanged;
+import fr.keyser.pt.event.CardRefreshInfo;
 import fr.keyser.pt.event.PlayerGoldChanged;
 import fr.keyser.pt.event.PlayerLegendChanged;
 
@@ -257,13 +257,12 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     @Override
     public void endOfDeployPhase() {
-	units().filter(DeployedCard::isInitialDeploy).forEach(dc -> forward(new CardDeploymentChanged(dc, this, true, null)));
 
 	fireEffect(When.DEPLOYEMENT);
 	computeValues();
 	computeDeployGain();
 
-	all().forEach(dc -> forward(new CardAgeRefreshInfo(dc, this)));
+	all().forEach(dc -> forward(new CardRefreshInfo(dc, this)));
     }
 
     CardSlot find(CardPosition position) {
@@ -436,7 +435,9 @@ public final class PlayerBoard implements PlayerBoardContract {
 	    DeployedCard dc = slot.deploy(meta, board.getTurnValue());
 
 	    if (previous != null)
-		forward(new CardDeploymentChanged(previous, this, false, dc));
+		forward(new CardDeploymentChanged(previous, this, false));
+
+	    forward(new CardDeploymentChanged(dc, this, true));
 
 	    model.getToDeploy().remove(meta);
 

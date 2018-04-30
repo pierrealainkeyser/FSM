@@ -4,9 +4,9 @@ import fr.keyser.bus.Bus;
 import fr.keyser.bus.SynchronousBus;
 import fr.keyser.pt.DeployedCard;
 import fr.keyser.pt.event.CardAgeChanged;
-import fr.keyser.pt.event.CardAgeRefreshInfo;
 import fr.keyser.pt.event.CardBuildingLevelChanged;
 import fr.keyser.pt.event.CardDeploymentChanged;
+import fr.keyser.pt.event.CardRefreshInfo;
 import fr.keyser.pt.event.DeployedCardEvent;
 import fr.keyser.pt.event.PlayerEvent;
 import fr.keyser.pt.event.PlayerGoldChanged;
@@ -38,12 +38,17 @@ class BoardViewUpdater implements Bus {
 	bus.listenTo(CardAgeChanged.class, this::cardAgeChanged);
 	bus.listenTo(CardDeploymentChanged.class, this::cardDeployementChanged);
 	bus.listenTo(CardBuildingLevelChanged.class, this::cardBuildingLevelChanged);
-	bus.listenTo(CardAgeRefreshInfo.class, this::cardAgeRefreshInfo);
+	bus.listenTo(CardRefreshInfo.class, this::cardRefreshInfo);
     }
 
-    private void cardAgeRefreshInfo(CardAgeRefreshInfo cari) {
-	CardView card = card(cari);
+    private void cardRefreshInfo(CardRefreshInfo cari) {
 	DeployedCard dc = cari.getCard();
+
+	CardView card = card(cari);
+
+	if (dc.isInitialDeploy())
+	    registerName(cari, card);
+
 	card.setCombat(dc.getCombat());
 	card.setMayCombat(dc.isMayCombat());
     }
@@ -58,29 +63,18 @@ class BoardViewUpdater implements Bus {
 
     private void cardDeployementChanged(CardDeploymentChanged cdc) {
 	CardView card = card(cdc);
-	if (cdc.isDeployed())
-	    registerNewDeployedCard(card, cdc.getCard());
-	else
-	    onRemoval(cdc, card);
-    }
+	if (cdc.isDeployed()) {
+	    boolean samePlayer = cdc.getPlayer().equals(fsm.getUuid());
+	    if (samePlayer)
+		registerName(cdc, card);
 
-    private void onRemoval(CardDeploymentChanged cdc, CardView card) {
-	DeployedCard newCard = cdc.getNewCard();
-	if (newCard == null)
+	    card.setHidden(true);
+	} else
 	    card.setRemoved(true);
-	else {
-	    // swapp and remove
-	    if (cdc.getPlayer().equals(fsm.getUuid()))
-		registerNewDeployedCard(card, newCard);
-	    else
-		card.setHidden(true);
-	}
     }
 
-    private void registerNewDeployedCard(CardView card, DeployedCard dc) {
-	card.setName(dc.getMeta().getName());
-	card.setRemoved(null);
-	card.setHidden(null);
+    private void registerName(DeployedCardEvent dce, CardView card) {
+	card.setName(dce.getCard().getMeta().getName());
     }
 
     private CardView card(DeployedCardEvent dce) {
