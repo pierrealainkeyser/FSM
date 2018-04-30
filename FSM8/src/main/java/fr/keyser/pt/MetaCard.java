@@ -16,6 +16,10 @@ public class MetaCard {
 	this.card = card;
     }
 
+    public String getName() {
+	return card.getName();
+    }
+
     public Card getCard() {
 	return card;
     }

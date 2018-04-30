@@ -1,5 +1,8 @@
 package fr.keyser.pt.fsm;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import fr.keyser.fsm.DelayedEventConsumer;
@@ -10,8 +13,10 @@ import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.CardAction;
+import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.PlayerBoardContract;
+import fr.keyser.pt.TargetedEffectDescription;
 
 public class PlayerBoardFSM {
 
@@ -228,5 +233,13 @@ public class PlayerBoardFSM {
 
     public String getAppearance() {
 	return appearance;
+    }
+
+    public UUID getUuid() {
+	return contract.getUuid();
+    }
+
+    public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
+	return contract.getInputActions();
     }
 }

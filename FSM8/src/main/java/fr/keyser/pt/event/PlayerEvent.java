@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import fr.keyser.pt.PlayerBoard;
 
-abstract class PlayerEvent {
+public abstract class PlayerEvent {
 
     private final UUID player;
 

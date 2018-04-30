@@ -7,12 +7,19 @@ public class CardDeploymentChanged extends DeployedCardEvent {
 
     private final boolean deployed;
 
-    public CardDeploymentChanged(DeployedCard card, PlayerBoard board, boolean deployed) {
+    private final DeployedCard newCard;
+
+    public CardDeploymentChanged(DeployedCard card, PlayerBoard board, boolean deployed, DeployedCard newCard) {
 	super(card, board);
 	this.deployed = deployed;
+	this.newCard = newCard;
     }
 
     public boolean isDeployed() {
 	return deployed;
+    }
+
+    public DeployedCard getNewCard() {
+        return newCard;
     }
 }

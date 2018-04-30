@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import fr.keyser.bus.Bus;
-import fr.keyser.bus.Bus.Suscription;
+import fr.keyser.bus.SynchronousBus;
+import fr.keyser.bus.SynchronousBus.Suscription;
 import fr.keyser.pt.CardPosition.Position;
 
 public class BoardBuilder {
@@ -83,13 +84,13 @@ public class BoardBuilder {
 	}
     }
 
-    private final Bus bus = new Bus();
+    private final SynchronousBus synchronousBus = new SynchronousBus();
 
     private final MetaCardBuilder cardBuilder = new MetaCardBuilder();
 
     private final MetaDeck deck = new MetaDeck();
 
-    private final Board board = new Board(bus, deck);
+    private final Board board = new Board(synchronousBus, deck);
 
     public PlayerBuilder player() {
 	return new PlayerBuilder();
@@ -100,11 +101,11 @@ public class BoardBuilder {
     }
 
     public Bus getBus() {
-	return bus;
+	return synchronousBus;
     }
 
     public <T> Suscription listenTo(Class<T> type, Consumer<? extends T> consumer) {
-	return bus.listenTo(type, consumer);
+	return synchronousBus.listenTo(type, consumer);
     }
 
     public Board getBoard() {

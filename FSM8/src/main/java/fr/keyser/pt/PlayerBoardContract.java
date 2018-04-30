@@ -1,5 +1,7 @@
 package fr.keyser.pt;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface PlayerBoardContract {
@@ -33,4 +35,6 @@ public interface PlayerBoardContract {
     void endAgePhase();
 
     void goldPhase();
+
+    Map<CardPosition, List<TargetedEffectDescription>> getInputActions();
 }

@@ -13,6 +13,8 @@ public class NotifyShiftShapeEffect implements SpecialEffect {
 
     @Override
     public void apply(DeployedCard card) {
+	card.clearShapeShifted();
 	card.doAge();
+
     }
 }

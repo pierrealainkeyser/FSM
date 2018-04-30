@@ -2,26 +2,23 @@ package fr.keyser.pt.event;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.DeployedCard;
-import fr.keyser.pt.MetaCard;
 import fr.keyser.pt.PlayerBoard;
 
-abstract class DeployedCardEvent extends PlayerEvent {
-    private final CardPosition position;
+public abstract class DeployedCardEvent extends PlayerEvent {
 
-    private final MetaCard meta;
+    private final DeployedCard card;
 
     protected DeployedCardEvent(DeployedCard card, PlayerBoard board) {
 	super(board);
-	position = card.getPosition();
-	meta = card.getMeta();
-
+	this.card = card;
     }
 
     public CardPosition getPosition() {
-	return position;
+	return card.getPosition();
     }
 
-    public MetaCard getMeta() {
-	return meta;
+    public DeployedCard getCard() {
+	return card;
     }
+
 }

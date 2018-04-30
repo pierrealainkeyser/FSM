@@ -18,6 +18,7 @@ import fr.keyser.pt.BuildingConstruction.BuildType;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.SpecialEffectScope.When;
 import fr.keyser.pt.event.CardAgeChanged;
+import fr.keyser.pt.event.CardAgeRefreshInfo;
 import fr.keyser.pt.event.CardBuildingLevelChanged;
 import fr.keyser.pt.event.CardDeploymentChanged;
 import fr.keyser.pt.event.PlayerGoldChanged;
@@ -256,9 +257,13 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     @Override
     public void endOfDeployPhase() {
+	units().filter(DeployedCard::isInitialDeploy).forEach(dc -> forward(new CardDeploymentChanged(dc, this, true, null)));
+
 	fireEffect(When.DEPLOYEMENT);
 	computeValues();
 	computeDeployGain();
+
+	all().forEach(dc -> forward(new CardAgeRefreshInfo(dc, this)));
     }
 
     CardSlot find(CardPosition position) {
@@ -329,6 +334,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return all().map(DeployedCard::getInfo).collect(Collectors.toList());
     }
 
+    @Override
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
 	return model.getInputActions();
     }
@@ -422,13 +428,15 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	    CardSlot slot = find(action.getTarget());
 
-	    slot.getCard().ifPresent(m -> {
-		board.moveToDiscard(m.getMeta());
-		forward(new CardDeploymentChanged(m, this, false));
-	    });
+	    DeployedCard previous = slot.getCard().orElse(null);
+
+	    if (previous != null)
+		board.moveToDiscard(previous.getMeta());
 
 	    DeployedCard dc = slot.deploy(meta, board.getTurnValue());
-	    forward(new CardDeploymentChanged(dc, this, true));
+
+	    if (previous != null)
+		forward(new CardDeploymentChanged(previous, this, false, dc));
 
 	    model.getToDeploy().remove(meta);
 
@@ -455,7 +463,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	DeployedCard dc = slot.redeploy(unit);
 	dc.shapeShifted();
-	forward(new CardDeploymentChanged(dc, this, true));
     }
 
     void registerAsyncEffect(Stream<DeployedCard> cards, When when) {

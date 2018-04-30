@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fr.keyser.bus.Bus;
+import fr.keyser.bus.NoopBus;
 
 public class Board implements BoardContract {
 
@@ -25,11 +26,11 @@ public class Board implements BoardContract {
     private Bus bus;
 
     public Board(MetaDeck deck) {
-	this(new Bus(), deck);
+	this(new NoopBus(), deck);
     }
 
-    public Board(Bus bus, MetaDeck deck) {
-	this.bus = bus;
+    public Board(Bus synchronousBus, MetaDeck deck) {
+	this.bus = synchronousBus;
 	this.deck = deck;
     }
 

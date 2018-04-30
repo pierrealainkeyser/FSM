@@ -12,7 +12,7 @@ public class DeployedCard implements InstalledCardBuildPlanner {
     public static final SpecialEffectScope AGING = new SpecialEffectScope(0, When.AGING);
 
     public static final SpecialEffectScope DEPLOY_LAST = new SpecialEffectScope(3, When.DEPLOYEMENT);
-    
+
     public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(2, When.DEPLOYEMENT);
 
     public static final SpecialEffectScope PLAY = new SpecialEffectScope(0, When.ON_PLAY);
@@ -63,6 +63,10 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     void shapeShifted() {
 	model.setShapeShifted(true);
+    }
+
+    public void clearShapeShifted() {
+	model.setShapeShifted(false);
     }
 
     DeployedCard withMeta(MetaCard meta) {
