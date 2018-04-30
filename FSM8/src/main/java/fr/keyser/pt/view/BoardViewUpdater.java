@@ -80,6 +80,8 @@ public class BoardViewUpdater {
 
     private void registerNewDeployedCard(CardView card, DeployedCard dc) {
 	card.setName(dc.getMeta().getName());
+	card.setRemoved(null);
+	card.setHidden(null);
     }
 
     private CardView card(DeployedCardEvent dce) {
