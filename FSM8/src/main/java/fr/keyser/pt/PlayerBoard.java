@@ -126,6 +126,7 @@ public final class PlayerBoard implements PlayerBoardContract {
     void doRefresh() {
 	all().forEach(dc -> forward(new CardDeploymentChanged(dc, this, true)));
 	buildings().forEach(this::buildingHasChanged);
+	units().forEach(this::cardHasAged);
 	all().forEach(dc -> forward(new CardRefreshInfo(dc, this)));
 
 	forward(new PlayerGoldChanged(this, getGold()));

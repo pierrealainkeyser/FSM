@@ -29,6 +29,23 @@ public class BoardViewsBuilderHub {
 	return players.stream().filter(p -> p.getUUID().equals(player)).findFirst();
     }
 
+    public BoardView refresh(UUID player) {
+	Optional<PlayerBoardAcces> matching = findMatching(player);
+	if (matching.isPresent()) {
+	    try {
+		BoardViewUpdater delegated = new BoardViewUpdater(matching.get());
+		bus.setDelegated(delegated);
+
+		matching.get().refresh();
+
+		return delegated.getView();
+	    } finally {
+		bus.setDelegated(null);
+	    }
+	} else
+	    return null;
+    }
+
     public List<BoardView> receive(UUID player, Object input) {
 	Optional<PlayerBoardAcces> matching = findMatching(player);
 	if (matching.isPresent()) {
