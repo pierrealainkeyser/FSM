@@ -5,22 +5,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import fr.keyser.pt.BuildingConstruction;
 import fr.keyser.pt.CardPosition;
+import fr.keyser.pt.MetaCard;
 import fr.keyser.pt.TargetedEffectDescription;
 
 public class BoardView {
 
     private String appeareance;
 
+    private List<BuildingConstruction> buildPlan;
+
     private Map<CardPosition, List<TargetedEffectDescription>> inputActions;
+
+    private final UUID local;
 
     private String phase;
 
     private Map<UUID, PlayerBoardView> players;
 
-    private Integer turn;
+    private List<MetaCard> toDeploy;
 
-    private final UUID local;
+    private List<MetaCard> toDraft;
+
+    private Integer turn;
 
     public BoardView(UUID local) {
 	this.local = local;
@@ -31,8 +39,16 @@ public class BoardView {
 	return appeareance;
     }
 
+    public List<BuildingConstruction> getBuildPlan() {
+	return buildPlan;
+    }
+
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
 	return inputActions;
+    }
+
+    public UUID getLocal() {
+	return local;
     }
 
     public String getPhase() {
@@ -46,7 +62,7 @@ public class BoardView {
 	if (players.containsKey(uuid))
 	    return players.get(uuid);
 	else {
-	    PlayerBoardView pbv = new PlayerBoardView(uuid);
+	    PlayerBoardView pbv = new PlayerBoardView();
 	    players.put(uuid, pbv);
 	    return pbv;
 	}
@@ -56,12 +72,24 @@ public class BoardView {
 	return players;
     }
 
+    public List<MetaCard> getToDeploy() {
+	return toDeploy;
+    }
+
+    public List<MetaCard> getToDraft() {
+	return toDraft;
+    }
+
     public Integer getTurn() {
 	return turn;
     }
 
     public void setAppeareance(String appeareance) {
 	this.appeareance = appeareance;
+    }
+
+    public void setBuildPlan(List<BuildingConstruction> buildPlan) {
+	this.buildPlan = buildPlan;
     }
 
     public void setInputActions(Map<CardPosition, List<TargetedEffectDescription>> inputActions) {
@@ -76,11 +104,15 @@ public class BoardView {
 	this.players = players;
     }
 
-    public void setTurn(Integer turn) {
-	this.turn = turn;
+    public void setToDeploy(List<MetaCard> toDeploy) {
+	this.toDeploy = toDeploy;
     }
 
-    public UUID getLocal() {
-        return local;
+    public void setToDraft(List<MetaCard> toDraft) {
+	this.toDraft = toDraft;
+    }
+
+    public void setTurn(Integer turn) {
+	this.turn = turn;
     }
 }

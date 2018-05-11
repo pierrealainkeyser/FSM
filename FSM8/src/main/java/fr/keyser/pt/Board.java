@@ -163,12 +163,18 @@ public class Board implements BoardContract {
 	return wins;
     }
 
-    void forward(Object event) {
+    @Override
+    public void forward(Object event) {
 	bus.forward(event);
     }
 
     List<MetaCard> getBuildings() {
 	return deck.getBuildings();
+    }
+
+    @Override
+    public int getTurn() {
+	return turn.getTurn();
     }
 
 }

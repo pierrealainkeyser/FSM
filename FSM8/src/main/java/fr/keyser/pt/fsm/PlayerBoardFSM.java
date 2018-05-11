@@ -17,6 +17,10 @@ import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.PlayerBoardContract;
 import fr.keyser.pt.TargetedEffectDescription;
+import fr.keyser.pt.event.PlayerBuildPlanEvent;
+import fr.keyser.pt.event.PlayerDoDeployEvent;
+import fr.keyser.pt.event.PlayerDoDraftEvent;
+import fr.keyser.pt.event.PlayerIdleEvent;
 
 public class PlayerBoardFSM implements PlayerBoardAcces {
 
@@ -156,7 +160,21 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
 	return () -> {
 	    this.expectedInput = expectedInput;
 	    this.appearance = appearance;
+
+	    fireStatusEvent();
 	};
+    }
+
+    public void fireStatusEvent() {
+	UUID uuid = getUUID();
+	boardFSM.forward(new PlayerIdleEvent(uuid, expectedInput == null));
+	if (DoDeployCardCommand.class.equals(expectedInput)) {
+	    boardFSM.forward(new PlayerDoDeployEvent(uuid, contract.getToDeploy()));
+	} else if (BuildCommand.class.equals(expectedInput)) {
+	    boardFSM.forward(new PlayerBuildPlanEvent(uuid, contract.getBuildPlan()));
+	} else if (DraftCommand.class.equals(expectedInput)) {
+	    boardFSM.forward(new PlayerDoDraftEvent(uuid, contract.getToDraft()));
+	}
     }
 
     public Class<?> getExpectedInput() {
@@ -241,6 +259,8 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     public void refresh() {
 	contract.refresh();
 
+	// gestion de l'état d'activité
+	boardFSM.refresh();
     }
 
     @Override
@@ -251,5 +271,15 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     @Override
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
 	return contract.getInputActions();
+    }
+
+    @Override
+    public int getTurn() {
+	return boardFSM.getTurn();
+    }
+
+    @Override
+    public String getPhase() {
+	return boardFSM.getPhase();
     }
 }

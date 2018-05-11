@@ -3,7 +3,6 @@ package fr.keyser.pt.view;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import fr.keyser.pt.CardPosition;
 
@@ -11,15 +10,11 @@ public class PlayerBoardView {
 
     private List<CardView> cards;
 
-    private final UUID uuid;
-
     private Integer score;
 
     private Integer gold;
 
-    public PlayerBoardView(UUID uuid) {
-	this.uuid = uuid;
-    }
+    private Boolean idle;
 
     public List<CardView> getCards() {
 	return cards;
@@ -55,8 +50,12 @@ public class PlayerBoardView {
 	this.gold = gold;
     }
 
-    public UUID getUuid() {
-	return uuid;
+    public Boolean getIdle() {
+	return idle;
+    }
+
+    public void setIdle(Boolean idle) {
+	this.idle = idle;
     }
 
 }

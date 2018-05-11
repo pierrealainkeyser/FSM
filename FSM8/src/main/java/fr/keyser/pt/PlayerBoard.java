@@ -349,11 +349,22 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     @Override
+    public List<BuildingConstruction> getBuildPlan() {
+	return model.getBuildPlan();
+    }
+
+    @Override
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
 	return model.getInputActions();
     }
+    
+    @Override
+    public List<MetaCard> getToDeploy() {
+ 	return model.getToDeploy();
+     }
 
-    List<MetaCard> getToDraft() {
+    @Override
+    public List<MetaCard> getToDraft() {
 	return model.getToDraft();
     }
 

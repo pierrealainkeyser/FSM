@@ -44,4 +44,14 @@ public class DefaultPlayerBoardAcces implements PlayerBoardAcces {
     public void refresh() {
 
     }
+
+    @Override
+    public int getTurn() {
+	return 0;
+    }
+
+    @Override
+    public String getPhase() {
+	return null;
+    }
 }

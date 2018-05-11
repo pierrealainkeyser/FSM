@@ -14,9 +14,9 @@ public class BoardViewsBuilderHub {
 
     private final PluggableBus bus;
 
-    private final List<PlayerBoardAcces> players;
+    private final List<? extends PlayerBoardAcces> players;
 
-    public BoardViewsBuilderHub(PluggableBus bus, List<PlayerBoardAcces> players) {
+    public BoardViewsBuilderHub(PluggableBus bus, List<? extends PlayerBoardAcces> players) {
 	this.bus = bus;
 	this.players = players;
     }
@@ -25,12 +25,12 @@ public class BoardViewsBuilderHub {
 	return players.stream().map(BoardViewUpdater::new).collect(toList());
     }
 
-    private Optional<PlayerBoardAcces> findMatching(UUID player) {
+    private Optional<? extends PlayerBoardAcces> findMatching(UUID player) {
 	return players.stream().filter(p -> p.getUUID().equals(player)).findFirst();
     }
 
     public BoardView refresh(UUID player) {
-	Optional<PlayerBoardAcces> matching = findMatching(player);
+	Optional<? extends PlayerBoardAcces> matching = findMatching(player);
 	if (matching.isPresent()) {
 	    try {
 		BoardViewUpdater delegated = new BoardViewUpdater(matching.get());
@@ -47,7 +47,7 @@ public class BoardViewsBuilderHub {
     }
 
     public List<BoardView> receive(UUID player, Object input) {
-	Optional<PlayerBoardAcces> matching = findMatching(player);
+	Optional<? extends PlayerBoardAcces> matching = findMatching(player);
 	if (matching.isPresent()) {
 	    try {
 		List<BoardViewUpdater> delegateds = updaters();

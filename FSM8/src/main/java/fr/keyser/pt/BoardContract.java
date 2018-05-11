@@ -2,7 +2,11 @@ package fr.keyser.pt;
 
 import java.util.stream.Stream;
 
-public interface BoardContract {
+import fr.keyser.bus.Bus;
+
+public interface BoardContract extends Bus {
+
+    int getTurn();
 
     void distributeCards();
 

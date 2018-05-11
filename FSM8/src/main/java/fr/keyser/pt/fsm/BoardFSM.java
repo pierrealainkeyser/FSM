@@ -165,4 +165,17 @@ public class BoardFSM {
     public String getPhase() {
 	return phase;
     }
+
+    int getTurn() {
+	return contract.getTurn();
+    }
+
+    void forward(Object event) {
+	contract.forward(event);
+    }
+
+    public void refresh() {
+	players.forEach(PlayerBoardFSM::fireStatusEvent);
+
+    }
 }

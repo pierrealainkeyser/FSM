@@ -9,6 +9,10 @@ import fr.keyser.pt.TargetedEffectDescription;
 
 public interface PlayerBoardAcces {
 
+    int getTurn();
+
+    String getPhase();
+
     String getAppearance();
 
     UUID getUUID();
@@ -18,5 +22,4 @@ public interface PlayerBoardAcces {
     void receiveInput(Object input);
 
     void refresh();
-
 }

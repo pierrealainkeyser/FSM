@@ -8,6 +8,10 @@ public abstract class PlayerEvent {
 
     private final UUID player;
 
+    public PlayerEvent(UUID player) {
+	this.player = player;
+    }
+
     public PlayerEvent(PlayerBoard board) {
 	this.player = board.getUUID();
     }
