@@ -1,7 +1,5 @@
 package fr.keyser.pt.fsm;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -13,14 +11,14 @@ import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.CardAction;
-import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.PlayerBoardContract;
-import fr.keyser.pt.TargetedEffectDescription;
+import fr.keyser.pt.event.PlayerAppearanceEvent;
 import fr.keyser.pt.event.PlayerBuildPlanEvent;
 import fr.keyser.pt.event.PlayerDoDeployEvent;
 import fr.keyser.pt.event.PlayerDoDraftEvent;
 import fr.keyser.pt.event.PlayerIdleEvent;
+import fr.keyser.pt.event.PlayerInputActionEvent;
 
 public class PlayerBoardFSM implements PlayerBoardAcces {
 
@@ -123,8 +121,10 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     public void conditionalInputProcessing(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> waitingEffect,
             StateBuilder<String, PlayerEvent> done) {
 	waitingEffect.onEntry(() -> {
-	    if (!contract.hasInputActions()) {
+	    if (!contract.hasInputActions())
 		ec.push(PlayerEvent.SKIP);
+	    else {
+		fireInputActions();
 	    }
 	}).transition(PlayerEvent.SKIP, done);
 
@@ -133,6 +133,10 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
 	        .transition(PlayerEvent.RECEIVE_INPUT, done)
 	        .guard(this::validateArgs)
 	        .onTransition(withArgs(this::processInput));
+    }
+
+    private void fireInputActions() {
+	boardFSM.forward(new PlayerInputActionEvent(contract.getUUID(), contract.getInputActions()));
     }
 
     private void waitDeploy(DelayedEventConsumer<String, PlayerEvent> ec, StateBuilder<String, PlayerEvent> deploy,
@@ -165,7 +169,12 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
 	};
     }
 
-    public void fireStatusEvent() {
+    public void fireEvents() {
+	fireStatusEvent();
+	fireInputActions();
+    }
+
+    private void fireStatusEvent() {
 	UUID uuid = getUUID();
 	boardFSM.forward(new PlayerIdleEvent(uuid, expectedInput == null));
 	if (DoDeployCardCommand.class.equals(expectedInput)) {
@@ -175,6 +184,8 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
 	} else if (DraftCommand.class.equals(expectedInput)) {
 	    boardFSM.forward(new PlayerDoDraftEvent(uuid, contract.getToDraft()));
 	}
+
+	boardFSM.forward(new PlayerAppearanceEvent(uuid, appearance));
     }
 
     public Class<?> getExpectedInput() {
@@ -251,11 +262,6 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     }
 
     @Override
-    public String getAppearance() {
-	return appearance;
-    }
-
-    @Override
     public void refresh() {
 	contract.refresh();
 
@@ -266,20 +272,5 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     @Override
     public UUID getUUID() {
 	return contract.getUUID();
-    }
-
-    @Override
-    public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
-	return contract.getInputActions();
-    }
-
-    @Override
-    public int getTurn() {
-	return boardFSM.getTurn();
-    }
-
-    @Override
-    public String getPhase() {
-	return boardFSM.getPhase();
     }
 }

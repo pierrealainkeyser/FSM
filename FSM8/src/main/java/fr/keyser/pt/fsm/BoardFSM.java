@@ -11,6 +11,8 @@ import fr.keyser.fsm.StateMachine;
 import fr.keyser.fsm.StateMachineBuilder;
 import fr.keyser.fsm.StateMachineBuilder.StateBuilder;
 import fr.keyser.pt.BoardContract;
+import fr.keyser.pt.event.PhaseEvent;
+import fr.keyser.pt.event.TurnEvent;
 
 public class BoardFSM {
 
@@ -89,13 +91,30 @@ public class BoardFSM {
 		ec.push(BoardEvent.NEXT);
 	});
 	checkEOG.transition(BoardEvent.NEXT, turn)
-	        .onTransition(this.contract::newTurn);
+	        .onTransition(this::newTurn);
 
 	this.stateMachine = builder.build();
     }
 
+    private void newTurn() {
+	this.contract.newTurn();
+	fireTurnEvent();
+    }
+
     private SimpleAction phase(String phase) {
-	return () -> this.phase = phase;
+	return () -> {
+	    this.phase = phase;
+	    firePhaseEvent();
+	};
+    }
+
+    /**
+     * JUnit only
+     * 
+     * @return the current phase
+     */
+    public String getPhase() {
+	return phase;
     }
 
     public void start() {
@@ -162,20 +181,24 @@ public class BoardFSM {
 	return Collections.unmodifiableList(players);
     }
 
-    public String getPhase() {
-	return phase;
-    }
-
-    int getTurn() {
-	return contract.getTurn();
-    }
-
     void forward(Object event) {
 	contract.forward(event);
     }
 
     public void refresh() {
-	players.forEach(PlayerBoardFSM::fireStatusEvent);
 
+	firePhaseEvent();
+	fireTurnEvent();
+
+	players.forEach(PlayerBoardFSM::fireEvents);
+
+    }
+
+    private void firePhaseEvent() {
+	forward(new PhaseEvent(phase));
+    }
+
+    private void fireTurnEvent() {
+	forward(new TurnEvent(contract.getTurn()));
     }
 }

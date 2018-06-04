@@ -95,9 +95,6 @@ public class TestBoardViewsBuilderHub {
 	BoardView newView = views.stream().filter(v -> v.getLocal().equals(u0)).findFirst().get();
 	Assertions.assertNull(newView.getAppeareance());
 	Assertions.assertNull(newView.getToDraft());
-	Assertions.assertEquals(1, (int) newView.getTurn());
-	Assertions.assertEquals(BoardFSM.DRAFT, newView.getPhase());
-
     }
 
 }

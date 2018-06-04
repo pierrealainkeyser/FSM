@@ -3,6 +3,7 @@ package fr.keyser.pt.view;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,7 +56,7 @@ public class BoardViewsBuilderHub {
 
 		matching.get().receiveInput(input);
 
-		return delegateds.stream().map(BoardViewUpdater::getView).collect(toList());
+		return delegateds.stream().map(BoardViewUpdater::getView).filter(Objects::nonNull).collect(toList());
 	    } finally {
 		bus.setDelegated(null);
 	    }
