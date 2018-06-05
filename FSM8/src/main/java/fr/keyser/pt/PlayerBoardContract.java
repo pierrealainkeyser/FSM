@@ -39,10 +39,4 @@ public interface PlayerBoardContract {
     Map<CardPosition, List<TargetedEffectDescription>> getInputActions();
 
     void refresh();
-
-    List<BuildingConstruction> getBuildPlan();
-
-    List<MetaCard> getToDeploy();
-
-    List<MetaCard> getToDraft();
 }

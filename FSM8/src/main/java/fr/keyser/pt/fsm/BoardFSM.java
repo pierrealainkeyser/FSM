@@ -140,6 +140,7 @@ public class BoardFSM {
 	    StateBuilder<String, BoardEvent> next = to;
 	    boolean notLast = i < count - 1;
 	    StateBuilder<String, BoardEvent> currentSub = buildingSub.get(i);
+	    currentSub.onExit(this::passCardsToNext);
 	    if (notLast) {
 		next = buildingSub.get(i + 1);
 		currentSub.onExit(() -> players.forEach(PlayerBoardFSM::loop));
@@ -148,7 +149,7 @@ public class BoardFSM {
 	    StateBuilder<String, BoardEvent> current = currentSub;
 	    chainedSubByPlayers(current, next);
 
-	    current.onExit(this::passCardsToNext);
+	
 	    if (!notLast)
 		current.onExit(this::nextPhase);
 	}

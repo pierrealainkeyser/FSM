@@ -11,7 +11,7 @@ import fr.keyser.bus.BroadcastingBus;
 import fr.keyser.bus.PluggableBus;
 import fr.keyser.pt.fsm.PlayerBoardAcces;
 
-public class BoardViewsBuilderHub {
+class BoardViewsBuilderHub {
 
     private final PluggableBus bus;
 

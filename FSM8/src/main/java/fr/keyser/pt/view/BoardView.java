@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import fr.keyser.pt.BuildingConstruction;
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.MetaCard;
@@ -47,6 +49,7 @@ public class BoardView {
 	return inputActions;
     }
 
+    @JsonIgnore
     public UUID getLocal() {
 	return local;
     }

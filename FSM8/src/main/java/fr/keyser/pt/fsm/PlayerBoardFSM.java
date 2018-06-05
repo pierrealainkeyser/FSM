@@ -14,9 +14,6 @@ import fr.keyser.pt.CardAction;
 import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.PlayerBoardContract;
 import fr.keyser.pt.event.PlayerAppearanceEvent;
-import fr.keyser.pt.event.PlayerBuildPlanEvent;
-import fr.keyser.pt.event.PlayerDoDeployEvent;
-import fr.keyser.pt.event.PlayerDoDraftEvent;
 import fr.keyser.pt.event.PlayerIdleEvent;
 import fr.keyser.pt.event.PlayerInputActionEvent;
 
@@ -177,15 +174,7 @@ public class PlayerBoardFSM implements PlayerBoardAcces {
     private void fireStatusEvent() {
 	UUID uuid = getUUID();
 	boardFSM.forward(new PlayerIdleEvent(uuid, expectedInput == null));
-	if (DoDeployCardCommand.class.equals(expectedInput)) {
-	    boardFSM.forward(new PlayerDoDeployEvent(uuid, contract.getToDeploy()));
-	} else if (BuildCommand.class.equals(expectedInput)) {
-	    boardFSM.forward(new PlayerBuildPlanEvent(uuid, contract.getBuildPlan()));
-	} else if (DraftCommand.class.equals(expectedInput)) {
-	    boardFSM.forward(new PlayerDoDraftEvent(uuid, contract.getToDraft()));
-	}
-
-	boardFSM.forward(new PlayerAppearanceEvent(uuid, appearance));
+	boardFSM.forward(new PlayerAppearanceEvent(getUUID(), appearance));
     }
 
     public Class<?> getExpectedInput() {

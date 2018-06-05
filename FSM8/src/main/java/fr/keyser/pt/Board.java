@@ -14,7 +14,8 @@ public class Board implements BoardContract {
     private static <T> T next(List<T> input, int current, int direction) {
 	int size = input.size();
 	int directionMod = direction % size;
-	return input.get((size + current + directionMod) % size);
+	int index = (size + current + directionMod) % size;
+	return input.get(index);
     }
 
     private final MetaDeck deck;
@@ -117,8 +118,12 @@ public class Board implements BoardContract {
 
 	List<List<MetaCard>> toDraft = players.stream().map(PlayerBoard::getToDraft).collect(Collectors.toList());
 
-	for (int i = 0; i < players.size(); ++i)
-	    players.get(i).setToDraft(next(toDraft, i, direction));
+	for (int i = 0; i < players.size(); ++i) {
+	    PlayerBoard p = players.get(i);
+	    List<MetaCard> next = next(toDraft, i, direction);	    
+	    p.setToDraft(next);
+	    
+	}
     }
 
     @Override

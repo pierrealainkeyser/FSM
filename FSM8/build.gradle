@@ -16,7 +16,8 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencies {
 	compile(
-	   	'org.springframework.boot:spring-boot-starter'
+	   	'org.springframework.boot:spring-boot-starter',
+	   	'org.springframework.boot:spring-boot-starter-websocket'
 	)
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.1.0'

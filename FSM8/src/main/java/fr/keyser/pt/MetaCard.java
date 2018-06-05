@@ -2,8 +2,11 @@ package fr.keyser.pt;
 
 import java.util.function.Predicate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class MetaCard {
 
+  
     private Card card;
 
     private int id;
@@ -20,6 +23,7 @@ public class MetaCard {
 	return card.getName();
     }
 
+    @JsonIgnore
     public Card getCard() {
 	return card;
     }

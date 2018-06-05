@@ -125,7 +125,7 @@ class BoardViewUpdater implements Bus {
     }
 
     private void playerDoDraftChanged(PlayerDoDraftEvent evt) {
-	if (samePlayer(evt))
+	if (samePlayer(evt)) 
 	    view().setToDraft(evt.getToDraft());
     }
 
@@ -143,7 +143,7 @@ class BoardViewUpdater implements Bus {
     }
 
     private void playerLegendChanged(PlayerLegendChanged plc) {
-	player(plc).setGold(plc.getLegend());
+	player(plc).setScore(plc.getLegend());
     }
 
     private void registerName(DeployedCardEvent dce, CardView card) {

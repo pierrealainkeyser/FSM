@@ -21,6 +21,9 @@ import fr.keyser.pt.event.CardAgeChanged;
 import fr.keyser.pt.event.CardBuildingLevelChanged;
 import fr.keyser.pt.event.CardDeploymentChanged;
 import fr.keyser.pt.event.CardRefreshInfo;
+import fr.keyser.pt.event.PlayerBuildPlanEvent;
+import fr.keyser.pt.event.PlayerDoDeployEvent;
+import fr.keyser.pt.event.PlayerDoDraftEvent;
 import fr.keyser.pt.event.PlayerGoldChanged;
 import fr.keyser.pt.event.PlayerLegendChanged;
 
@@ -131,6 +134,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 
 	forward(new PlayerGoldChanged(this, getGold()));
 	forward(new PlayerLegendChanged(this, getLegend()));
+
+	forward(new PlayerDoDeployEvent(uuid, model.getToDeploy()));
+	forward(new PlayerBuildPlanEvent(uuid, model.getBuildPlan()));
+	forward(new PlayerDoDraftEvent(uuid, model.getToDraft()));
     }
 
     @Override
@@ -349,22 +356,14 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     @Override
-    public List<BuildingConstruction> getBuildPlan() {
-	return model.getBuildPlan();
-    }
-
-    @Override
     public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
-	return model.getInputActions();
+	Map<CardPosition, List<TargetedEffectDescription>> inputActions = model.getInputActions();
+	if (inputActions.isEmpty())
+	    return null;
+	return inputActions;
     }
-    
-    @Override
-    public List<MetaCard> getToDeploy() {
- 	return model.getToDeploy();
-     }
 
-    @Override
-    public List<MetaCard> getToDraft() {
+    List<MetaCard> getToDraft() {
 	return model.getToDraft();
     }
 
@@ -483,6 +482,8 @@ public final class PlayerBoard implements PlayerBoardContract {
     public void processDraft(int id) {
 	List<MetaCard> toDeploy = model.getToDeploy();
 	removeDrafted(id, toDeploy::add);
+
+	forward(new PlayerDoDeployEvent(uuid, toDeploy));
     }
 
     public void redeploy(MetaCard unit, CardPosition position) {
@@ -527,6 +528,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     void setToDraft(List<MetaCard> toDraft) {
 	model.setToDraft(toDraft);
+
+	forward(new PlayerDoDraftEvent(uuid, toDraft));
     }
 
     void setVictoriousWar(int victoriousWar) {
