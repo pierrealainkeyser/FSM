@@ -112,6 +112,12 @@ public class Board implements BoardContract {
     }
 
     @Override
+    public void acquireLastDraft() {
+	players.forEach(PlayerBoard::acquireLastDraft);
+
+    }
+
+    @Override
     public void passCardsToNext() {
 	boolean even = turn.getTurn() % 2 == 0;
 	int direction = even ? 1 : -1;
@@ -120,9 +126,9 @@ public class Board implements BoardContract {
 
 	for (int i = 0; i < players.size(); ++i) {
 	    PlayerBoard p = players.get(i);
-	    List<MetaCard> next = next(toDraft, i, direction);	    
+	    List<MetaCard> next = next(toDraft, i, direction);
 	    p.setToDraft(next);
-	    
+
 	}
     }
 

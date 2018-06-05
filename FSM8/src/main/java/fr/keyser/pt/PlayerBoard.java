@@ -517,6 +517,16 @@ public final class PlayerBoard implements PlayerBoardContract {
 	}
     }
 
+    void acquireLastDraft() {
+	List<MetaCard> toDraft = model.getToDraft();
+	List<MetaCard> toDeploy = model.getToDeploy();
+
+	toDeploy.addAll(toDraft);
+	toDraft.clear();
+
+	forward(new PlayerDoDeployEvent(uuid, toDeploy));
+    }
+
     void resetCounters() {
 	counters = new PlayerCounters();
 	all().forEach(DeployedCard::resetCounters);
@@ -553,4 +563,5 @@ public final class PlayerBoard implements PlayerBoardContract {
     public int getLegend() {
 	return model.getLegend();
     }
+
 }

@@ -79,12 +79,13 @@ public class TestGameHub {
 	TracerEndpoint e0 = new TracerEndpoint(hub, players.get(0).getUUID());
 	TracerEndpoint e1 = new TracerEndpoint(hub, players.get(1).getUUID());
 
-	List<MetaCard> toDraft0 = e0.getView().getToDraft();
-	List<MetaCard> toDraft1 = e1.getView().getToDraft();
-	
-	e0.receive(new DraftCommand(toDraft0.get(0), toDraft0.get(1)));
-	e1.receive(new DraftCommand(toDraft1.get(0), toDraft1.get(1)));
+	for (int i = 0; i < 4; ++i) {
+	    List<MetaCard> toDraft0 = e0.getView().getToDraft();
+	    List<MetaCard> toDraft1 = e1.getView().getToDraft();
 
+	    e0.receive(new DraftCommand(toDraft0.get(0), toDraft0.get(1)));
+	    e1.receive(new DraftCommand(toDraft1.get(0), toDraft1.get(1)));
+	}
 
     }
 

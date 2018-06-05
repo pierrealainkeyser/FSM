@@ -12,6 +12,8 @@ public interface BoardContract extends Bus {
 
     void passCardsToNext();
 
+    void acquireLastDraft();
+
     void resetCounters();
 
     void newTurn();

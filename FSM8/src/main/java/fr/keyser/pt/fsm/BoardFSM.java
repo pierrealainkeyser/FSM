@@ -77,7 +77,9 @@ public class BoardFSM {
 	turn.onEntry(this.contract::resetCounters);
 
 	draft.onEntry(this::distributeAndWaitCard);
+	deploy.onEntry(this::acquireLastDraft);
 	deploy.onEntry(this::nextPhase);
+	
 	war.onEntry(this::nextPhase)
 	        .onEntry(this.contract::warPhase);
 	gold.onEntry(this::nextPhase);
@@ -139,17 +141,15 @@ public class BoardFSM {
 	for (int i = 0; i < count; ++i) {
 	    StateBuilder<String, BoardEvent> next = to;
 	    boolean notLast = i < count - 1;
-	    StateBuilder<String, BoardEvent> currentSub = buildingSub.get(i);
-	    currentSub.onExit(this::passCardsToNext);
+	    StateBuilder<String, BoardEvent> current = buildingSub.get(i);
+	    current.onExit(this::passCardsToNext);
 	    if (notLast) {
 		next = buildingSub.get(i + 1);
-		currentSub.onExit(() -> players.forEach(PlayerBoardFSM::loop));
+		current.onExit(() -> players.forEach(PlayerBoardFSM::loop));
 	    }
 
-	    StateBuilder<String, BoardEvent> current = currentSub;
 	    chainedSubByPlayers(current, next);
 
-	
 	    if (!notLast)
 		current.onExit(this::nextPhase);
 	}
@@ -157,6 +157,10 @@ public class BoardFSM {
 
     private void passCardsToNext() {
 	this.contract.passCardsToNext();
+    }
+
+    private void acquireLastDraft() {
+	this.contract.acquireLastDraft();
     }
 
     private void chainedSubByPlayers(StateBuilder<String, BoardEvent> from, StateBuilder<String, BoardEvent> to) {
