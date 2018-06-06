@@ -147,7 +147,7 @@ public class TestPlayerBoard {
 
 	Assertions.assertEquals(1, p0.getInputActions().size());
 	p0.processCardAction(new CardAction(front1, DropAgeTokenEffect.DROP_AGE, front0));
-	Assertions.assertEquals(0, p0.getInputActions().size());
+	Assertions.assertNull(p0.getInputActions());
 	p0.endOfDeployPhase();
 
 	Assertions.assertEquals(4, u.getCombat());
@@ -180,7 +180,7 @@ public class TestPlayerBoard {
 
 	Assertions.assertEquals(1, p0.getInputActions().size());
 	p0.processCardAction(new CardAction(front0, DropAgeTokenEffect.DROP_AGE, front0));
-	Assertions.assertEquals(0, p0.getInputActions().size());
+	Assertions.assertNull(p0.getInputActions());
 	p0.endOfDeployPhase();
 
 	Assertions.assertEquals(3, alchimistCard.getAgeToken());
