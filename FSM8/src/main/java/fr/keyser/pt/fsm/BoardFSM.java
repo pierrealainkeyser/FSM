@@ -149,9 +149,6 @@ public class BoardFSM {
 	    }
 
 	    chainedSubByPlayers(current, next);
-
-	    if (!notLast)
-		current.onExit(this::nextPhase);
 	}
     }
 
