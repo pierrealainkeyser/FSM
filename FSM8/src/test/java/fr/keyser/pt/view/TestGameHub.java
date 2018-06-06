@@ -1,5 +1,6 @@
 package fr.keyser.pt.view;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,9 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.keyser.bus.PluggableBus;
 import fr.keyser.pt.Board;
+import fr.keyser.pt.CardPosition.Position;
+import fr.keyser.pt.DoDeployCard;
 import fr.keyser.pt.MetaCard;
 import fr.keyser.pt.MetaDeck;
 import fr.keyser.pt.fsm.BoardFSM;
+import fr.keyser.pt.fsm.DoDeployCardCommand;
 import fr.keyser.pt.fsm.DraftCommand;
 import fr.keyser.pt.fsm.PlayerBoardFSM;
 
@@ -87,6 +91,21 @@ public class TestGameHub {
 	    e1.receive(new DraftCommand(toDraft1.get(0), toDraft1.get(1)));
 	}
 
+	DoDeployCardCommand deploy0 = deployAll(e0);
+	DoDeployCardCommand deploy1 = deployAll(e1);
+
+	e0.receive(deploy0);
+	e1.receive(deploy1);
+
+    }
+
+    private DoDeployCardCommand deployAll(TracerEndpoint ep) {
+	List<MetaCard> deploy = ep.getView().getToDeploy();
+	return new DoDeployCardCommand(Arrays.asList(
+	        new DoDeployCard(deploy.get(0), Position.FRONT.index(0)),
+	        new DoDeployCard(deploy.get(1), Position.FRONT.index(1)),
+	        new DoDeployCard(deploy.get(2), Position.BACK.index(0)),
+	        new DoDeployCard(deploy.get(3), Position.BACK.index(1))), deploy.get(4).getId());
     }
 
 }
