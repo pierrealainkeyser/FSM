@@ -5,8 +5,10 @@ import static fr.keyser.n.fsm.automat.StateBuilder.join;
 
 import org.junit.jupiter.api.Test;
 
+import fr.keyser.n.fsm.automat.Automat;
 import fr.keyser.n.fsm.automat.AutomatBuilder;
 import fr.keyser.n.fsm.automat.StateBuilder;
+import fr.keyser.n.fsm.container.AutomatContainerBuilder;
 
 public class TestAutomatBuilder {
     @Test
@@ -42,7 +44,11 @@ public class TestAutomatBuilder {
 
 	endOfTurn.on(choice("nextTurn", turn).otherwise(end));
 
-	System.out.println(builder.build());
+	Automat automat = builder.build();
+	System.out.println(automat);
+
+	AutomatContainerBuilder cib = new AutomatContainerBuilder(automat);
+	cib.build().start();
 
     }
 

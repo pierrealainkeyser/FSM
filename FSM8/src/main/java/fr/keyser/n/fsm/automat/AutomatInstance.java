@@ -60,7 +60,11 @@ class AutomatInstance {
     }
 
     void start() {
-	listener.entering(id, current, Started.INSTANCE);
+	if (parentId == null) {
+	    current.states().forEach(s -> listener.entering(id, s, Started.INSTANCE));
+	} else
+	    listener.entering(id, current, Started.INSTANCE);
+
 	reachCurrentState();
     }
 

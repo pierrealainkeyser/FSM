@@ -52,6 +52,11 @@ public final class State {
 	return range.mapToObj(this::subState);
     }
 
+    public Stream<State> states() {
+	IntStream range = IntStream.range(1, states.size() + 1);
+	return range.mapToObj(this::subState);
+    }
+
     private State subState(int index) {
 	return new State(states.subList(0, index));
     }

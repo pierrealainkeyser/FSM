@@ -32,4 +32,13 @@ class TestState {
 	assertIterableEquals(asList(new State("A", "E")), diffDestSrc);
     }
 
+    @Test
+    void testStates() {
+	assertIterableEquals(asList(new State("A"), new State("A", "B"), new State("A", "B", "C")),
+	        new State("A", "B", "C").states().collect(toList()));
+
+	assertIterableEquals(asList(new State("A")),
+	        new State("A").states().collect(toList()));
+    }
+
 }
