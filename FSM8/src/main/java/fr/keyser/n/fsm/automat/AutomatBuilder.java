@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.StateType;
 
-public class AutomatBuilder implements ExtendedBuilder<StateBuilder> {
+public class AutomatBuilder implements ExtendedBuilder {
 
     private static <T> BinaryOperator<T> throwingMerger() {
 	return (u, v) -> {
@@ -23,8 +23,8 @@ public class AutomatBuilder implements ExtendedBuilder<StateBuilder> {
 	if (roots.isEmpty())
 	    return null;
 
-	StateBuilder initial = roots.get(0);
-
+	StateBuilder initial = roots.stream().filter(StateBuilder::isInitial).findFirst().orElse(roots.get(0));
+	
 	LinkedHashMap<State, StateNode> collected = roots.stream().flatMap(StateBuilder::build)
 	        .collect(Collectors.toMap(StateNode::getState, s -> s, throwingMerger(), LinkedHashMap::new));
 

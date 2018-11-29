@@ -5,10 +5,10 @@ public class LazyEventReceiver implements EventReceiver {
     private EventReceiver eventReceiver;
 
     @Override
-    public void receive(Event evt) {
+    public EventProcessingStatus receive(Event evt) {
 	if (eventReceiver == null)
 	    throw new IllegalStateException("Receiver is not set");
-	eventReceiver.receive(evt);
+	return eventReceiver.receive(evt);
     }
 
     public void setEventReceiver(EventReceiver eventReceiver) {

@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import fr.keyser.n.fsm.Event;
+import fr.keyser.n.fsm.EventProcessingStatus;
 import fr.keyser.n.fsm.EventReceiver;
 import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.InstanceState;
@@ -28,18 +29,6 @@ public class AutomatContainer implements EventReceiver {
     private final Executor executor;
 
     private final Supplier<InstanceId> idSupplier;
-
-    private final EventReceiver innerDispatch = new EventReceiver() {
-
-	@Override
-	public void receive(Event event) {
-	    List<AutomatInstance> selected = prepareTargets(event);
-	    selected.forEach(ai -> {
-		if (listener.guard(ai.getId(), event))
-		    ai.receive(event);
-	    });
-	}
-    };
 
     private final Map<InstanceId, AutomatInstance> instances = new LinkedHashMap<>();
 
@@ -134,9 +123,19 @@ public class AutomatContainer implements EventReceiver {
 	return selected;
     }
 
+    private void innerDispatch(EventProcessingStatus epc, Event event) {
+	List<AutomatInstance> selected = prepareTargets(event);
+	selected.forEach(ai -> {
+	    if (listener.guard(ai.getId(), event))
+		ai.receive(event);
+	});
+    }
+
     @Override
-    public void receive(Event evt) {
-	executor.execute(() -> innerDispatch.receive(evt));
+    public EventProcessingStatus receive(Event evt) {
+	EventProcessingStatus epc = new EventProcessingStatus();
+	executor.execute(() -> innerDispatch(epc, evt));
+	return epc;
     }
 
     private void removeInstance(AutomatInstance ai) {

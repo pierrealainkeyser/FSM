@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.StateType;
 
-public class StateBuilder implements ExtendedBuilder<StateBuilder> {
+public class StateBuilder implements ExtendedBuilder {
 
     private final List<StateBuilder> childs = new ArrayList<>();
 
@@ -21,6 +21,8 @@ public class StateBuilder implements ExtendedBuilder<StateBuilder> {
     private final List<Supplier<? extends TransitionSource>> transitions = new ArrayList<>();
 
     private StateType type;
+
+    private boolean initial = false;
 
     private StateBuilder(StateBuilder parent, State state, StateType type) {
 	this.parent = parent;
@@ -55,6 +57,15 @@ public class StateBuilder implements ExtendedBuilder<StateBuilder> {
 	    return childs.get(0).first();
 	else
 	    return this;
+    }
+    
+    public boolean isInitial() {
+	return initial;
+    }
+
+    public StateBuilder initial() {
+	initial = true;
+	return this;
     }
 
     public State getState() {
