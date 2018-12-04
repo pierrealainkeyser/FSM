@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import fr.keyser.fsm.SequentialExecutor;
 import fr.keyser.n.fsm.EventReceiver;
 import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.LazyEventReceiver;
@@ -28,7 +27,7 @@ public class AutomatContainerBuilder {
 	private StateConfigurer(State state) {
 	    this.state = state;
 	}
-	
+
 	public Choices with(String index, Supplier<Boolean> supplier) {
 	    return choiceListener.choices(state).with(index, supplier);
 	}
@@ -88,7 +87,6 @@ public class AutomatContainerBuilder {
     private final LazyTimeoutScheduler timeOutScheduler = new LazyTimeoutScheduler();
 
     private final TimeOutAutomatListener timerListener;
-    
 
     public AutomatContainerBuilder(Automat automat) {
 	this.automat = automat;
@@ -98,7 +96,7 @@ public class AutomatContainerBuilder {
     }
 
     public AutomatContainer build() {
-	AutomatContainer container = new AutomatContainer(new SequentialExecutor(), automat, new LoggingAutomatListener(choiceListener));
+	AutomatContainer container = new AutomatContainer(automat, new LoggingAutomatListener(choiceListener));
 	receiver.setEventReceiver(container);
 	return container;
     }

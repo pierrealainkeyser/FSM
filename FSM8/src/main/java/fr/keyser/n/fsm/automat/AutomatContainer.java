@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -26,7 +26,7 @@ public class AutomatContainer implements EventReceiver {
 
     private final Automat automat;
 
-    private final Executor executor;
+    private final AutomatExecutor executor = new AutomatExecutor();
 
     private final Supplier<InstanceId> idSupplier;
 
@@ -34,12 +34,11 @@ public class AutomatContainer implements EventReceiver {
 
     private final DelegatedAutomatListener listener;
 
-    public AutomatContainer(Executor executor, Automat automat, AutomatListener listener) {
-	this(executor, automat, listener, new SequenceInstanceIdSupplier());
+    public AutomatContainer(Automat automat, AutomatListener listener) {
+	this(automat, listener, new SequenceInstanceIdSupplier());
     }
 
-    public AutomatContainer(Executor executor, Automat automat, AutomatListener listener, Supplier<InstanceId> idSupplier) {
-	this.executor = executor;
+    public AutomatContainer(Automat automat, AutomatListener listener, Supplier<InstanceId> idSupplier) {
 	this.automat = automat;
 	this.idSupplier = idSupplier;
 	this.listener = new DelegatedAutomatListener(listener) {
@@ -91,7 +90,7 @@ public class AutomatContainer implements EventReceiver {
 	    alreadyJoined.forEach(this::removeInstance);
 
 	    // continue on the parent
-	    parentInstance.receive(Joined.INSTANCE);
+	    receive(Joined.join(id));
 	}
     }
 
@@ -123,19 +122,25 @@ public class AutomatContainer implements EventReceiver {
 	return selected;
     }
 
-    private void innerDispatch(EventProcessingStatus epc, Event event) {
+    private void innerDispatch(AtomicReference<EventProcessingStatus> ref, Event event) {
+
+	// mise en place du status
+	EventProcessingStatus status = executor.getStatus();
+
 	List<AutomatInstance> selected = prepareTargets(event);
 	selected.forEach(ai -> {
 	    if (listener.guard(ai.getId(), event))
-		ai.receive(event);
+		ai.receive(status, event);
 	});
+
+	ref.set(status);
     }
 
     @Override
     public EventProcessingStatus receive(Event evt) {
-	EventProcessingStatus epc = new EventProcessingStatus();
-	executor.execute(() -> innerDispatch(epc, evt));
-	return epc;
+	AtomicReference<EventProcessingStatus> ref = new AtomicReference<>();
+	executor.execute(() -> innerDispatch(ref, evt));
+	return ref.get();
     }
 
     private void removeInstance(AutomatInstance ai) {

@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import fr.keyser.n.fsm.Event;
+import fr.keyser.n.fsm.EventProcessingStatus;
 import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
@@ -39,18 +40,18 @@ class AutomatInstance {
 	return listener.guard(id, transition);
     }
 
-    void receive(Event event) {
+    void receive(EventProcessingStatus status, Event event) {
 	Stream<Transition> transitions = automat.findTransitions(current, event);
 
 	Optional<Transition> transition = transitions.filter(this::guard).findFirst();
 	if (transition.isPresent()) {
 	    Transition t = transition.get();
 
-	    follow(t);
+	    follow(status, t);
 	}
     }
 
-    private void follow(Transition t) {
+    private void follow(EventProcessingStatus status, Transition t) {
 	t.leaving().forEach(l -> listener.leaving(id, l, t.getEvent()));
 	listener.following(id, t);
 	t.entering().forEach(e -> listener.entering(id, e, t.getEvent()));
