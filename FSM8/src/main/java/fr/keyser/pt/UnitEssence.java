@@ -4,7 +4,8 @@ public final class UnitEssence extends CardEssence<UnitEssence> {
 
     private final static BooleanValue DEFAULT_COMBAT = BooleanValue.card(DeployedCard::isOnFrontLine);
 
-    private final static BooleanValue DEFAULT_DEATH = BooleanValue.card(DeployedCard.hasALeastAgeToken(1));
+    private final static BooleanValue DEFAULT_DEATH = BooleanValue
+            .card(DeployedCard.hasALeastAgeToken(1).and(DeployedCard::isNotProtection));
 
     final int goldCost;
 

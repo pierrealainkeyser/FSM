@@ -1,13 +1,13 @@
 package fr.keyser.pt;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import fr.keyser.pt.BuildingConstruction.BuildType;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt.SpecialEffectScope.When;
-import fr.keyser.pt.event.CardAgeChanged;
 import fr.keyser.pt.event.CardBuildingLevelChanged;
 import fr.keyser.pt.event.CardDeploymentChanged;
 import fr.keyser.pt.event.CardRefreshInfo;
@@ -54,7 +53,7 @@ import fr.keyser.pt.event.PlayerLegendChanged;
  * <ul>
  * <li>{@link PlayerBoard#collectDying()}</li>
  * <li>Phase 6 Effect
- * <li>{@link PlayerBoard#computeDyingGain()}</li>
+ * <li>{@link PlayerBoard#computeAgeGain()}</li>
  * <li>{@link PlayerBoard#removeDead()}</li>
  * <li>{@link PlayerBoard#doAge()}</li>
  * </ul>
@@ -66,33 +65,6 @@ import fr.keyser.pt.event.PlayerLegendChanged;
  *
  */
 public final class PlayerBoard implements PlayerBoardContract {
-
-    public final static class FiredEffect {
-	private final DeployedCard card;
-
-	private final ScopedSpecialEffect effect;
-
-	private FiredEffect(DeployedCard card, ScopedSpecialEffect effect) {
-	    this.card = card;
-	    this.effect = effect;
-	}
-
-	private void fire() {
-	    effect.getSpecialEffect().apply(card);
-	}
-
-	public DeployedCard getCard() {
-	    return card;
-	}
-
-	public String getName() {
-	    return effect.getName();
-	}
-
-	private int getOrder() {
-	    return effect.getScope().getOrder();
-	}
-    }
 
     private static final int POINT_PER_VICTORY = 3;
 
@@ -112,6 +84,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     private PlayerCounters counters = new PlayerCounters();
 
+    private PlayerCounters previous = new PlayerCounters();
+
     private List<DeployedCard> dying = new ArrayList<>();
 
     private List<CardSlot> front = ctx(Position.FRONT, 3);
@@ -129,7 +103,6 @@ public final class PlayerBoard implements PlayerBoardContract {
     void doRefresh() {
 	all().forEach(dc -> forward(new CardDeploymentChanged(dc, this, true)));
 	buildings().forEach(this::buildingHasChanged);
-	units().forEach(this::cardHasAged);
 	all().forEach(dc -> forward(new CardRefreshInfo(dc, this)));
 
 	forward(new PlayerGoldChanged(this, getGold()));
@@ -152,17 +125,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     }
 
-    private void addLegend(int legend) {
-	model.addLegend(legend);
-	if (legend != 0)
-	    forward(new PlayerLegendChanged(this, model.getLegend()));
-    }
-
     @Override
     public void agePhase() {
-	clearInputActions();
 	collectDying();
-	registerAsyncEffect(all(), When.AGING);
+	collectEffects(When.AGING);
     }
 
     Stream<DeployedCard> all() {
@@ -183,16 +149,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     }
 
-    void cardHasAged(DeployedCard deployedCard) {
-	forward(new CardAgeChanged(deployedCard, this, deployedCard.getAgeToken()));
-    }
-
     void clearBuilding() {
 	model.getBuildPlan().clear();
-    }
-
-    private void clearInputActions() {
-	model.getInputActions().clear();
     }
 
     void collectBuilding(Collection<MetaCard> bluePrints) {
@@ -207,40 +165,31 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     void computeDeployGain() {
 	all().forEach(DeployedCard::computeDeployGain);
-	counters(all()).forEach(counters::sumDeployGain);
-
-	addGold(counters.getDeployGold());
-	addLegend(counters.getDeployLegend());
+	counters.sumWar(counters(all()));
     }
 
-    void computeDyingGain() {
-	all().forEach(DeployedCard::computeDyingGain);
-	counters(all()).forEach(counters::sumDyingGain);
-
-	addGold(counters.getDieGold());
-	addLegend(counters.getDieLegend());
+    void computeAgeGain() {
+	all().forEach(DeployedCard::computeAgeGain);
+	counters.sumAge(counters(all()));
     }
 
     void computeValues() {
-	counters.resetBasicCounters();
+	all().forEach(DeployedCard::computeResources);
+	counters.sumResources(counters(all()));
 
 	all().forEach(DeployedCard::computeGoldGain);
-	counters(all()).forEach(counters::sumGold);
+	counters.sumGold(counters(all()));
 
-	all().forEach(DeployedCard::computeValues);
-	counters(all()).forEach(counters::sumValues);
+	all().forEach(DeployedCard::computeCombat);
+	counters.sumCombat(counters(all()));
     }
 
     void computeWarGain() {
-	counters.setWarLegend(POINT_PER_VICTORY * getVictoriousWar());
+	all().forEach(DeployedCard::computeWarGain);
+	counters.sumWar(counters(all()));
 
-	units().forEach(DeployedCard::computeWarGain);
-	buildings().forEach(DeployedCard::computeWarGain);
+	counters.getWar().addLegend(POINT_PER_VICTORY * getVictoriousWar());
 
-	counters(all()).forEach(counters::sumWarGain);
-
-	addGold(counters.getWarGold());
-	addLegend(counters.getWarLegend());
     }
 
     private List<CardSlot> ctx(Position position, int number) {
@@ -253,8 +202,8 @@ public final class PlayerBoard implements PlayerBoardContract {
     @Override
     public void deployPhase() {
 	computeValues();
-	clearInputActions();
-	registerAsyncEffect(all(), When.DEPLOYEMENT);
+	collectEffects(all().filter(DeployedCard::isInitialDeploy), When.INITIAL_DEPLOYEMENT);
+	collectEffects(When.DEPLOYEMENT);
     }
 
     void doAge() {
@@ -267,8 +216,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     @Override
     public void endAgePhase() {
-	computeDyingGain();
-	fireEffect(When.AGING);
+	computeAgeGain();
+	fireEffects();
 	removeDead();
     }
 
@@ -279,8 +228,7 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     @Override
     public void endOfDeployPhase() {
-
-	fireEffect(When.DEPLOYEMENT);
+	fireEffects();
 	computeValues();
 	computeDeployGain();
 
@@ -305,26 +253,23 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return list.get(position.getIndex());
     }
 
-    void fireEffect(Stream<DeployedCard> cards, When when) {
+    void collectEffects(Stream<DeployedCard> cards, When when) {
 	List<FiredEffect> fired = cards.flatMap(d -> d.effects(when).map(e -> new FiredEffect(d, e)))
-	        .collect(Collectors.toList());
+	        .collect(toList());
 	fired.sort(Comparator.comparing(FiredEffect::getOrder));
-	for (FiredEffect f : fired) {
-	    forward(f);
-	    f.fire();
-	}
+	model.setEffects(fired);
     }
 
-    void fireEffect(When when) {
-	fireEffect(all(), when);
+    void collectEffects(When when) {
+	collectEffects(all(), when);
+    }
+
+    void fireEffects() {
+	model.getEffects().forEach(f -> f.fire(this));
     }
 
     private void forward(Object event) {
 	board.forward(event);
-    }
-
-    void gainGold() {
-	addGold(counters.getGoldGain());
     }
 
     public Board getBoard() {
@@ -348,7 +293,7 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     int getGoldGain() {
-	return counters.getGoldGain();
+	return counters.getGold().getGold();
     }
 
     public List<DeployedCardInfo> getInfos() {
@@ -356,11 +301,8 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     @Override
-    public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
-	Map<CardPosition, List<TargetedEffectDescription>> inputActions = model.getInputActions();
-	if (inputActions.isEmpty())
-	    return null;
-	return inputActions;
+    public List<FiredEffect> getInputActions() {
+	return model.getEffects();
     }
 
     List<MetaCard> getToDraft() {
@@ -382,13 +324,12 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     @Override
     public void goldPhase() {
-	gainGold();
 
     }
 
     @Override
     public boolean hasInputActions() {
-	return !model.getInputActions().isEmpty();
+	return !model.getEffects().isEmpty();
     }
 
     @Override
@@ -401,16 +342,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 		board.moveToDiscard(next);
 	    }
 	}
-    }
-
-    public void preserveFromDeath(CardPosition position) {
-	Iterator<DeployedCard> it = dying.iterator();
-	while (it.hasNext()) {
-	    DeployedCard next = it.next();
-	    if (next.getPosition().equals(position))
-		it.remove();
-	}
-
     }
 
     @Override
@@ -433,15 +364,8 @@ public final class PlayerBoard implements PlayerBoardContract {
 
     @Override
     public void processCardAction(CardAction action) {
-
-	CardPosition source = action.getSource();
-	model.getInputActions().remove(source);
-
-	DeployedCard from = find(source).getCard().get();
-	for (Entry<String, CardPosition> e : action.getTarget().entrySet()) {
-	    from.addPositionFor(e.getValue(), e.getKey());
-	}
-
+	Optional<FiredEffect> first = model.getEffects().stream().filter(f -> f.match(action)).findFirst();
+	first.ifPresent(f -> f.use(action));
     }
 
     @Override
@@ -467,9 +391,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	    model.getToDeploy().remove(meta);
 
 	    int goldDelta = ((Unit) meta.getCard()).getGoldCost();
-	    counters.setDeployGold(counters.getDeployGold() - goldDelta);
-
-	    fireEffect(Stream.of(dc), When.ON_PLAY);
 	}
     }
 
@@ -484,22 +405,6 @@ public final class PlayerBoard implements PlayerBoardContract {
 	removeDrafted(id, toDeploy::add);
 
 	forward(new PlayerDoDeployEvent(uuid, toDeploy));
-    }
-
-    public void redeploy(MetaCard unit, CardPosition position) {
-	CardSlot slot = find(position);
-
-	DeployedCard dc = slot.redeploy(unit);
-	dc.shapeShifted();
-    }
-
-    void registerAsyncEffect(Stream<DeployedCard> cards, When when) {
-	cards.forEach(d -> d.effects(when).filter(ScopedSpecialEffect::isAsync).forEach(e -> {
-	    List<TargetedEffectDescription> asyncEffect = e.asyncEffect(d);
-	    if (asyncEffect != null)
-		model.getInputActions().put(d.getPosition(), asyncEffect);
-	}));
-
     }
 
     void removeDead() {
@@ -528,6 +433,8 @@ public final class PlayerBoard implements PlayerBoardContract {
     }
 
     void resetCounters() {
+	previous = new PlayerCounters(counters);
+
 	counters = new PlayerCounters();
 	all().forEach(DeployedCard::resetCounters);
     }
@@ -550,6 +457,10 @@ public final class PlayerBoard implements PlayerBoardContract {
 	return asDeployedCard(Stream.concat(front.stream(), back.stream()));
     }
 
+    public Optional<DeployedCard> cardAt(CardPosition position) {
+	return find(position).getCard();
+    }
+
     /**
      * Test only
      * 
@@ -563,5 +474,4 @@ public final class PlayerBoard implements PlayerBoardContract {
     public int getLegend() {
 	return model.getLegend();
     }
-
 }

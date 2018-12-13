@@ -9,7 +9,7 @@ public final class Daemon extends Unit {
 
     public Daemon() {
 	super(essence(2)
-	        .dieLegend(IntValue.choice(DeployedCard.hasAgeToken(1), IntValue.constant(-3), IntValue.ZERO))
+	        .ageLegend(IntValue.choice(DeployedCard.hasAgeToken(1).and(DeployedCard::willDie), IntValue.constant(-3), IntValue.ZERO))
 	        .combat(IntValue.constant(7))
 	        .effect(DeployedCard.INITIAL_DEPLOY_FIRST, DoAgeEffect.INSTANCE));
     }

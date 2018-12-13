@@ -2,11 +2,10 @@ package fr.keyser.pt.effects;
 
 import fr.keyser.pt.BuildingLevel;
 import fr.keyser.pt.DeployedCard;
-import fr.keyser.pt.SpecialEffect;
 
-public class UpgradeBuildingToLevel2 implements SpecialEffect {
+public class UpgradeBuildingToLevel2 implements SelfEffect {
 
-    public static final SpecialEffect INSTANCE = new UpgradeBuildingToLevel2();
+    public static final UpgradeBuildingToLevel2 INSTANCE = new UpgradeBuildingToLevel2();
 
     private UpgradeBuildingToLevel2() {
 

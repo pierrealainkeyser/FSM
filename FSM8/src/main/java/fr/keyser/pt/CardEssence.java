@@ -3,14 +3,16 @@ package fr.keyser.pt;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.keyser.pt.effects.TargetableEffect;
+
 public abstract class CardEssence<E extends CardEssence<E>> {
 
-    IntValue dieLegend = IntValue.ZERO;
+    IntValue ageLegend = IntValue.ZERO;
 
     IntValue warLegend = IntValue.ZERO;
 
     IntValue deployLegend = IntValue.ZERO;
-    
+
     IntValue endOfGameLegend = IntValue.ZERO;
 
     IntValue food = IntValue.ZERO;
@@ -25,7 +27,7 @@ public abstract class CardEssence<E extends CardEssence<E>> {
 
     IntValue warGold = IntValue.ZERO;
 
-    IntValue dieGold = IntValue.ZERO;
+    IntValue ageGold = IntValue.ZERO;
 
     IntValue deployGold = IntValue.ZERO;
 
@@ -36,14 +38,10 @@ public abstract class CardEssence<E extends CardEssence<E>> {
     CardEssence() {
     }
 
-    public E effect(SpecialEffectScope scope, TargetedSpecialEffect targeter) {
-	return effect(scope, new AsyncSpecialEffect(targeter));
-    }
-
-    public E effect(SpecialEffectScope scope, SpecialEffect specialEffect) {
+    public E effect(SpecialEffectScope scope, TargetableEffect effect) {
 	if (effects == null)
 	    effects = new ArrayList<>();
-	effects.add(new ScopedSpecialEffect(scope, specialEffect));
+	effects.add(new ScopedSpecialEffect(scope, effects.size(), effect));
 	return getThis();
     }
 
@@ -51,11 +49,11 @@ public abstract class CardEssence<E extends CardEssence<E>> {
 	this.food = food;
 	return getThis();
     }
-    
+
     public E endOfGameLegend(IntValue endOfGameLegend) {
- 	this.endOfGameLegend = endOfGameLegend;
- 	return getThis();
-     }
+	this.endOfGameLegend = endOfGameLegend;
+	return getThis();
+    }
 
     public E warLegend(IntValue warLegend) {
 	this.warLegend = warLegend;
@@ -77,13 +75,13 @@ public abstract class CardEssence<E extends CardEssence<E>> {
 	return getThis();
     }
 
-    public E dieGold(IntValue dieGold) {
-	this.dieGold = dieGold;
+    public E ageGold(IntValue ageGold) {
+	this.ageGold = ageGold;
 	return getThis();
     }
 
-    public E dieLegend(IntValue dieLegend) {
-	this.dieLegend = dieLegend;
+    public E ageLegend(IntValue ageLegend) {
+	this.ageLegend = ageLegend;
 	return getThis();
     }
 

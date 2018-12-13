@@ -1,9 +1,7 @@
 package fr.keyser.pt;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class PlayerBoardModel {
 
@@ -11,13 +9,13 @@ public final class PlayerBoardModel {
 
     private int legend;
 
-    private Map<CardPosition, List<TargetedEffectDescription>> inputActions = new HashMap<>();
-
     private List<MetaCard> toDraft = new ArrayList<>();
 
     private List<MetaCard> toDeploy = new ArrayList<>();
 
     private List<BuildingConstruction> buildPlan = new ArrayList<>();
+
+    private List<FiredEffect> effects = new ArrayList<>();
 
     public int getGold() {
 	return gold;
@@ -47,10 +45,6 @@ public final class PlayerBoardModel {
 	    this.gold = 0;
     }
 
-    public Map<CardPosition, List<TargetedEffectDescription>> getInputActions() {
-	return inputActions;
-    }
-
     public List<MetaCard> getToDraft() {
 	return toDraft;
     }
@@ -73,6 +67,14 @@ public final class PlayerBoardModel {
 
     public void setBuildPlan(List<BuildingConstruction> buildPlan) {
 	this.buildPlan = buildPlan;
+    }
+
+    public List<FiredEffect> getEffects() {
+        return effects;
+    }
+
+    public void setEffects(List<FiredEffect> effects) {
+        this.effects = effects;
     }
 
 }

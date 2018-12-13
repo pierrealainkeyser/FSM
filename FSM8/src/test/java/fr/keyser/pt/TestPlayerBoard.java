@@ -146,7 +146,7 @@ public class TestPlayerBoard {
 	p0.deployPhase();
 
 	Assertions.assertEquals(1, p0.getInputActions().size());
-	p0.processCardAction(new CardAction(front1, DropAgeTokenEffect.DROP_AGE, front0));
+	p0.processCardAction(new CardAction(front1, 0, DropAgeTokenEffect.DROP_AGE, front0));
 	Assertions.assertNull(p0.getInputActions());
 	p0.endOfDeployPhase();
 
@@ -179,7 +179,7 @@ public class TestPlayerBoard {
 	p0.deployPhase();
 
 	Assertions.assertEquals(1, p0.getInputActions().size());
-	p0.processCardAction(new CardAction(front0, DropAgeTokenEffect.DROP_AGE, front0));
+	p0.processCardAction(new CardAction(front0, 0, DropAgeTokenEffect.DROP_AGE, front0));
 	Assertions.assertNull(p0.getInputActions());
 	p0.endOfDeployPhase();
 

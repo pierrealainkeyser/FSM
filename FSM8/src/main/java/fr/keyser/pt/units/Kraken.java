@@ -14,7 +14,7 @@ public final class Kraken extends Unit {
 	                IntValue.choice(DeployedCard::isInitialDeploy,
 	                        IntValue.constant(-3).mult(IntValue.LEVEL2_BUILDING),
 	                        IntValue.ZERO))
-	        .dieLegend(IntValue.DYING_AGE_TOKEN)
+	        .ageLegend(IntValue.DYING_AGE_TOKEN)
 	        .effect(DeployedCard.INITIAL_DEPLOY_FIRST, AgeEveryoneButMe.INSTANCE));
     }
 }

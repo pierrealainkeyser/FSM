@@ -1,42 +1,44 @@
 package fr.keyser.pt;
 
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import fr.keyser.pt.SpecialEffectScope.When;
+import fr.keyser.pt.effects.ChoosenTargets;
+import fr.keyser.pt.effects.Target;
+import fr.keyser.pt.effects.TargetableEffect;
 
 public final class ScopedSpecialEffect {
     private final SpecialEffectScope scope;
-    private final SpecialEffect specialEffect;
+    private final TargetableEffect effect;
+    private final int index;
 
-    public ScopedSpecialEffect(SpecialEffectScope scope, SpecialEffect specialEffect) {
+    public ScopedSpecialEffect(SpecialEffectScope scope, int index, TargetableEffect effect) {
 	this.scope = scope;
-	this.specialEffect = specialEffect;
-    }
-
-    public boolean testTargeter(Predicate<TargetedSpecialEffect> pred) {
-	if (isAsync())
-	    return ((AsyncSpecialEffect) specialEffect).testTargeter(pred);
-	return false;
-    }
-
-    public List<TargetedEffectDescription> asyncEffect(DeployedCard card) {
-	if (isAsync())
-	    return ((AsyncSpecialEffect) specialEffect).asyncEffect(card);
-	return null;
-    }
-
-    public boolean isAsync() {
-	return specialEffect instanceof AsyncSpecialEffect;
-    }
-
-    public SpecialEffectScope getScope() {
-	return scope;
-    }
-
-    public SpecialEffect getSpecialEffect() {
-	return specialEffect;
+	this.index = index;
+	this.effect = effect;
     }
 
     public String getName() {
-	return specialEffect.getName();
+	return "TODO";
+    }
+
+    public Stream<Target> targets(DeployedCard source) {
+	return effect.targets(source);
+    }
+
+    public void apply(DeployedCard source, ChoosenTargets targets) {
+	effect.apply(source, targets);
+    }
+
+    public boolean match(When when) {
+	return scope.match(when);
+    }
+
+    public int getOrder() {
+	return scope.getOrder();
+    }
+
+    public int getIndex() {
+	return index;
     }
 }

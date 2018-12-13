@@ -1,88 +1,119 @@
 package fr.keyser.pt;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class CardModel {
 
-    private int ageToken;
+    public class CardModelInfo {
+	private CardModelInfo(int ageToken, BuildingLevel level, MetaCard meta) {
+	    this.ageToken = ageToken;
+	    this.level = level;
+	    this.meta = meta;
+	}
 
-    private BuildingLevel level;
+	private CardModelInfo(CardModelInfo other) {
+	    this(other.ageToken, other.level, other.meta);
+	}
 
-    private MetaCard meta;
+	private int ageToken;
+
+	private BuildingLevel level;
+
+	private MetaCard meta;
+
+	public int getAgeToken() {
+	    return ageToken;
+	}
+
+	public void setAgeToken(int ageToken) {
+	    this.ageToken = ageToken;
+	}
+
+	public BuildingLevel getLevel() {
+	    return level;
+	}
+
+	public void setLevel(BuildingLevel level) {
+	    this.level = level;
+	}
+
+	public MetaCard getMeta() {
+	    return meta;
+	}
+
+	public void setMeta(MetaCard meta) {
+	    this.meta = meta;
+	}
+    }
+
+    private CardModelInfo info;
+
+    private CardModelInfo previous;
 
     private int playedTurn;
 
-    private Map<String, CardPosition> selected;
-
-    private boolean shapeShifted;
+    private boolean protection;
 
     public CardModel() {
+	this.info = new CardModelInfo(0, null, null);
     }
 
     public CardModel(MetaCard meta, BuildingLevel level) {
-	this.meta = meta;
-	this.level = level;
+	this.info = new CardModelInfo(0, level, meta);
     }
 
     public CardModel(MetaCard meta, int ageToken, int playedTurn) {
-	this.meta = meta;
-	this.ageToken = ageToken;
+	this.info = new CardModelInfo(ageToken, null, meta);
 	this.playedTurn = playedTurn;
     }
 
-    public void addPositionFor(CardPosition position, String name) {
-	if (selected == null)
-	    selected = new HashMap<>();
-
-	selected.put(name, position);
-    }
-
     public int getAgeToken() {
-	return ageToken;
+	return info.getAgeToken();
     }
 
     public BuildingLevel getLevel() {
-	return level;
+	return info.getLevel();
     }
 
     public MetaCard getMeta() {
-	return meta;
+	return info.getMeta();
     }
 
     public int getPlayedTurn() {
 	return playedTurn;
     }
 
-    public Map<String, CardPosition> getSelected() {
-	return selected;
-    }
-
-    public boolean isShapeShifted() {
-        return shapeShifted;
-    }
-
     public void setAgeToken(int ageToken) {
-	this.ageToken = ageToken;
+	info.setAgeToken(ageToken);
     }
 
     public void setLevel(BuildingLevel level) {
-	this.level = level;
+	info.setLevel(level);
     }
 
     public void setMeta(MetaCard meta) {
-	this.meta = meta;
+	info.setMeta(meta);
     }
 
     public void setPlayedTurn(int playedTurn) {
 	this.playedTurn = playedTurn;
     }
 
-    public void setSelected(Map<String, CardPosition> selected) {
-	this.selected = selected;
+    public boolean isProtection() {
+	return protection;
     }
 
-    public void setShapeShifted(boolean shapeShifted) {
-        this.shapeShifted = shapeShifted;
+    public void setProtection(boolean protection) {
+	this.protection = protection;
+    }
+
+    public CardModelInfo getInfo() {
+	return info;
+    }
+
+    public void updatePrevious() {
+	previous = new CardModelInfo(info);
+    }
+
+    public CardModelInfo getPrevious() {
+	return previous;
     }
 }

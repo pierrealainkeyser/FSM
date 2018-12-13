@@ -1,11 +1,9 @@
 package fr.keyser.pt;
 
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.SpecialEffectScope.When;
-import fr.keyser.pt.effects.NotifyShiftShapeEffect;
 
 public class DeployedCard implements InstalledCardBuildPlanner {
 
@@ -14,8 +12,6 @@ public class DeployedCard implements InstalledCardBuildPlanner {
     public static final SpecialEffectScope DEPLOY_LAST = new SpecialEffectScope(3, When.DEPLOYEMENT);
 
     public static final SpecialEffectScope DEPLOY = new SpecialEffectScope(2, When.DEPLOYEMENT);
-
-    public static final SpecialEffectScope PLAY = new SpecialEffectScope(0, When.ON_PLAY);
 
     public static final SpecialEffectScope INITIAL_DEPLOY_LAST = new SpecialEffectScope(2, When.INITIAL_DEPLOYEMENT);
 
@@ -41,6 +37,8 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     private CardCounters counters;
 
+    private CardCounters previous;
+
     private final CardModel model;
 
     private final PlayerBoard player;
@@ -54,19 +52,12 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 	this.card = meta.getCard();
 	this.model = model;
 
-	resetCounters();
+	previous = new CardCounters();
+	counters = new CardCounters();
     }
 
     public DeployedCardInfo getInfo() {
 	return new DeployedCardInfo(position, model);
-    }
-
-    void shapeShifted() {
-	model.setShapeShifted(true);
-    }
-
-    public void clearShapeShifted() {
-	model.setShapeShifted(false);
     }
 
     DeployedCard withMeta(MetaCard meta) {
@@ -77,48 +68,36 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 	return player.find(position).getCard().get();
     }
 
-    Map<String, CardPosition> getSelected() {
-	return model.getSelected();
-    }
-
-    void addPositionFor(CardPosition position, String name) {
-	model.addPositionFor(position, name);
-    }
-
     @Override
     public String toString() {
 	return card.getName();
     }
 
     void computeDeployGain() {
-	counters.setDeployLegend(card.getDeployLegend().getValue(this));
-	counters.setDeployGold(card.getDeployGold().getValue(this));
-
-	// clear all selected
-	model.setSelected(null);
-	model.setShapeShifted(false);
+	counters.getDeploy().apply(card.getDeploy(), this);
     }
 
-    void computeDyingGain() {
-	counters.setDieLegend(card.getDieLegend().getValue(this));
-	counters.setDieGold(card.getDieGold().getValue(this));
+    void computeAgeGain() {
+	counters.getAge().apply(card.getAge(), this);
     }
 
     void computeGoldGain() {
-	counters.setGoldGain(card.getGold().getValue(this));
+	counters.getGold().apply(card.getGold(), this);
     }
 
-    void computeValues() {
+    void computeResources() {
 	counters.setFood(card.getFood().getValue(this));
 	counters.setWood(card.getWood().getValue(this));
 	counters.setCrystal(card.getCrystal().getValue(this));
+    }
+
+    void computeCombat() {
 	counters.setCombat(card.getCombat().getValue(this));
 	counters.setMayCombat(card.getMayCombat().getValue(this));
     }
 
     void computeWarGain() {
-	counters.setWarLegend(card.getWarLegend().getValue(this));
-	counters.setWarGold(card.getWarGold().getValue(this));
+	counters.getWar().apply(card.getWar(), this);
     }
 
     public void doAge() {
@@ -127,24 +106,15 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     public void doAge(int amount) {
 	model.setAgeToken(model.getAgeToken() + amount);
-	player.cardHasAged(this);
-    }
-
-    public Stream<ScopedSpecialEffect> intialDeployementEffect() {
-	return streamEffect(s -> When.INITIAL_DEPLOYEMENT.match(s.getScope()));
-    }
-
-    private Stream<ScopedSpecialEffect> streamEffect(Predicate<ScopedSpecialEffect> predicate) {
-	Stream<ScopedSpecialEffect> effects = card.getEffects().stream();
-	if (model.isShapeShifted()) {
-	    effects = Stream.concat(effects, Stream.of(new ScopedSpecialEffect(INITIAL_DEPLOY_FIRST, NotifyShiftShapeEffect.INSTANCE)));
-	}
-
-	return effects.filter(predicate);
     }
 
     public Stream<ScopedSpecialEffect> effects(When when) {
-	return streamEffect(s -> when.match(s.getScope(), this));
+	Stream<ScopedSpecialEffect> effects = card.getEffects().stream();
+	return effects.filter(sse -> sse.match(when));
+    }
+
+    public ScopedSpecialEffect effects(int index) {
+	return card.getEffects().get(index);
     }
 
     public int getAgeToken() {
@@ -198,6 +168,7 @@ public class DeployedCard implements InstalledCardBuildPlanner {
     }
 
     void resetCounters() {
+	previous = new CardCounters(counters);
 	counters = new CardCounters();
     }
 
@@ -219,5 +190,13 @@ public class DeployedCard implements InstalledCardBuildPlanner {
 
     public void recomputeValues() {
 	player.computeValues();
+    }
+
+    public boolean isNotProtection() {
+	return !model.isProtection();
+    }
+
+    public void setProtection(boolean protection) {
+	model.setProtection(protection);
     }
 }

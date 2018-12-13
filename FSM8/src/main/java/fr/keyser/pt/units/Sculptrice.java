@@ -7,7 +7,7 @@ public final class Sculptrice extends Unit {
 
     public Sculptrice() {
 	super(essence(0)
-	        .dieLegend(IntValue.constant(3)));
+	        .ageLegend(IntValue.constant(3)));
     }
 
 }

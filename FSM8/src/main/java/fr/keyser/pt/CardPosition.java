@@ -1,7 +1,5 @@
 package fr.keyser.pt;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public final class CardPosition {
     public static enum Position {
 	BACK, BUILDING, FRONT;
@@ -20,9 +18,15 @@ public final class CardPosition {
 	this.index = index;
     }
 
-    @JsonIgnore
-    public boolean isOnFrontLine() {
-	return Position.FRONT == getPosition();
+    public boolean isUnit() {
+	return Position.FRONT == position || position == Position.BACK;
+    }
+
+    public static boolean mayCombat(CardPosition cp) {
+	if (cp == null)
+	    return false;
+	else
+	    return Position.FRONT == cp.position || Position.BUILDING == cp.position;
     }
 
     public int getIndex() {

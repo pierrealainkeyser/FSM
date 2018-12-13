@@ -1,18 +1,82 @@
 package fr.keyser.pt;
 
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 public abstract class Counters {
 
-    protected int combat;
-    protected int crystal;
-    protected int food;
-    protected int goldGain;
-    protected int warGold;
-    protected int dieGold;
-    protected int deployGold;
-    protected int warLegend;
-    protected int dieLegend;
-    protected int deployLegend;
-    protected int wood;
+    private int combat;
+
+    private int crystal;
+    private int food;
+    private int wood;
+
+    private final Gain deploy = new Gain();
+
+    private final Gain war = new Gain();
+
+    private final Gain age = new Gain();
+
+    private final Gain gold = new Gain();
+
+    protected Counters() {
+
+    }
+
+    protected Counters(Counters counters) {
+	this.combat = counters.combat;
+	this.crystal = counters.crystal;
+	this.food = counters.food;
+	this.wood = counters.wood;
+
+	deploy.setAll(Stream.of(counters.deploy));
+	war.setAll(Stream.of(counters.war));
+	age.setAll(Stream.of(counters.deploy));
+	gold.setAll(Stream.of(counters.gold));
+    }
+
+    public void sumResources(Stream<CardCounters> str) {
+
+	crystal = 0;
+	food = 0;
+	wood = 0;
+
+	str.forEach(card -> {
+	    crystal += card.getCrystal();
+	    food += card.getFood();
+	    wood += card.getFood();
+	});
+
+    }
+
+    public void sumCombat(Stream<CardCounters> str) {
+	combat = 0;
+	str.forEach(card -> {
+	    if (card.isMayCombat())
+		combat += card.getCombat();
+	});
+
+    }
+
+    public void sumAge(Stream<? extends Counters> cards) {
+	sum(cards, Counters::getAge);
+    }
+
+    private void sum(Stream<? extends Counters> cards, Function<Counters, Gain> accessor) {
+	accessor.apply(this).setAll(cards.map(accessor));
+    }
+
+    public void sumWar(Stream<? extends Counters> cards) {
+	sum(cards, Counters::getWar);
+    }
+
+    public void sumDeploy(Stream<? extends Counters> cards) {
+	sum(cards, Counters::getDeploy);
+    }
+
+    public void sumGold(Stream<? extends Counters> cards) {
+	sum(cards, Counters::getGold);
+    }
 
     public int getCombat() {
 	return combat;
@@ -38,68 +102,28 @@ public abstract class Counters {
 	this.food = food;
     }
 
-    public int getGoldGain() {
-	return goldGain;
-    }
-
-    public void setGoldGain(int goldGain) {
-	this.goldGain = goldGain;
-    }
-
-    public int getWarGold() {
-	return warGold;
-    }
-
-    public void setWarGold(int warGold) {
-	this.warGold = warGold;
-    }
-
-    public int getDieGold() {
-	return dieGold;
-    }
-
-    public void setDieGold(int dieGold) {
-	this.dieGold = dieGold;
-    }
-
-    public int getDeployGold() {
-	return deployGold;
-    }
-
-    public void setDeployGold(int deployGold) {
-	this.deployGold = deployGold;
-    }
-
-    public int getWarLegend() {
-	return warLegend;
-    }
-
-    public void setWarLegend(int warLegend) {
-	this.warLegend = warLegend;
-    }
-
-    public int getDieLegend() {
-	return dieLegend;
-    }
-
-    public void setDieLegend(int dieLegend) {
-	this.dieLegend = dieLegend;
-    }
-
-    public int getDeployLegend() {
-	return deployLegend;
-    }
-
-    public void setDeployLegend(int deployLegend) {
-	this.deployLegend = deployLegend;
-    }
-
     public int getWood() {
 	return wood;
     }
 
     public void setWood(int wood) {
 	this.wood = wood;
+    }
+
+    public Gain getDeploy() {
+	return deploy;
+    }
+
+    public Gain getWar() {
+	return war;
+    }
+
+    public Gain getAge() {
+	return age;
+    }
+
+    public Gain getGold() {
+	return gold;
     }
 
 }

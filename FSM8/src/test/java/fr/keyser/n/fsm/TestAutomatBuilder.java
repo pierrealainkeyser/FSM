@@ -36,7 +36,7 @@ public class TestAutomatBuilder {
 	    cur = next;
 	}
 
-	createWaiting(deploy, war);
+	createWaitingInput(deploy, war);
 	createWaiting(war, gold);
 	createWaiting(gold, build);
 	createWaiting(build, age);
@@ -50,6 +50,26 @@ public class TestAutomatBuilder {
 	AutomatContainerBuilder cib = new AutomatContainerBuilder(automat);
 	cib.build().start();
 
+    }
+
+    private void createWaitingInput(StateBuilder parent, StateBuilder dest) {
+	StateBuilder done = parent.joining("done");
+	for (int i = 0; i < 3; ++i) {
+	    StateBuilder base = parent.state("P" + i);
+	    StateBuilder check = base.choice("CheckInput");
+	    StateBuilder waitingInput = base.state("WaitingInput");
+	    StateBuilder waiting = base.state("Waiting");
+
+	    check.on(choice("hasInput", waitingInput)
+	            .otherwise(waiting));
+
+	    waitingInput.onEvent("done", done);
+	    waitingInput.on(StateBuilder.timeout(), done);
+	    
+	    waiting.onEvent("done", done);
+	    waiting.on(StateBuilder.timeout(), done);
+	}
+	parent.on(join(), dest);
     }
 
     private void createWaiting(StateBuilder parent, StateBuilder dest) {
