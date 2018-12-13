@@ -10,6 +10,7 @@ public class Troll extends Unit {
     private final PlugableInt payGoldGain = new PlugableInt();
 
     public Troll() {
+	super(2);
 	combat = ConstInt.TWO.add(payGoldGain);
     }
 

@@ -9,8 +9,9 @@ public class Tavern extends Building {
     private final PlugableInt totalFood = new PlugableInt();
 
     public Tavern() {
+	super(cost().food(1), cost().wood(1).food(1));
 	warGoldGain = totalFood;
-	warLegend = totalFood.when(isLevel2());
+	warLegend = totalFood.when(getLevel2());
     }
 
     @Override

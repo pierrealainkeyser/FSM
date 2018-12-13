@@ -10,6 +10,7 @@ public class Knight extends Unit {
     private final PlugableInt victory = new PlugableInt();
 
     public Knight() {
+	super(2);
 	combat = ConstInt.FOUR;
 	warLegend = victory;
     }

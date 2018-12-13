@@ -5,13 +5,14 @@ import fr.keyser.pt2.LocalBoard;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.PlugableInt;
 
-public class Cave extends Building {
+public class Mine extends Building {
 
     private final PlugableInt totalCrystal = new PlugableInt();
 
-    public Cave() {
+    public Mine() {
+	super(cost().wood(1), cost().wood(1).crystal(1));
 	crystal = ConstInt.ONE;
-	warLegend = totalCrystal.mult(ConstInt.TWO).when(isLevel2());
+	warLegend = totalCrystal.mult(ConstInt.TWO).when(getLevel2());
     }
 
     @Override

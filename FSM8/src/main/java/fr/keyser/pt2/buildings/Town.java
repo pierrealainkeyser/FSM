@@ -5,9 +5,9 @@ import fr.keyser.pt2.prop.ConstInt;
 public class Town extends Building {
 
     public Town() {
+	super(cost().wood(1), cost().wood(2));
 	food = ConstInt.ONE;
 	wood = ConstInt.ONE;
-	crystal = ConstInt.ONE.when(isLevel2());
+	crystal = ConstInt.ONE.when(getLevel2());
     }
-
 }

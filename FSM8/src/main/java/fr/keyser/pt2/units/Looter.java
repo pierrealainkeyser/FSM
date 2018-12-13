@@ -10,6 +10,7 @@ public class Looter extends Unit {
     private final PlugableInt victory = new PlugableInt();
 
     public Looter() {
+	super(1);
 	combat = ConstInt.THREE;
 	warGoldGain = victory;
     }

@@ -11,6 +11,7 @@ public class Leviathan extends Unit {
     private final PlugableInt totalFood = new PlugableInt();
 
     public Leviathan() {
+	super(2);
 	BoolSupplier hasAge = getAge().gte(ConstInt.ONE);
 
 	combat = ConstInt.FOUR.add(totalFood.mult(ConstInt.TWO));

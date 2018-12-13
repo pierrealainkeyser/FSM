@@ -10,6 +10,7 @@ public class Chief extends Unit {
     private final PlugableInt totalFood = new PlugableInt();
 
     public Chief() {
+	super(0);
 	combat = ConstInt.ONE;
 	payGoldGain = totalFood;
     }

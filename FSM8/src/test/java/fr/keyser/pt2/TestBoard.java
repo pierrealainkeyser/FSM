@@ -33,11 +33,11 @@ public class TestBoard {
 	lb1.front(2).play(new Looter());
 
 	Town town = new Town();
-	town.getBuildLevel().setValue(2);
+	town.setBuildingLevel(2);
 	lb1.building(0).play(town);
 
 	Tavern tavern = new Tavern();
-	tavern.getBuildLevel().setValue(2);
+	tavern.setBuildingLevel(2);
 	Slot b1 = lb1.building(1);
 	b1.play(tavern);
 

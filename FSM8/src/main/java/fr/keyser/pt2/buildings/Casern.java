@@ -11,8 +11,9 @@ public class Casern extends Building {
     private final PlugableInt totalWood = new PlugableInt();
 
     public Casern() {
+	super(cost().wood(1), cost().wood(1).food(1));
 	payGoldGain = totalWood;
-	payLegend = totalUnitsAbove3.when(isLevel2());
+	payLegend = totalUnitsAbove3.when(getLevel2());
     }
 
     @Override

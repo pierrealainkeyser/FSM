@@ -10,6 +10,7 @@ public class Dragon extends Unit {
     private final PlugableBool hasCrystal = new PlugableBool();
 
     public Dragon() {
+	super(3);
 	combat = ConstInt.SEVEN.when(hasCrystal);
     }
 

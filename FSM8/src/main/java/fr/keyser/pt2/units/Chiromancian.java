@@ -10,6 +10,7 @@ public class Chiromancian extends Unit {
     private final PlugableInt dyingAgeToken = new PlugableInt();
 
     public Chiromancian() {
+	super(2);
 	combat = ConstInt.ONE;
 	ageLegend = dyingAgeToken;
     }

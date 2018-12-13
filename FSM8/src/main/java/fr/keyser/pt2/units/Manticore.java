@@ -10,6 +10,7 @@ public class Manticore extends Unit {
     private final PlugableInt totalFood = new PlugableInt();
 
     public Manticore() {
+	super(2);
 	combat = ConstInt.TWO.add(totalFood.mult(ConstInt.TWO));
     }
 
