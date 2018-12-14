@@ -63,6 +63,8 @@ public final class LocalBoard {
 
     private final IntSupplier unitsAbove3;
 
+    private final IntSupplier differentRessourcesCount;
+
     public LocalBoard(IntSupplier currentTurn) {
 	this.currentTurn = currentTurn;
 	addSlot(3, Position.FRONT);
@@ -95,14 +97,10 @@ public final class LocalBoard {
 	ageGoldGain = sum(values, Slot::getAgeGoldGain);
 
 	unitsAbove3 = IntSupplier.count(units.stream().map(Slot::getCombat), c -> c >= 3);
-    }
 
-    public Stream<Unit> getUnits() {
-	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Unit).map(c -> (Unit) c);
-    }
-
-    public Stream<Building> getBuildings() {
-	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Building).map(c -> (Building) c);
+	differentRessourcesCount = ConstInt.ONE.when(food.gte(ConstInt.ONE))
+	        .add(ConstInt.ONE.when(wood.gte(ConstInt.ONE)))
+	        .add(ConstInt.ONE.when(crystal.gte(ConstInt.ONE)));
     }
 
     private void addSlot(int count, Position position) {
@@ -146,6 +144,10 @@ public final class LocalBoard {
 	return ageLegend;
     }
 
+    public Stream<Building> getBuildings() {
+	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Building).map(c -> (Building) c);
+    }
+
     public IntSupplier getBuildingWarLegend() {
 	return buildingWarLegend;
     }
@@ -170,6 +172,10 @@ public final class LocalBoard {
 	return deployLegend;
     }
 
+    public IntSupplier getDifferentRessourcesCount() {
+	return differentRessourcesCount;
+    }
+
     public IntSupplier getDyingAgeToken() {
 	return dyingAgeToken;
     }
@@ -192,6 +198,10 @@ public final class LocalBoard {
 
     public Map<CardPosition, Slot> getSlots() {
 	return slots;
+    }
+
+    public Stream<Unit> getUnits() {
+	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Unit).map(c -> (Unit) c);
     }
 
     public IntSupplier getUnitsAbove3() {
@@ -219,12 +229,12 @@ public final class LocalBoard {
 	setNeighbours(opponent.combat, twice);
     }
 
-    public void setNeighbours(LocalBoard left, LocalBoard right) {
-	setNeighbours(left.combat, right.combat);
-    }
-
     public void setNeighbours(IntSupplier left, IntSupplier right) {
 	victory.setSupplier(winWar(left).add(winWar(right)));
+    }
+
+    public void setNeighbours(LocalBoard left, LocalBoard right) {
+	setNeighbours(left.combat, right.combat);
     }
 
     @Override
@@ -233,6 +243,7 @@ public final class LocalBoard {
 	vals.add("Food : " + food);
 	vals.add("Wood : " + wood);
 	vals.add("Crystal : " + crystal);
+	vals.add("Different resources : " + differentRessourcesCount);
 
 	vals.add("Units above 3 strenght : " + unitsAbove3);
 	vals.add("Combat : " + combat);

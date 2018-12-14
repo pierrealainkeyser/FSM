@@ -10,10 +10,6 @@ public abstract class Unit extends Card {
 	this.cost = cost;
     }
 
-    public void addAge(int delta) {
-	getAge().add(delta);
-    }
-
     public int getCost() {
 	return cost;
     }

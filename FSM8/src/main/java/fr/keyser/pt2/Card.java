@@ -52,6 +52,14 @@ public abstract class Card {
 	deployedTurn.set(currentTurn.get());
     }
 
+    public void setBuildingLevel(int level) {
+	getBuildLevel().setValue(level);
+    }
+
+    public void addAge(int delta) {
+	getAge().add(delta);
+    }
+
     public final MutableInt getAge() {
 	return age;
     }

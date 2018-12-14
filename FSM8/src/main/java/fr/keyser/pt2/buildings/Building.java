@@ -23,10 +23,6 @@ public abstract class Building extends Card {
 	this.costLevel2 = costLevel2;
     }
 
-    public void setBuildingLevel(int level) {
-	getBuildLevel().setValue(level);
-    }
-
     public BoolSupplier getLevel2() {
 	return level2;
     }

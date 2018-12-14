@@ -3,8 +3,7 @@ package fr.keyser.pt2.prop;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class BridgedProp<T, R> implements DirtySupplier<R> {
-    private WeakDirtyObserver observer = new WeakDirtyObserver();
+public class BridgedProp<T, R> extends ObservableSupplier<R> {
 
     private final Function<T, ? extends DirtySupplier<R>> mapper;
 
@@ -21,21 +20,11 @@ public class BridgedProp<T, R> implements DirtySupplier<R> {
 	reload();
     }
 
-    @Override
-    public final void addListener(DirtyListener e) {
-	observer.addListener(e);
-    }
-
     public final R get() {
 	if (actual != null)
 	    return actual.get();
 	else
 	    return null;
-    }
-
-    @Override
-    public final void removeListener(DirtyListener e) {
-	observer.removeListener(e);
     }
 
     private void reload() {

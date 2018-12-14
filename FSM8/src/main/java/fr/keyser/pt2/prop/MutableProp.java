@@ -2,9 +2,7 @@ package fr.keyser.pt2.prop;
 
 import java.util.Objects;
 
-public class MutableProp<T> implements DirtySupplier<T> {
-
-    private final WeakDirtyObserver observer = new WeakDirtyObserver();
+public class MutableProp<T> extends ObservableSupplier<T> {
 
     private T value;
 
@@ -17,20 +15,8 @@ public class MutableProp<T> implements DirtySupplier<T> {
     }
 
     @Override
-    public void addListener(DirtyListener e) {
-	observer.addListener(e);
-
-    }
-
-    @Override
     public T get() {
 	return value;
-    }
-
-    @Override
-    public void removeListener(DirtyListener e) {
-	observer.removeListener(e);
-
     }
 
     public void set(T value) {

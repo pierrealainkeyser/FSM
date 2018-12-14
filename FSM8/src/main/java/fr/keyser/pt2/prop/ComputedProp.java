@@ -3,13 +3,11 @@ package fr.keyser.pt2.prop;
 import java.util.Collection;
 import java.util.Objects;
 
-public abstract class ComputedProp<T> implements DirtySupplier<T> {
+public abstract class ComputedProp<T> extends ObservableSupplier<T> {
 
     private boolean dirty = true;
 
     protected final DirtyListener dirtyListener = this::setDirty;
-
-    private WeakDirtyObserver observer = new WeakDirtyObserver();
 
     private T value;
 
@@ -23,11 +21,6 @@ public abstract class ComputedProp<T> implements DirtySupplier<T> {
 	    dl.addListener(dirtyListener);
     }
 
-    @Override
-    public final void addListener(DirtyListener e) {
-	observer.addListener(e);
-    }
-
     protected abstract T compute();
 
     public final T get() {
@@ -36,11 +29,6 @@ public abstract class ComputedProp<T> implements DirtySupplier<T> {
 	    dirty = false;
 	}
 	return value;
-    }
-
-    @Override
-    public final void removeListener(DirtyListener e) {
-	observer.removeListener(e);
     }
 
     private void setDirty() {

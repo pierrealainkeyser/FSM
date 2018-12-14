@@ -21,7 +21,7 @@ public class DropAgeTokenEffect implements MonoEffect {
 
     @Override
     public void apply(Slot source, Card target) {
-	target.getAge().add(ageCount.getValue());
+	target.addAge(ageCount.getValue());
     }
 
 }

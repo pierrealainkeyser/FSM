@@ -14,6 +14,6 @@ public class DoAgeEffect implements SelfEffect {
     @Override
     public void apply(Slot slot) {
 	Card card = slot.getCard().get();
-	card.getAge().add(1);
+	card.addAge(1);
     }
 }
