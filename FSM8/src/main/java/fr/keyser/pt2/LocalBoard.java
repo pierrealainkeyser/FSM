@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt2.buildings.Building;
-import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.prop.PlugableInt;
@@ -216,12 +215,15 @@ public final class LocalBoard {
     }
 
     public void setNeighbour(LocalBoard opponent) {
-	BoolSupplier dbl = combat.gte(opponent.combat.mult(ConstInt.TWO));
-
-	victory.setSupplier(winWar(opponent).add(ConstInt.ONE.when(dbl)));
+	IntSupplier twice = opponent.combat.mult(ConstInt.TWO);
+	setNeighbours(opponent.combat, twice);
     }
 
     public void setNeighbours(LocalBoard left, LocalBoard right) {
+	setNeighbours(left.combat, right.combat);
+    }
+
+    public void setNeighbours(IntSupplier left, IntSupplier right) {
 	victory.setSupplier(winWar(left).add(winWar(right)));
     }
 
@@ -258,8 +260,8 @@ public final class LocalBoard {
 	return slots.values().stream().filter(s -> s.getCardPosition().isUnit());
     }
 
-    private IntSupplier winWar(LocalBoard board) {
-	return ConstInt.ONE.when(combat.gte(board.combat));
+    private IntSupplier winWar(IntSupplier combat) {
+	return ConstInt.ONE.when(this.combat.gte(combat));
     }
 
 }
