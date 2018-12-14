@@ -13,7 +13,6 @@ import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.CardPosition.Position;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
-import fr.keyser.pt2.prop.DirtySupplier;
 import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.prop.PlugableInt;
 
@@ -86,7 +85,7 @@ public final class LocalBoard {
 	ageLegend = sum(values, Slot::getAgeLegend);
 	ageGoldGain = sum(values, Slot::getAgeGoldGain);
 
-	unitsAbove3 = DirtySupplier.count(units().map(Slot::getCombat), c -> c != null && c >= 3);
+	unitsAbove3 = IntSupplier.count(units().map(Slot::getCombat), c -> c >= 3);
     }
 
     private void addSlot(int count, Position position) {

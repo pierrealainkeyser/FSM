@@ -57,6 +57,8 @@ public final class Slot {
     private final IntSupplier ageGoldGain = mapInt(Card::getAgeGoldGain);
 
     private final BoolSupplier willDie = mapBool(Card::getWillDie);
+    
+    private final BoolSupplier willLive = mapBool(Card::getWillLive);
 
     private final IntSupplier dyingAgeToken = mapInt(Card::getDyingAgeToken);
 
@@ -101,6 +103,10 @@ public final class Slot {
 	return cardPosition;
     }
 
+    public IntSupplier getCombat() {
+	return combat;
+    }
+
     public IntSupplier getCrystal() {
 	return crystal;
     }
@@ -137,10 +143,6 @@ public final class Slot {
 	return warGoldGain;
     }
 
-    public IntSupplier getCombat() {
-	return combat;
-    }
-
     public IntSupplier getWarLegend() {
 	return warLegend;
     }
@@ -149,8 +151,20 @@ public final class Slot {
 	return willDie;
     }
 
+    public BoolSupplier getWillLive() {
+        return willLive;
+    }
+
     public IntSupplier getWood() {
 	return wood;
+    }
+
+    private BoolSupplier mapBool(Function<Card, BoolSupplier> mapper) {
+	return this.card.mapBool(mapper);
+    }
+
+    private IntSupplier mapInt(Function<Card, IntSupplier> mapper) {
+	return this.card.mapInt(mapper);
     }
 
     public void play(Card card) {
@@ -172,13 +186,5 @@ public final class Slot {
 	    card.setPosition(cardPosition);
 	    card.setBoard(board);
 	}
-    }
-
-    private IntSupplier mapInt(Function<Card, IntSupplier> mapper) {
-	return this.card.mapInt(mapper);
-    }
-
-    private BoolSupplier mapBool(Function<Card, BoolSupplier> mapper) {
-	return this.card.mapBool(mapper);
     }
 }

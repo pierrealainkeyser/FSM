@@ -2,6 +2,7 @@ package fr.keyser.pt2.prop;
 
 import java.util.List;
 import java.util.function.BinaryOperator;
+import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,6 +14,16 @@ public interface IntSupplier extends DirtySupplier<Integer> {
 	    return i;
 	else
 	    return 0;
+    }
+
+    public static <T> IntSupplier count(Stream<IntSupplier> mapped, IntPredicate predicate) {
+	List<IntSupplier> suppliers = mapped.collect(Collectors.toList());
+	return new ComputedInt(suppliers) {
+	    @Override
+	    protected Integer compute() {
+		return (int) suppliers.stream().filter(d -> predicate.test(d.getValue())).count();
+	    }
+	};
     }
 
     public default IntSupplier add(IntSupplier right) {
@@ -55,16 +66,16 @@ public interface IntSupplier extends DirtySupplier<Integer> {
 	    }
 	};
     }
-    
+
     public default BoolSupplier lt(IntSupplier right) {
-  	IntSupplier me = this;
-  	return new ComputedBool(me, right) {
-  	    @Override
-  	    protected Boolean compute() {
-  		return me.getValue() < right.getValue();
-  	    }
-  	};
-      }
+	IntSupplier me = this;
+	return new ComputedBool(me, right) {
+	    @Override
+	    protected Boolean compute() {
+		return me.getValue() < right.getValue();
+	    }
+	};
+    }
 
     public default BoolSupplier gte(IntSupplier right) {
 	IntSupplier me = this;

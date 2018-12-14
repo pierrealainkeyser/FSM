@@ -4,17 +4,19 @@ import java.util.function.Function;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.prop.BoolSupplier;
+import fr.keyser.pt2.prop.ConstBool;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.DirtySupplier;
 import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.prop.MutableBool;
 import fr.keyser.pt2.prop.MutableInt;
 import fr.keyser.pt2.prop.MutableProp;
+import fr.keyser.pt2.units.Unit;
 
 public abstract class Card {
 
     private final MutableProp<LocalBoard> board = new MutableProp<>();
-    
+
     protected IntSupplier combat = ConstInt.ZERO;
     protected IntSupplier warLegend = ConstInt.ZERO;
     protected IntSupplier warGoldGain = ConstInt.ZERO;
@@ -41,42 +43,16 @@ public abstract class Card {
     private final MutableInt age = new MutableInt();
     protected final MutableInt tokenToDie = new MutableInt(1);
     private final MutableBool simpleDyingProtection = new MutableBool(false);
-    private final BoolSupplier willDie = (age.lt(tokenToDie).or(age.eq(ConstInt.ONE).and(simpleDyingProtection))).not();
+    private final BoolSupplier isUnit = new ConstBool(this instanceof Unit);
+    private final BoolSupplier willLive = isUnit.and(age.lt(tokenToDie).or(age.eq(ConstInt.ONE).and(simpleDyingProtection)));
+    private final BoolSupplier willDie = isUnit.and(willLive.not());
     private final IntSupplier dyingAgeToken = age.when(willDie);
 
     protected final MutableProp<CardPosition> position = new MutableProp<>();
     protected BoolSupplier mayCombat = position.match(CardPosition::mayCombat);
 
-   
-
-    protected IntSupplier mapInt(Function<LocalBoard, IntSupplier> accessor) {
-	return board.mapInt(accessor);
-    }
-
-    protected BoolSupplier mapBool(Function<LocalBoard, BoolSupplier> accessor) {
-	return board.mapBool(accessor);
-    }
-
-    public void setBoard(LocalBoard board) {
-	this.board.set(board);
-    }
-
-    public CardMemento getMemento() {
-	CardMemento cm = new CardMemento();
-	cm.setAge(age.getValue());
-	cm.setBuildLevel(buildLevel.getValue());
-	cm.setPosition(position.get());
-	cm.setDeployedTurn(deployedTurn.getValue());
-	cm.setSimpleDyingProtection(simpleDyingProtection.getValue());
-	return cm;
-    }
-
-    public void setMemento(CardMemento m) {
-	age.setValue(m.getAge());
-	buildLevel.setValue(m.getBuildLevel());
-	position.set(m.getPosition());
-	deployedTurn.set(m.getDeployedTurn());
-	simpleDyingProtection.set(m.isSimpleDyingProtection());
+    public final void deploy() {
+	deployedTurn.set(currentTurn.get());
     }
 
     public final MutableInt getAge() {
@@ -127,6 +103,16 @@ public abstract class Card {
 	return mayCombat;
     }
 
+    public CardMemento getMemento() {
+	CardMemento cm = new CardMemento();
+	cm.setAge(age.getValue());
+	cm.setBuildLevel(buildLevel.getValue());
+	cm.setPosition(position.get());
+	cm.setDeployedTurn(deployedTurn.getValue());
+	cm.setSimpleDyingProtection(simpleDyingProtection.getValue());
+	return cm;
+    }
+
     public final IntSupplier getPayGoldGain() {
 	return payGoldGain;
     }
@@ -151,8 +137,20 @@ public abstract class Card {
 	return willDie;
     }
 
+    public BoolSupplier getWillLive() {
+	return willLive;
+    }
+
     public final IntSupplier getWood() {
 	return wood;
+    }
+
+    protected BoolSupplier mapBool(Function<LocalBoard, BoolSupplier> accessor) {
+	return board.mapBool(accessor);
+    }
+
+    protected IntSupplier mapInt(Function<LocalBoard, IntSupplier> accessor) {
+	return board.mapInt(accessor);
     }
 
     public final DirtySupplier<CardPosition> position() {
@@ -163,15 +161,23 @@ public abstract class Card {
 	this.ageGoldGain = ageGoldGain;
     }
 
-    public final void deploy() {
-	deployedTurn.set(currentTurn.get());
+    public void setBoard(LocalBoard board) {
+	this.board.set(board);
     }
 
-    public final void undeploy() {
-	deployedTurn.set(null);
+    public void setMemento(CardMemento m) {
+	age.setValue(m.getAge());
+	buildLevel.setValue(m.getBuildLevel());
+	position.set(m.getPosition());
+	deployedTurn.set(m.getDeployedTurn());
+	simpleDyingProtection.set(m.isSimpleDyingProtection());
     }
 
     public final void setPosition(CardPosition position) {
 	this.position.set(position);
+    }
+
+    public final void undeploy() {
+	deployedTurn.set(null);
     }
 }
