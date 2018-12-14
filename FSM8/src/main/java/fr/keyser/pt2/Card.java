@@ -4,14 +4,12 @@ import java.util.function.Function;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.prop.BoolSupplier;
-import fr.keyser.pt2.prop.ConstBool;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.DirtySupplier;
 import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.prop.MutableBool;
 import fr.keyser.pt2.prop.MutableInt;
 import fr.keyser.pt2.prop.MutableProp;
-import fr.keyser.pt2.units.Unit;
 
 public abstract class Card {
 
@@ -43,9 +41,8 @@ public abstract class Card {
     private final MutableInt age = new MutableInt();
     protected final MutableInt tokenToDie = new MutableInt(1);
     private final MutableBool simpleDyingProtection = new MutableBool(false);
-    private final BoolSupplier isUnit = new ConstBool(this instanceof Unit);
-    private final BoolSupplier willLive = isUnit.and(age.lt(tokenToDie).or(age.eq(ConstInt.ONE).and(simpleDyingProtection)));
-    private final BoolSupplier willDie = isUnit.and(willLive.not());
+    private final BoolSupplier willLive = age.lt(tokenToDie).or(age.eq(ConstInt.ONE).and(simpleDyingProtection));
+    private final BoolSupplier willDie = willLive.not();
     private final IntSupplier dyingAgeToken = age.when(willDie);
 
     protected final MutableProp<CardPosition> position = new MutableProp<>();
@@ -103,7 +100,7 @@ public abstract class Card {
 	return mayCombat;
     }
 
-    public CardMemento getMemento() {
+    public final CardMemento getMemento() {
 	CardMemento cm = new CardMemento();
 	cm.setAge(age.getValue());
 	cm.setBuildLevel(buildLevel.getValue());
@@ -145,16 +142,20 @@ public abstract class Card {
 	return wood;
     }
 
-    protected BoolSupplier mapBool(Function<LocalBoard, BoolSupplier> accessor) {
+    protected final BoolSupplier mapBool(Function<LocalBoard, BoolSupplier> accessor) {
 	return board.mapBool(accessor);
     }
 
-    protected IntSupplier mapInt(Function<LocalBoard, IntSupplier> accessor) {
+    protected final IntSupplier mapInt(Function<LocalBoard, IntSupplier> accessor) {
 	return board.mapInt(accessor);
     }
 
     public final DirtySupplier<CardPosition> position() {
 	return position;
+    }
+
+    public CardPosition getPosition() {
+	return position.get();
     }
 
     public void setAgeGoldGain(IntSupplier ageGoldGain) {
@@ -165,7 +166,7 @@ public abstract class Card {
 	this.board.set(board);
     }
 
-    public void setMemento(CardMemento m) {
+    public final void setMemento(CardMemento m) {
 	age.setValue(m.getAge());
 	buildLevel.setValue(m.getBuildLevel());
 	position.set(m.getPosition());

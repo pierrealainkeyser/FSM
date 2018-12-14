@@ -87,6 +87,10 @@ public final class Slot {
 	return ageLegend;
     }
 
+    public LocalBoard getBoard() {
+        return board;
+    }
+
     public IntSupplier getBuildLevel() {
 	return buildLevel;
     }

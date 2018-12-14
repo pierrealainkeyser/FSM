@@ -12,4 +12,8 @@ public class MutableInt extends MutableProp<Integer> implements IntSupplier {
     public void setValue(int value) {
 	set(value);
     }
+
+    public void add(int delta) {
+	setValue(getValue() + delta);
+    }
 }

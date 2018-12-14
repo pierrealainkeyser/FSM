@@ -13,10 +13,12 @@ import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.CardPosition.Position;
+import fr.keyser.pt2.buildings.Building;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.prop.PlugableInt;
+import fr.keyser.pt2.units.Unit;
 
 public final class LocalBoard {
 
@@ -70,14 +72,15 @@ public final class LocalBoard {
 
 	Collection<Slot> values = all();
 	List<Slot> buildings = buildings().collect(toList());
+	List<Slot> units = units().collect(toList());
 
 	food = sum(values, Slot::getFood);
 	wood = sum(values, Slot::getWood);
 	crystal = sum(values, Slot::getCrystal);
 	combat = sum(values, Slot::getEffectiveCombat);
 
-	age = sum(values, Slot::getAge);
-	dyingAgeToken = sum(values, Slot::getDyingAgeToken);
+	age = sum(units, Slot::getAge);
+	dyingAgeToken = sum(units, Slot::getDyingAgeToken);
 
 	deployLegend = sum(values, Slot::getDeployLegend);
 	deployGoldGain = sum(values, Slot::getDeployGoldGain);
@@ -92,7 +95,15 @@ public final class LocalBoard {
 	ageLegend = sum(values, Slot::getAgeLegend);
 	ageGoldGain = sum(values, Slot::getAgeGoldGain);
 
-	unitsAbove3 = IntSupplier.count(units().map(Slot::getCombat), c -> c >= 3);
+	unitsAbove3 = IntSupplier.count(units.stream().map(Slot::getCombat), c -> c >= 3);
+    }
+
+    public Stream<Unit> getUnits() {
+	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Unit).map(c -> (Unit) c);
+    }
+
+    public Stream<Building> getBuildings() {
+	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Building).map(c -> (Building) c);
     }
 
     private void addSlot(int count, Position position) {
