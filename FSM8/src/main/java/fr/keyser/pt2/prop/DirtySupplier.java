@@ -9,12 +9,16 @@ import java.util.stream.Stream;
 
 public interface DirtySupplier<T> extends Supplier<T>, DirtyObserver {
 
-    public default <R> DirtySupplier<R> map(Function<T, R> mapper) {
-	return new MappedProp<>(mapper, this);
+    public default <R> DirtySupplier<R> map(Function<T, DirtySupplier<R>> mapper) {
+	return new BridgedProp<>(this, mapper);
     }
 
-    public default IntSupplier mapInt(Function<T, Integer> mapper) {
-	return new MappedInt<>(mapper, this);
+    public default IntSupplier mapInt(Function<T, IntSupplier> mapper) {
+	return new BridgedInt<>(this, mapper);
+    }
+
+    public default BoolSupplier mapBool(Function<T, BoolSupplier> mapper) {
+	return new BridgedBool<>(this, mapper);
     }
 
     public static <T> IntSupplier count(Stream<DirtySupplier<T>> mapped, Predicate<T> predicate) {

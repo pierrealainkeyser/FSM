@@ -55,4 +55,8 @@ public abstract class ComputedProp<T> implements DirtySupplier<T> {
 	return Objects.toString(get());
     }
 
+    public boolean isDirty() {
+	return dirty;
+    }
+
 }

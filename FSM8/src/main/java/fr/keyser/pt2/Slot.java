@@ -5,9 +5,9 @@ import java.util.function.Function;
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
+import fr.keyser.pt2.prop.DirtySupplier;
 import fr.keyser.pt2.prop.IntSupplier;
-import fr.keyser.pt2.prop.PlugableBool;
-import fr.keyser.pt2.prop.PlugableInt;
+import fr.keyser.pt2.prop.MutableProp;
 
 public final class Slot {
 
@@ -24,43 +24,43 @@ public final class Slot {
 
     private final LocalBoard board;
 
-    private Card card;
+    private final MutableProp<Card> card = new MutableProp<>();
 
     private final CardPosition cardPosition;
 
-    private final PlugableInt food = new PlugableInt();
+    private final IntSupplier food = mapInt(Card::getFood);
 
-    private final PlugableInt wood = new PlugableInt();
+    private final IntSupplier wood = mapInt(Card::getWood);
 
-    private final PlugableInt crystal = new PlugableInt();
+    private final IntSupplier crystal = mapInt(Card::getCrystal);
 
-    private final PlugableInt effectiveCombat = new PlugableInt();
+    private final IntSupplier effectiveCombat = mapInt(Slot::effectiveCombat);
 
-    private final PlugableInt combat = new PlugableInt();
+    private final IntSupplier combat = mapInt(Card::getCombat);
 
-    private final PlugableInt age = new PlugableInt();
+    private final IntSupplier age = mapInt(Card::getAge);
 
-    private final PlugableInt deployLegend = new PlugableInt();
+    private final IntSupplier deployLegend = mapInt(Card::getDeployLegend);
 
-    private final PlugableInt deployGoldGain = new PlugableInt();
+    private final IntSupplier deployGoldGain = mapInt(Card::getDeployGoldGain);
 
-    private final PlugableInt warLegend = new PlugableInt();
+    private final IntSupplier warLegend = mapInt(Card::getWarLegend);
 
-    private final PlugableInt warGoldGain = new PlugableInt();
+    private final IntSupplier warGoldGain = mapInt(Card::getWarGoldGain);
 
-    private final PlugableInt payLegend = new PlugableInt();
+    private final IntSupplier payLegend = mapInt(Card::getPayLegend);
 
-    private final PlugableInt payGoldGain = new PlugableInt();
+    private final IntSupplier payGoldGain = mapInt(Card::getPayGoldGain);
 
-    private final PlugableInt ageLegend = new PlugableInt();
+    private final IntSupplier ageLegend = mapInt(Card::getAgeLegend);
 
-    private final PlugableInt ageGoldGain = new PlugableInt();
+    private final IntSupplier ageGoldGain = mapInt(Card::getAgeGoldGain);
 
-    private final PlugableBool willDie = new PlugableBool();
+    private final BoolSupplier willDie = mapBool(Card::getWillDie);
 
-    private final PlugableInt dyingAgeToken = new PlugableInt();
+    private final IntSupplier dyingAgeToken = mapInt(Card::getDyingAgeToken);
 
-    private final PlugableInt buildLevel = new PlugableInt();
+    private final IntSupplier buildLevel = mapInt(Card::getBuildLevel);
 
     private final BoolSupplier buildLevel2 = buildLevel.gte(ConstInt.TWO);
 
@@ -93,7 +93,7 @@ public final class Slot {
 	return buildLevel2;
     }
 
-    public Card getCard() {
+    public DirtySupplier<Card> getCard() {
 	return card;
     }
 
@@ -159,40 +159,26 @@ public final class Slot {
     }
 
     public void setCard(Card card) {
-	if (this.card != null) {
-	    this.card.setPosition(null);
-	    this.card.setBoardAccessor(new BoardAccessor(null));
+
+	Card oldCard = this.card.get();
+	if (oldCard != null) {
+	    oldCard.setPosition(null);
+	    oldCard.setBoard(null);
 	}
 
-	food.setSupplier(apply(card, Card::getFood));
-	wood.setSupplier(apply(card, Card::getWood));
-	crystal.setSupplier(apply(card, Card::getCrystal));
+	this.card.set(card);
 
-	buildLevel.setSupplier(apply(card, Card::getBuildLevel));
-	age.setSupplier(apply(card, Card::getAge));
-	willDie.setSupplier(apply(card, Card::getWillDie));
-	dyingAgeToken.setSupplier(apply(card, Card::getDyingAgeToken));
-
-	combat.setSupplier(apply(card, Card::getCombat));
-	effectiveCombat.setSupplier(apply(card, Slot::effectiveCombat));
-
-	deployLegend.setSupplier(apply(card, Card::getDeployLegend));
-	deployGoldGain.setSupplier(apply(card, Card::getDeployGoldGain));
-
-	warLegend.setSupplier(apply(card, Card::getWarLegend));
-	warGoldGain.setSupplier(apply(card, Card::getWarGoldGain));
-
-	payLegend.setSupplier(apply(card, Card::getPayLegend));
-	payGoldGain.setSupplier(apply(card, Card::getPayGoldGain));
-
-	ageLegend.setSupplier(apply(card, Card::getAgeLegend));
-	ageGoldGain.setSupplier(apply(card, Card::getAgeGoldGain));
-
-	this.card = card;
-	if (this.card != null) {
-	    this.card.setPosition(cardPosition);
-	    this.card.setBoardAccessor(new BoardAccessor(this));
+	if (card != null) {
+	    card.setPosition(cardPosition);
+	    card.setBoard(board);
 	}
     }
 
+    private IntSupplier mapInt(Function<Card, IntSupplier> mapper) {
+	return this.card.mapInt(mapper);
+    }
+
+    private BoolSupplier mapBool(Function<Card, BoolSupplier> mapper) {
+	return this.card.mapBool(mapper);
+    }
 }

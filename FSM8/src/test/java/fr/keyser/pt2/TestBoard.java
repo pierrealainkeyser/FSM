@@ -15,7 +15,6 @@ import fr.keyser.pt2.units.Manticore;
 import fr.keyser.pt2.units.Sculptrice;
 
 public class TestBoard {
-
     @Test
     public void test() {
 

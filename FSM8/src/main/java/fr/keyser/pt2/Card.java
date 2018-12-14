@@ -1,5 +1,7 @@
 package fr.keyser.pt2;
 
+import java.util.function.Function;
+
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
@@ -8,10 +10,11 @@ import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.prop.MutableBool;
 import fr.keyser.pt2.prop.MutableInt;
 import fr.keyser.pt2.prop.MutableProp;
-import fr.keyser.pt2.prop.PlugableInt;
 
 public abstract class Card {
 
+    private final MutableProp<LocalBoard> board = new MutableProp<>();
+    
     protected IntSupplier combat = ConstInt.ZERO;
     protected IntSupplier warLegend = ConstInt.ZERO;
     protected IntSupplier warGoldGain = ConstInt.ZERO;
@@ -32,7 +35,7 @@ public abstract class Card {
     private final MutableInt buildLevel = new MutableInt();
 
     private final MutableInt deployedTurn = new MutableInt();
-    private final PlugableInt currentTurn = new PlugableInt();
+    private final IntSupplier currentTurn = mapInt(LocalBoard::getCurrentTurn);
     private final BoolSupplier justDeployed = deployedTurn.eq(currentTurn);
 
     private final MutableInt age = new MutableInt();
@@ -43,6 +46,20 @@ public abstract class Card {
 
     protected final MutableProp<CardPosition> position = new MutableProp<>();
     protected BoolSupplier mayCombat = position.match(CardPosition::mayCombat);
+
+   
+
+    protected IntSupplier mapInt(Function<LocalBoard, IntSupplier> accessor) {
+	return board.mapInt(accessor);
+    }
+
+    protected BoolSupplier mapBool(Function<LocalBoard, BoolSupplier> accessor) {
+	return board.mapBool(accessor);
+    }
+
+    public void setBoard(LocalBoard board) {
+	this.board.set(board);
+    }
 
     public CardMemento getMemento() {
 	CardMemento cm = new CardMemento();
@@ -144,14 +161,6 @@ public abstract class Card {
 
     public void setAgeGoldGain(IntSupplier ageGoldGain) {
 	this.ageGoldGain = ageGoldGain;
-    }
-
-    public void setBoardAccessor(BoardAccessor accessor) {
-
-    }
-
-    public final void setCurrentTurn(IntSupplier turn) {
-	currentTurn.setSupplier(turn);
     }
 
     public final void deploy() {
