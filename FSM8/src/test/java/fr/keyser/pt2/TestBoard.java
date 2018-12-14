@@ -12,6 +12,7 @@ import fr.keyser.pt2.units.Knight;
 import fr.keyser.pt2.units.Leviathan;
 import fr.keyser.pt2.units.Looter;
 import fr.keyser.pt2.units.Manticore;
+import fr.keyser.pt2.units.Princess;
 import fr.keyser.pt2.units.Sculptrice;
 
 public class TestBoard {
@@ -30,6 +31,7 @@ public class TestBoard {
 	Leviathan leviathan = new Leviathan();
 	lb1.front(1).play(leviathan);
 	lb1.front(2).play(new Looter());
+	lb1.back(0).play(new Princess());
 
 	Town town = new Town();
 	town.setBuildingLevel(2);
@@ -37,8 +39,7 @@ public class TestBoard {
 
 	Tavern tavern = new Tavern();
 	tavern.setBuildingLevel(2);
-	Slot b1 = lb1.building(1);
-	b1.play(tavern);
+	lb1.building(1).play(tavern);
 
 	Sculptrice sculptrice = new Sculptrice();
 

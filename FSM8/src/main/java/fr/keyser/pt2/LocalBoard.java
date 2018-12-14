@@ -1,5 +1,7 @@
 package fr.keyser.pt2;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +42,8 @@ public final class LocalBoard {
 
     private final IntSupplier warLegend;
 
+    private final IntSupplier buildingWarLegend;
+
     private final IntSupplier warGoldGain;
 
     private final IntSupplier payLegend;
@@ -65,6 +69,8 @@ public final class LocalBoard {
 	addSlot(4, Position.BUILDING);
 
 	Collection<Slot> values = all();
+	List<Slot> buildings = buildings().collect(toList());
+
 	food = sum(values, Slot::getFood);
 	wood = sum(values, Slot::getWood);
 	crystal = sum(values, Slot::getCrystal);
@@ -76,6 +82,7 @@ public final class LocalBoard {
 	deployLegend = sum(values, Slot::getDeployLegend);
 	deployGoldGain = sum(values, Slot::getDeployGoldGain);
 
+	buildingWarLegend = sum(buildings, Slot::getWarLegend);
 	warLegend = ConstInt.THREE.mult(victory).add(sum(values, Slot::getWarLegend));
 	warGoldGain = sum(values, Slot::getWarGoldGain);
 
@@ -109,6 +116,10 @@ public final class LocalBoard {
 	return getSlot(Position.BUILDING.index(index));
     }
 
+    private Stream<Slot> buildings() {
+	return slots.values().stream().filter(s -> !s.getCardPosition().isUnit());
+    }
+
     public Slot front(int index) {
 	return getSlot(Position.FRONT.index(index));
     }
@@ -123,6 +134,10 @@ public final class LocalBoard {
 
     public IntSupplier getAgeLegend() {
 	return ageLegend;
+    }
+
+    public IntSupplier getBuildingWarLegend() {
+	return buildingWarLegend;
     }
 
     public IntSupplier getCombat() {
@@ -213,7 +228,7 @@ public final class LocalBoard {
 	vals.add("Deploy phase legend : " + deployLegend);
 	vals.add("Deploy phase gold gain : " + deployGoldGain);
 
-	vals.add("War phase legend : " + warLegend);
+	vals.add("War phase legend : " + warLegend + " (" + buildingWarLegend + ")");
 	vals.add("War phase gold gain : " + warGoldGain);
 
 	vals.add("Pay phase legend : " + payLegend);
