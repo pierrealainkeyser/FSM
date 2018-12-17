@@ -103,6 +103,27 @@ public final class LocalBoard {
 	        .add(ConstInt.ONE.when(crystal.gte(ConstInt.ONE)));
     }
 
+    public ResourcesStats getStats() {
+	ResourcesStats r = new ResourcesStats();
+	r.setAge(age.getValue());
+	r.setAgeGoldGain(ageGoldGain.getValue());
+	r.setAgeLegend(ageLegend.getValue());
+	r.setCombat(combat.getValue());
+	r.setCrystal(crystal.getValue());
+	r.setDeployGoldGain(deployGoldGain.getValue());
+	r.setDeployLegend(deployLegend.getValue());
+	r.setDyingAgeToken(dyingAgeToken.getValue());
+	r.setFood(food.getValue());
+	r.setPayGoldGain(payGoldGain.getValue());
+	r.setPayLegend(payLegend.getValue());
+	r.setWarGoldGain(warGoldGain.getValue());
+	r.setWarLegend(warLegend.getValue());
+	r.setWood(wood.getValue());
+	
+	r.setVictory(victory.getValue());
+	return r;
+    }
+
     private void addSlot(int count, Position position) {
 	for (int i = 0; i < count; ++i)
 	    addSlot(new Slot(this, position.index(i)));

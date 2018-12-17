@@ -48,6 +48,26 @@ public abstract class Card {
     protected final MutableProp<CardPosition> position = new MutableProp<>();
     protected BoolSupplier mayCombat = position.match(CardPosition::mayCombat);
 
+    public ResourcesStats getStats() {
+	ResourcesStats r = new ResourcesStats();
+	r.setAge(age.getValue());
+	r.setAgeGoldGain(ageGoldGain.getValue());
+	r.setAgeLegend(ageLegend.getValue());
+	r.setCombat(combat.getValue());
+	r.setCrystal(crystal.getValue());
+	r.setDeployGoldGain(deployGoldGain.getValue());
+	r.setDeployLegend(deployLegend.getValue());
+	r.setDyingAgeToken(dyingAgeToken.getValue());
+	r.setFood(food.getValue());
+	r.setPayGoldGain(payGoldGain.getValue());
+	r.setPayLegend(payLegend.getValue());
+	r.setWarGoldGain(warGoldGain.getValue());
+	r.setWarLegend(warLegend.getValue());
+	r.setWood(wood.getValue());
+
+	return r;
+    }
+
     public final void deploy() {
 	deployedTurn.set(currentTurn.get());
     }
