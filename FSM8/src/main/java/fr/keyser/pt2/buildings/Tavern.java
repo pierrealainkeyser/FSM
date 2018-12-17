@@ -7,7 +7,7 @@ public class Tavern extends Building {
     public Tavern() {
 	super(cost().food(1), cost().wood(1).food(1));
 	IntSupplier totalFood = mapInt(LocalBoard::getFood);
-	warGoldGain = totalFood;
+	payGoldGain = totalFood;
 	warLegend = totalFood.when(getLevel2());
     }
 }

@@ -1,6 +1,5 @@
 package fr.keyser.pt2.prop;
 
-import java.util.Objects;
 import java.util.function.Function;
 
 public class BridgedProp<T, R> extends ObservableSupplier<R> {
@@ -39,10 +38,4 @@ public class BridgedProp<T, R> extends ObservableSupplier<R> {
 
 	dirtyListener.setDirty();
     }
-
-    @Override
-    public String toString() {
-	return Objects.toString(get());
-    }
-
 }

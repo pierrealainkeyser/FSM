@@ -25,9 +25,4 @@ public class MutableProp<T> extends ObservableSupplier<T> {
 	if (changed)
 	    observer.setDirty();
     }
-
-    @Override
-    public String toString() {
-	return Objects.toString(value);
-    }
 }

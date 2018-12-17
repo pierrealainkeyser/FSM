@@ -1,7 +1,6 @@
 package fr.keyser.pt2.prop;
 
 import java.util.Collection;
-import java.util.Objects;
 
 public abstract class ComputedProp<T> extends ObservableSupplier<T> {
 
@@ -36,11 +35,6 @@ public abstract class ComputedProp<T> extends ObservableSupplier<T> {
 	    dirty = true;
 	    observer.setDirty();
 	}
-    }
-
-    @Override
-    public String toString() {
-	return Objects.toString(get());
     }
 
     public boolean isDirty() {
