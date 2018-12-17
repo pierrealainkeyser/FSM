@@ -4,7 +4,6 @@ import fr.keyser.pt2.LocalBoard;
 import fr.keyser.pt2.prop.ConstInt;
 
 public class Princess extends Unit {
-
     public Princess() {
 	super(5);
 	combat = ConstInt.ONE;
