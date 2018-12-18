@@ -43,8 +43,8 @@ public class AutomatContainer implements EventReceiver {
 	this.idSupplier = idSupplier;
 	this.listener = new DelegatedAutomatListener(listener) {
 	    @Override
-	    public boolean guard(InstanceId id, Event evt) {
-		AutomatInstance ai = instances.get(id);
+	    public boolean guard(InstanceState state, Event evt) {
+		AutomatInstance ai = instances.get(state.getId());
 		if (ai == null)
 		    return false;
 
@@ -57,19 +57,19 @@ public class AutomatContainer implements EventReceiver {
 		if (StateType.ORTHOGONAL == type)
 		    return evt instanceof Joined;
 
-		return super.guard(id, evt);
+		return super.guard(state, evt);
 	    }
 
 	    @Override
-	    public void reaching(InstanceId id, State reached, StateType type) {
-		super.reaching(id, reached, type);
+	    public void reaching(InstanceState state, State reached, StateType type) {
+		super.reaching(state, reached, type);
 
 		if (StateType.ORTHOGONAL == type) {
-		    startAllChilds(id, reached);
+		    startAllChilds(state.getId(), reached);
 		} else if (StateType.JOINING == type) {
-		    checkJoinedState(id, reached);
+		    checkJoinedState(state.getId(), reached);
 		} else if (StateType.TERMINAL == type) {
-		    terminateInstance(id);
+		    terminateInstance(state.getId());
 		}
 	    }
 	};
@@ -129,7 +129,7 @@ public class AutomatContainer implements EventReceiver {
 
 	List<AutomatInstance> selected = prepareTargets(event);
 	selected.forEach(ai -> {
-	    if (listener.guard(ai.getId(), event))
+	    if (listener.guard(ai.getInstanceState(), event))
 		ai.receive(status, event);
 	});
 

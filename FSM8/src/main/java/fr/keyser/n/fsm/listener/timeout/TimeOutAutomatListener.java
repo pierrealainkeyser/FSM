@@ -38,16 +38,16 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public boolean guard(InstanceId id, Event event) {
+    public boolean guard(InstanceState state, Event event) {
 	if (event instanceof TimeOut) {
 	    TimeOut incomming = (TimeOut) event;
 
 	    // same timer
-	    RegisteredTimeOut current = registeredTimeout.get(id);
+	    RegisteredTimeOut current = registeredTimeout.get(state.getId());
 	    return current != null && current.isSameTimer(incomming.getTimer());
 	}
 
-	return super.guard(id, event);
+	return super.guard(state, event);
     }
 
     @Override
@@ -62,12 +62,12 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void entering(InstanceId id, State entered, Event event) {
+    public void entering(InstanceState state, State entered, Event event) {
 	Supplier<Duration> d = timeouts.get(entered);
 	if (d != null) {
-	    schedule(TimeOut.timeout(id, entered, ++nextTimeout, d.get()));
+	    schedule(TimeOut.timeout(state.getId(), entered, ++nextTimeout, d.get()));
 	}
-	super.entering(id, entered, event);
+	super.entering(state, entered, event);
     }
 
     private void removeTimedOut(InstanceId id) {
@@ -78,11 +78,12 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void leaving(InstanceId id, State leaved, Event event) {
+    public void leaving(InstanceState state, State leaved, Event event) {
+	InstanceId id = state.getId();
 	RegisteredTimeOut timedOut = registeredTimeout.get(id);
 	if (timedOut != null && timedOut.isSameState(leaved)) {
 	    removeTimedOut(id);
 	}
-	super.leaving(id, leaved, event);
+	super.leaving(state, leaved, event);
     }
 }

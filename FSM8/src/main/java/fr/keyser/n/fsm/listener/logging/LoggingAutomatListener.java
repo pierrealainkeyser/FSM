@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.keyser.n.fsm.Event;
-import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.StateType;
@@ -21,19 +20,19 @@ public class LoggingAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void entering(InstanceId id, State entered, Event event) {
+    public void entering(InstanceState id, State entered, Event event) {
 	logger.debug("entering {} {} @{}", id, entered, event);
 	super.entering(id, entered, event);
     }
 
     @Override
-    public void following(InstanceId id, Transition transition) {
+    public void following(InstanceState id, Transition transition) {
 	logger.debug("following {} {} ", id, transition);
 	super.following(id, transition);
     }
 
     @Override
-    public boolean guard(InstanceId id, Transition transition) {
+    public boolean guard(InstanceState id, Transition transition) {
 	boolean guarded = super.guard(id, transition);
 	if (!guarded) {
 	    logger.debug("guard reject transition {} {} ", id, transition);
@@ -42,13 +41,13 @@ public class LoggingAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void leaving(InstanceId id, State leaved, Event event) {
+    public void leaving(InstanceState id, State leaved, Event event) {
 	logger.debug("leaving {} {} @{}", id, leaved, event);
 	super.leaving(id, leaved, event);
     }
 
     @Override
-    public void reaching(InstanceId id, State reached, StateType type) {
+    public void reaching(InstanceState id, State reached, StateType type) {
 	logger.debug("reaching {} {}({})", id, reached, type);
 	super.reaching(id, reached, type);
     }
@@ -66,7 +65,7 @@ public class LoggingAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public boolean guard(InstanceId id, Event event) {
+    public boolean guard(InstanceState id, Event event) {
 	boolean guarded = super.guard(id, event);
 	if (!guarded) {
 	    logger.debug("guard reject event {} {} ", id, event);

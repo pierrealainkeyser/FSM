@@ -5,7 +5,7 @@ import java.util.Map;
 
 import fr.keyser.n.fsm.Event;
 import fr.keyser.n.fsm.EventReceiver;
-import fr.keyser.n.fsm.InstanceId;
+import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.StateType;
 import fr.keyser.n.fsm.Transition;
@@ -28,7 +28,7 @@ public class ChoiceAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public boolean guard(InstanceId id, Transition transition) {
+    public boolean guard(InstanceState state, Transition transition) {
 	Event event = transition.getEvent();
 	if (event instanceof Choice) {
 	    Choice choice = (Choice) event;
@@ -42,14 +42,14 @@ public class ChoiceAutomatListener extends DelegatedAutomatListener {
 		return false;
 	}
 
-	return super.guard(id, transition);
+	return super.guard(state, transition);
     }
 
     @Override
-    public void reaching(InstanceId id, State reached, StateType type) {
-	super.reaching(id, reached, type);
+    public void reaching(InstanceState state, State reached, StateType type) {
+	super.reaching(state, reached, type);
 	if (StateType.CHOICE == type) {
-	    receiver.receive(Choice.choice(id));
+	    receiver.receive(Choice.choice(state.getId()));
 	}
     }
 }

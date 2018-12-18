@@ -31,6 +31,10 @@ public class Event {
 	    return put(INSTANCE_ID, id);
 	}
 
+	public Builder id(InstanceState state) {
+	    return id(state.getId());
+	}
+
 	public Builder put(String key, Object value) {
 	    args.put(key, value);
 	    return this;

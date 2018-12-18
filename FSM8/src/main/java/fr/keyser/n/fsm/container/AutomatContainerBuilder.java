@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import fr.keyser.n.fsm.EventReceiver;
-import fr.keyser.n.fsm.InstanceId;
+import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.LazyEventReceiver;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.automat.Automat;
@@ -61,12 +61,12 @@ public class AutomatContainerBuilder {
 	    return this;
 	}
 
-	public StateConfigurer entry(Consumer<InstanceId> run) {
+	public StateConfigurer entry(Consumer<InstanceState> run) {
 	    entries.entry(state, run);
 	    return this;
 	}
 
-	public StateConfigurer exit(Consumer<InstanceId> run) {
+	public StateConfigurer exit(Consumer<InstanceState> run) {
 	    entries.exit(state, run);
 	    return this;
 	}

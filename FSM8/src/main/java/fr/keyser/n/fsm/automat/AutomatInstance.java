@@ -37,7 +37,7 @@ class AutomatInstance {
     }
 
     private boolean guard(Transition transition) {
-	return listener.guard(id, transition);
+	return listener.guard(getInstanceState(), transition);
     }
 
     void receive(EventProcessingStatus status, Event event) {
@@ -52,26 +52,28 @@ class AutomatInstance {
     }
 
     private void follow(EventProcessingStatus status, Transition t) {
-	t.leaving().forEach(l -> listener.leaving(id, l, t.getEvent()));
-	listener.following(id, t);
-	t.entering().forEach(e -> listener.entering(id, e, t.getEvent()));
+	InstanceState state = getInstanceState();
+	t.leaving().forEach(l -> listener.leaving(state, l, t.getEvent()));
+	listener.following(state, t);
+	t.entering().forEach(e -> listener.entering(state, e, t.getEvent()));
 
 	current = t.getDestination();
 	reachCurrentState();
     }
 
     void start() {
+	InstanceState state = getInstanceState();
 	if (parentId == null) {
-	    current.states().forEach(s -> listener.entering(id, s, Started.INSTANCE));
+	    current.states().forEach(s -> listener.entering(state, s, Started.INSTANCE));
 	} else
-	    listener.entering(id, current, Started.INSTANCE);
+	    listener.entering(state, current, Started.INSTANCE);
 
 	reachCurrentState();
     }
 
     private void reachCurrentState() {
 	StateType type = automat.type(current);
-	listener.reaching(id, current, type);
+	listener.reaching(getInstanceState(), current, type);
     }
 
     InstanceId getId() {

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import fr.keyser.n.fsm.Event;
-import fr.keyser.n.fsm.InstanceId;
+import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.listener.AutomatListener;
 import fr.keyser.n.fsm.listener.DelegatedAutomatListener;
@@ -42,15 +42,15 @@ public class EntryAutomatListener extends DelegatedAutomatListener {
 	return add(state, exits, run);
     }
 
-    public EntryAutomatListener entry(State state, Consumer<InstanceId> run) {
+    public EntryAutomatListener entry(State state, Consumer<InstanceState> run) {
 	return add(state, entries, run);
     }
 
-    public EntryAutomatListener exit(State state, Consumer<InstanceId> run) {
+    public EntryAutomatListener exit(State state, Consumer<InstanceState> run) {
 	return add(state, exits, run);
     }
 
-    private EntryAutomatListener add(State state, Map<State, List<EntryListener>> map, Consumer<InstanceId> consumer) {
+    private EntryAutomatListener add(State state, Map<State, List<EntryListener>> map, Consumer<InstanceState> consumer) {
 	return add(state, map, (id, s, e) -> consumer.accept(id));
     }
 
@@ -64,16 +64,16 @@ public class EntryAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void entering(InstanceId id, State entered, Event event) {
-	super.entering(id, entered, event);
+    public void entering(InstanceState state, State entered, Event event) {
+	super.entering(state, entered, event);
 
 	List<EntryListener> ls = entries.get(entered);
 	if (ls != null)
-	    ls.forEach(l -> l.handle(id, entered, event));
+	    ls.forEach(l -> l.handle(state, entered, event));
     }
 
     @Override
-    public void leaving(InstanceId id, State leaved, Event event) {
+    public void leaving(InstanceState id, State leaved, Event event) {
 	super.leaving(id, leaved, event);
 
 	List<EntryListener> ls = exits.get(leaved);

@@ -1,7 +1,6 @@
 package fr.keyser.n.fsm.listener;
 
 import fr.keyser.n.fsm.Event;
-import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.StateType;
@@ -19,19 +18,19 @@ public class DelegatedAutomatListener implements AutomatListener {
     }
 
     @Override
-    public void entering(InstanceId id, State entered, Event event) {
+    public void entering(InstanceState id, State entered, Event event) {
 	if (listener != null)
 	    listener.entering(id, entered, event);
     }
 
     @Override
-    public void following(InstanceId id, Transition transition) {
+    public void following(InstanceState id, Transition transition) {
 	if (listener != null)
 	    listener.following(id, transition);
     }
 
     @Override
-    public boolean guard(InstanceId id, Transition transition) {
+    public boolean guard(InstanceState id, Transition transition) {
 	if (listener != null)
 	    return listener.guard(id, transition);
 	else
@@ -39,13 +38,13 @@ public class DelegatedAutomatListener implements AutomatListener {
     }
 
     @Override
-    public void leaving(InstanceId id, State leaved, Event event) {
+    public void leaving(InstanceState id, State leaved, Event event) {
 	if (listener != null)
 	    listener.leaving(id, leaved, event);
     }
 
     @Override
-    public void reaching(InstanceId id, State reached, StateType type) {
+    public void reaching(InstanceState id, State reached, StateType type) {
 	if (listener != null)
 	    listener.reaching(id, reached, type);
     }
@@ -63,7 +62,7 @@ public class DelegatedAutomatListener implements AutomatListener {
     }
 
     @Override
-    public boolean guard(InstanceId id, Event event) {
+    public boolean guard(InstanceState id, Event event) {
 	if (listener != null)
 	    return listener.guard(id, event);
 	else
