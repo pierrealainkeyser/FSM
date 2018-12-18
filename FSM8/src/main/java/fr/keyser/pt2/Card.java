@@ -1,8 +1,14 @@
 package fr.keyser.pt2;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import fr.keyser.pt.CardPosition;
+import fr.keyser.pt2.effects.TargetableEffect;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.DirtySupplier;
@@ -47,6 +53,17 @@ public abstract class Card {
 
     protected final MutableProp<CardPosition> position = new MutableProp<>();
     protected BoolSupplier mayCombat = position.match(CardPosition::mayCombat);
+
+    private Map<PhaseEvent, List<TargetableEffect>> effects = new EnumMap<>(PhaseEvent.class);
+
+    protected void addEffect(PhaseEvent when, TargetableEffect effect) {
+	List<TargetableEffect> data = effects.computeIfAbsent(when, w -> new ArrayList<>());
+	data.add(effect);
+    }
+
+    public List<TargetableEffect> getEffects(PhaseEvent when) {
+	return Collections.unmodifiableList(effects.getOrDefault(when, Collections.emptyList()));
+    }
 
     public ResourcesStats getStats() {
 	ResourcesStats r = new ResourcesStats();

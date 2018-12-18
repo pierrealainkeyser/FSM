@@ -14,11 +14,11 @@ public class ChoosenTargets {
 
     }
 
-    public CardPosition get(String key) {
+    public CardPosition get(TargetableEffect effect, String key) {
 	return null;
     }
 
-    public CardPosition getDefault() {
-	return get(Target.DEFAULT);
+    public CardPosition get(TargetableEffect effect) {
+	return null;
     }
 }

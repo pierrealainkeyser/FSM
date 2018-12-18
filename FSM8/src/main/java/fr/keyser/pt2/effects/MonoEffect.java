@@ -11,7 +11,7 @@ public interface MonoEffect extends TargetableEffect {
     @Override
     public default void apply(Slot source, ChoosenTargets targets) {
 	LocalBoard board = source.getBoard();
-	Slot slot = board.getSlot(targets.getDefault());
+	Slot slot = board.getSlot(targets.get(this));
 	Card target = slot.getCard().get();
 	apply(source, target);
     }

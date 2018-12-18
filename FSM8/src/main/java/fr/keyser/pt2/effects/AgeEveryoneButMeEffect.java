@@ -3,11 +3,11 @@ package fr.keyser.pt2.effects;
 import fr.keyser.pt2.Card;
 import fr.keyser.pt2.Slot;
 
-public class AgeEveryoneButMe implements SelfEffect {
+public class AgeEveryoneButMeEffect implements SelfEffect {
 
-    public static final AgeEveryoneButMe INSTANCE = new AgeEveryoneButMe();
+    public static final AgeEveryoneButMeEffect INSTANCE = new AgeEveryoneButMeEffect();
 
-    private AgeEveryoneButMe() {
+    private AgeEveryoneButMeEffect() {
 
     }
 

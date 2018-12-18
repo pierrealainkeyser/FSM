@@ -4,11 +4,11 @@ import fr.keyser.pt2.PhaseEvent;
 import fr.keyser.pt2.effects.DoAgeEffect;
 import fr.keyser.pt2.prop.ConstInt;
 
-public class Devil extends Unit {
-    public Devil() {
-	super(-2);
-	combat = ConstInt.TWO;
-	ageLegend = ConstInt.MINUS_TWO.when(getWillDie().and(getAge().eq(ConstInt.ONE)));
+public class CaveSpirit extends Unit {
+    public CaveSpirit() {
+	super(1);
+	combat = ConstInt.FOUR;
+	crystal = ConstInt.ONE;
 	addEffect(PhaseEvent.INITIAL_DEPLOY, DoAgeEffect.INSTANCE);
     }
 }

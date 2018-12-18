@@ -16,12 +16,13 @@ public class DropAgeTokenEffect implements MonoEffect {
 
     @Override
     public Stream<Target> targets(Slot source) {
-	return source.getBoard().getUnits().map(dc -> new Target(dc.getPosition()));
+	return source.getBoard().getUnits().map(dc -> target(dc.getPosition()));
     }
 
     @Override
     public void apply(Slot source, Card target) {
-	target.addAge(ageCount.getValue());
+	int value = ageCount.getValue();
+	target.addAge(value);
     }
 
 }

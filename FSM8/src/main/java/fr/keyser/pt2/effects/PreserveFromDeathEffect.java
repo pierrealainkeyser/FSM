@@ -9,7 +9,7 @@ public class PreserveFromDeathEffect implements MonoEffect {
 
     @Override
     public Stream<Target> targets(Slot source) {
-	return source.getBoard().getUnits().filter(c -> c.getWillDie().getValue()).map(dc -> new Target(dc.getPosition()));
+	return source.getBoard().getUnits().filter(c -> c.getWillDie().getValue()).map(dc -> target(dc.getPosition()));
     }
 
     @Override

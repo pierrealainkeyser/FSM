@@ -8,17 +8,11 @@ import fr.keyser.pt.CardPosition;
 
 public class Target {
 
-    public static final String DEFAULT = "_";
-
     private final String name;
 
     private final CardPosition position;
 
     private List<Target> targets;
-
-    public Target(CardPosition position) {
-	this(DEFAULT, position);
-    }
 
     public Target(String name, CardPosition position) {
 	this.name = name;

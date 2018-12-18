@@ -8,7 +8,7 @@ public interface SelfEffect extends TargetableEffect {
 
     @Override
     public default Stream<Target> targets(Slot source) {
-	return Stream.of(new Target(source.getCardPosition()));
+	return Stream.of(target(source.getCardPosition()));
     }
 
     public void apply(Slot source);
