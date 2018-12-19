@@ -1,18 +1,26 @@
 package fr.keyser.pt2.effects;
 
+import java.util.Collections;
+import java.util.List;
+
+import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.Card;
 import fr.keyser.pt2.LocalBoard;
 import fr.keyser.pt2.Slot;
 
 public interface MonoEffect extends TargetableEffect {
 
-    public void apply(Slot source, Card target);
+    public List<EffectLog> apply(Slot source, Card target);
 
     @Override
-    public default void apply(Slot source, ChoosenTargets targets) {
+    public default List<EffectLog> apply(Slot source, ChoosenTargets targets) {
 	LocalBoard board = source.getBoard();
-	Slot slot = board.getSlot(targets.get(this));
+	CardPosition position = targets.get(this);
+	if (position == null)
+	    return Collections.emptyList();
+	
+	Slot slot = board.getSlot(position);
 	Card target = slot.getCard().get();
-	apply(source, target);
+	return apply(source, target);
     }
 }

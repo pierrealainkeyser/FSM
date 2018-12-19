@@ -21,6 +21,8 @@ public abstract class Card {
 
     private final MutableProp<LocalBoard> board = new MutableProp<>();
 
+    private int id;
+
     protected IntSupplier combat = ConstInt.ZERO;
     protected IntSupplier warLegend = ConstInt.ZERO;
     protected IntSupplier warGoldGain = ConstInt.ZERO;
@@ -56,45 +58,17 @@ public abstract class Card {
 
     private Map<PhaseEvent, List<TargetableEffect>> effects = new EnumMap<>(PhaseEvent.class);
 
-    protected void addEffect(PhaseEvent when, TargetableEffect effect) {
+    public final void addAge(int delta) {
+	getAge().add(delta);
+    }
+
+    protected final void addEffect(PhaseEvent when, TargetableEffect effect) {
 	List<TargetableEffect> data = effects.computeIfAbsent(when, w -> new ArrayList<>());
 	data.add(effect);
     }
 
-    public List<TargetableEffect> getEffects(PhaseEvent when) {
-	return Collections.unmodifiableList(effects.getOrDefault(when, Collections.emptyList()));
-    }
-
-    public ResourcesStats getStats() {
-	ResourcesStats r = new ResourcesStats();
-	r.setAge(age.getValue());
-	r.setAgeGoldGain(ageGoldGain.getValue());
-	r.setAgeLegend(ageLegend.getValue());
-	r.setCombat(combat.getValue());
-	r.setCrystal(crystal.getValue());
-	r.setDeployGoldGain(deployGoldGain.getValue());
-	r.setDeployLegend(deployLegend.getValue());
-	r.setDyingAgeToken(dyingAgeToken.getValue());
-	r.setFood(food.getValue());
-	r.setPayGoldGain(payGoldGain.getValue());
-	r.setPayLegend(payLegend.getValue());
-	r.setWarGoldGain(warGoldGain.getValue());
-	r.setWarLegend(warLegend.getValue());
-	r.setWood(wood.getValue());
-
-	return r;
-    }
-
     public final void deploy() {
 	deployedTurn.set(currentTurn.get());
-    }
-
-    public void setBuildingLevel(int level) {
-	getBuildLevel().setValue(level);
-    }
-
-    public void addAge(int delta) {
-	getAge().add(delta);
     }
 
     public final MutableInt getAge() {
@@ -133,8 +107,16 @@ public abstract class Card {
 	return dyingAgeToken;
     }
 
+    public final List<TargetableEffect> getEffects(PhaseEvent when) {
+	return Collections.unmodifiableList(effects.getOrDefault(when, Collections.emptyList()));
+    }
+
     public final IntSupplier getFood() {
 	return food;
+    }
+
+    public final int getId() {
+        return id;
     }
 
     public final BoolSupplier getJustDeployed() {
@@ -163,8 +145,32 @@ public abstract class Card {
 	return payLegend;
     }
 
+    public final CardPosition getPosition() {
+	return position.get();
+    }
+
     public final MutableBool getSimpleDyingProtection() {
 	return simpleDyingProtection;
+    }
+
+    public ResourcesStats getStats() {
+	ResourcesStats r = new ResourcesStats();
+	r.setAge(age.getValue());
+	r.setAgeGoldGain(ageGoldGain.getValue());
+	r.setAgeLegend(ageLegend.getValue());
+	r.setCombat(combat.getValue());
+	r.setCrystal(crystal.getValue());
+	r.setDeployGoldGain(deployGoldGain.getValue());
+	r.setDeployLegend(deployLegend.getValue());
+	r.setDyingAgeToken(dyingAgeToken.getValue());
+	r.setFood(food.getValue());
+	r.setPayGoldGain(payGoldGain.getValue());
+	r.setPayLegend(payLegend.getValue());
+	r.setWarGoldGain(warGoldGain.getValue());
+	r.setWarLegend(warLegend.getValue());
+	r.setWood(wood.getValue());
+
+	return r;
     }
 
     public final IntSupplier getWarGoldGain() {
@@ -179,7 +185,7 @@ public abstract class Card {
 	return willDie;
     }
 
-    public BoolSupplier getWillLive() {
+    public final BoolSupplier getWillLive() {
 	return willLive;
     }
 
@@ -199,16 +205,20 @@ public abstract class Card {
 	return position;
     }
 
-    public CardPosition getPosition() {
-	return position.get();
-    }
-
-    public void setAgeGoldGain(IntSupplier ageGoldGain) {
+    public final void setAgeGoldGain(IntSupplier ageGoldGain) {
 	this.ageGoldGain = ageGoldGain;
     }
 
-    public void setBoard(LocalBoard board) {
+    public final void setBoard(LocalBoard board) {
 	this.board.set(board);
+    }
+
+    public final void setBuildingLevel(int level) {
+	getBuildLevel().setValue(level);
+    }
+
+    public final void setId(int id) {
+        this.id = id;
     }
 
     public final void setMemento(CardMemento m) {

@@ -1,5 +1,10 @@
 package fr.keyser.pt2.effects;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import fr.keyser.pt2.Card;
 import fr.keyser.pt2.Slot;
 
 public class UpgradeBuildingsToLevel2Effect implements SelfEffect {
@@ -11,7 +16,14 @@ public class UpgradeBuildingsToLevel2Effect implements SelfEffect {
     }
 
     @Override
-    public void apply(Slot card) {
-	card.getBoard().getBuildings().forEach(b -> b.setBuildingLevel(2));
+    public List<EffectLog> apply(Slot source) {
+	Card card = source.getCard().get();
+	Stream<EffectLog> e = source.getBoard().getBuildings()
+	        .filter(b -> b.getBuildLevel().getValue() == 1)
+	        .map(b -> {
+	            b.setBuildingLevel(2);
+	            return EffectLog.upgrade(card, b);
+	        });
+	return e.collect(Collectors.toList());
     }
 }

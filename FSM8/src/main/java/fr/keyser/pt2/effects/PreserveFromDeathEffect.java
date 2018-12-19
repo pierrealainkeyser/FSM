@@ -1,5 +1,8 @@
 package fr.keyser.pt2.effects;
 
+import static java.util.Arrays.asList;
+
+import java.util.List;
 import java.util.stream.Stream;
 
 import fr.keyser.pt2.Card;
@@ -13,8 +16,9 @@ public class PreserveFromDeathEffect implements MonoEffect {
     }
 
     @Override
-    public void apply(Slot source, Card target) {
+    public List<EffectLog> apply(Slot source, Card target) {
 	target.getSimpleDyingProtection().setValue(true);
+	return asList(EffectLog.preserve(source.getCard().get(), target));
     }
 
 }

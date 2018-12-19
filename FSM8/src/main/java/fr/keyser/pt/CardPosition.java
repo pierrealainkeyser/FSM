@@ -2,7 +2,7 @@ package fr.keyser.pt;
 
 public final class CardPosition {
     public static enum Position {
-	BACK, BUILDING, FRONT;
+	BACK, BUILDING, FRONT, PLAYER, DISCARD, DECK;
 
 	public CardPosition index(int index) {
 	    return new CardPosition(this, index);

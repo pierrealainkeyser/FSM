@@ -1,5 +1,8 @@
 package fr.keyser.pt2.effects;
 
+import java.util.Arrays;
+import java.util.List;
+
 import fr.keyser.pt2.Card;
 import fr.keyser.pt2.Slot;
 
@@ -12,8 +15,9 @@ public class DoAgeEffect implements SelfEffect {
     }
 
     @Override
-    public void apply(Slot slot) {
+    public List<EffectLog> apply(Slot slot) {
 	Card card = slot.getCard().get();
 	card.addAge(1);
+	return Arrays.asList(EffectLog.age(card, 1));
     }
 }

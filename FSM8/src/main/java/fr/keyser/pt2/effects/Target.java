@@ -14,7 +14,7 @@ public class Target {
 
     private List<Target> targets;
 
-    public Target(String name, CardPosition position) {
+    Target(String name, CardPosition position) {
 	this.name = name;
 	this.position = position;
     }

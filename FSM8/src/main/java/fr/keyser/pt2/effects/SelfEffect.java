@@ -1,5 +1,6 @@
 package fr.keyser.pt2.effects;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import fr.keyser.pt2.Slot;
@@ -11,10 +12,10 @@ public interface SelfEffect extends TargetableEffect {
 	return Stream.of(target(source.getCardPosition()));
     }
 
-    public void apply(Slot source);
+    public List<EffectLog> apply(Slot source);
 
     @Override
-    public default void apply(Slot source, ChoosenTargets targets) {
-	apply(source);
+    public default List<EffectLog> apply(Slot source, ChoosenTargets targets) {
+	return apply(source);
     }
 }
