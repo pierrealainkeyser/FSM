@@ -5,7 +5,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Troll extends Unit {
     public Troll() {
-	super(2);
+	super(ConstInt.TWO);
 	combat = ConstInt.TWO.add(mapInt(LocalBoard::getPayGoldGain));
     }
 }

@@ -5,7 +5,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Manticore extends Unit {
     public Manticore() {
-	super(2);
+	super(ConstInt.TWO);
 	combat = ConstInt.TWO.add(mapInt(LocalBoard::getFood).mult(ConstInt.TWO));
     }
 }

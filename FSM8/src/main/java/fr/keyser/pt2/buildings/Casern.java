@@ -6,6 +6,6 @@ public class Casern extends Building {
     public Casern() {
 	super(cost().wood(1), cost().wood(1).food(1));
 	combat = mapInt(LocalBoard::getWood);
-	warLegend = mapInt(LocalBoard::getUnitsAbove3).when(getLevel2());
+	warLegend = mapInt(LocalBoard::getUnitsStrenghtAbove3).when(getLevel2());
     }
 }

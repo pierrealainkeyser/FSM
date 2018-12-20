@@ -4,7 +4,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Miner extends Unit {
     public Miner() {
-	super(1);
+	super(ConstInt.ONE);
 	combat = ConstInt.TWO;
 	crystal = ConstInt.ONE;
     }

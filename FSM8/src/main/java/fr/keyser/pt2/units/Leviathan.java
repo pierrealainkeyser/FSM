@@ -6,7 +6,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Leviathan extends Unit {
     public Leviathan() {
-	super(2);
+	super(ConstInt.TWO);
 	BoolSupplier hasAge = getAge().gte(ConstInt.ONE);
 
 	combat = ConstInt.FOUR.add(mapInt(LocalBoard::getFood).mult(ConstInt.TWO));

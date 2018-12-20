@@ -5,7 +5,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Knight extends Unit {
     public Knight() {
-	super(2);
+	super(ConstInt.TWO);
 	combat = ConstInt.FOUR;
 	warLegend = mapInt(LocalBoard::getVictory);
     }

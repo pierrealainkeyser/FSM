@@ -4,7 +4,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Farmer extends Unit {
     public Farmer() {
-	super(0);
+	super(ConstInt.ZERO);
 	food = ConstInt.ONE;
     }
 }

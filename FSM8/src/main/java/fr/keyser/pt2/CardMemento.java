@@ -1,8 +1,11 @@
 package fr.keyser.pt2;
 
 import fr.keyser.pt.CardPosition;
+import fr.keyser.pt2.view.CardView;
 
 public class CardMemento {
+
+    private String name;
 
     private int age;
 
@@ -13,6 +16,18 @@ public class CardMemento {
     private boolean simpleDyingProtection;
 
     private CardPosition position;
+
+    private int combat;
+
+    public CardView view() {
+	CardView v = new CardView();
+	v.setName(name);
+	v.setCombat(combat > 0 ? combat : null);
+	v.setLevel(buildLevel > 0 ? buildLevel : null);
+	v.setPosition(position);
+	v.setAge(age > 0 ? age : null);
+	return v;
+    }
 
     public int getAge() {
 	return age;
@@ -58,6 +73,14 @@ public class CardMemento {
     public String toString() {
 	return "CardMemento [age=" + age + ", buildLevel=" + buildLevel + ", deployedTurn=" + deployedTurn + ", simpleDyingProtection="
 	        + simpleDyingProtection + ", position=" + position + "]";
+    }
+
+    public String getName() {
+	return name;
+    }
+
+    public void setName(String name) {
+	this.name = name;
     }
 
 }

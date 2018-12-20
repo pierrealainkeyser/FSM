@@ -5,7 +5,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Looter extends Unit {
     public Looter() {
-	super(1);
+	super(ConstInt.ONE);
 	combat = ConstInt.THREE;
 	warGoldGain = mapInt(LocalBoard::getVictory);
     }

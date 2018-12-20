@@ -4,7 +4,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public final class ForestSpirit extends Unit {
     public ForestSpirit() {
-	super(3);
+	super(ConstInt.THREE);
 	combat = ConstInt.THREE;
 	wood = ConstInt.THREE;
     }

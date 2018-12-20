@@ -8,16 +8,20 @@ import fr.keyser.pt2.Card;
 public class EffectLog {
 
     public enum Effect {
-	ADD_AGE, ADD_LEGEND, ADD_GOLD, UPGRADE, PRESERVE
+	ADD_AGE, ADD_LEGEND, ADD_GOLD, UPGRADE, PRESERVE, DEPLOY, BUILD
     }
 
     public static EffectLog age(Card source, int delta) {
 	return new EffectLog(source.getPosition(), Effect.ADD_AGE, delta, null);
     }
-    
+
+    public static EffectLog deploy(Card source) {
+	return new EffectLog(source.getPosition(), Effect.DEPLOY, null, null);
+    }
+
     public static EffectLog legend(Card source, int delta) {
-  	return new EffectLog(source.getPosition(), Effect.ADD_LEGEND, delta, null);
-      }
+	return new EffectLog(source.getPosition(), Effect.ADD_LEGEND, delta, null);
+    }
 
     public static EffectLog ageOther(Card source, int delta, Card target) {
 	return new EffectLog(source.getPosition(), Effect.ADD_AGE, delta, target.getPosition());

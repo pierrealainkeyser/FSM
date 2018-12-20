@@ -5,7 +5,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class GreatSnake extends Unit {
     public GreatSnake() {
-	super(1);
+	super(ConstInt.ONE);
 	BoolSupplier hasAge = getAge().gte(ConstInt.ONE);
 
 	combat = ConstInt.FOUR;

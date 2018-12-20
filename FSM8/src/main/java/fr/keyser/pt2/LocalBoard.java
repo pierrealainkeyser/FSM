@@ -61,9 +61,13 @@ public final class LocalBoard {
 
     private final IntSupplier currentTurn;
 
-    private final IntSupplier unitsAbove3;
+    private final IntSupplier unitsStrenghtAbove3;
+
+    private final IntSupplier unitsCostAbove2;
 
     private final IntSupplier differentRessourcesCount;
+
+    private Deck deck;
 
     public LocalBoard(IntSupplier currentTurn) {
 	this.currentTurn = currentTurn;
@@ -96,32 +100,16 @@ public final class LocalBoard {
 	ageLegend = sum(values, Slot::getAgeLegend);
 	ageGoldGain = sum(values, Slot::getAgeGoldGain);
 
-	unitsAbove3 = IntSupplier.count(units.stream().map(Slot::getCombat), c -> c >= 3);
+	unitsStrenghtAbove3 = IntSupplier.count(units.stream().map(Slot::getCombat), c -> c >= 3);
+	unitsCostAbove2 = IntSupplier.count(units.stream().map(Slot::getCost), c -> c >= 2);
 
 	differentRessourcesCount = ConstInt.ONE.when(food.gte(ConstInt.ONE))
 	        .add(ConstInt.ONE.when(wood.gte(ConstInt.ONE)))
 	        .add(ConstInt.ONE.when(crystal.gte(ConstInt.ONE)));
     }
 
-    public ResourcesStats getStats() {
-	ResourcesStats r = new ResourcesStats();
-	r.setAge(age.getValue());
-	r.setAgeGoldGain(ageGoldGain.getValue());
-	r.setAgeLegend(ageLegend.getValue());
-	r.setCombat(combat.getValue());
-	r.setCrystal(crystal.getValue());
-	r.setDeployGoldGain(deployGoldGain.getValue());
-	r.setDeployLegend(deployLegend.getValue());
-	r.setDyingAgeToken(dyingAgeToken.getValue());
-	r.setFood(food.getValue());
-	r.setPayGoldGain(payGoldGain.getValue());
-	r.setPayLegend(payLegend.getValue());
-	r.setWarGoldGain(warGoldGain.getValue());
-	r.setWarLegend(warLegend.getValue());
-	r.setWood(wood.getValue());
-	
-	r.setVictory(victory.getValue());
-	return r;
+    public Unit nextUnit() {
+	return deck.next();
     }
 
     private void addSlot(int count, Position position) {
@@ -133,7 +121,7 @@ public final class LocalBoard {
 	slots.put(slot.getCardPosition(), slot);
     }
 
-    private Collection<Slot> all() {
+    public Collection<Slot> all() {
 	return slots.values();
     }
 
@@ -217,16 +205,16 @@ public final class LocalBoard {
 	return slots.get(position);
     }
 
-    public Map<CardPosition, Slot> getSlots() {
-	return slots;
-    }
-
     public Stream<Unit> getUnits() {
 	return slots.values().stream().map(s -> s.getCard().get()).filter(c -> c instanceof Unit).map(c -> (Unit) c);
     }
 
-    public IntSupplier getUnitsAbove3() {
-	return unitsAbove3;
+    public IntSupplier getUnitsCostAbove2() {
+	return unitsCostAbove2;
+    }
+
+    public IntSupplier getUnitsStrenghtAbove3() {
+	return unitsStrenghtAbove3;
     }
 
     public IntSupplier getVictory() {
@@ -258,6 +246,30 @@ public final class LocalBoard {
 	setNeighbours(left.combat, right.combat);
     }
 
+    public PlayerStats stats() {
+	PlayerStats r = new PlayerStats();
+	r.setAge(age.getValue());
+	r.setAgeGoldGain(ageGoldGain.getValue());
+	r.setAgeLegend(ageLegend.getValue());
+	r.setCombat(combat.getValue());
+	r.setCrystal(crystal.getValue());
+	r.setDeployGoldGain(deployGoldGain.getValue());
+	r.setDeployLegend(deployLegend.getValue());
+	r.setDyingAgeToken(dyingAgeToken.getValue());
+	r.setFood(food.getValue());
+	r.setPayGoldGain(payGoldGain.getValue());
+	r.setPayLegend(payLegend.getValue());
+	r.setWarGoldGain(warGoldGain.getValue());
+	r.setWarLegend(warLegend.getValue());
+	r.setWood(wood.getValue());
+
+	r.setVictory(victory.getValue());
+
+	r.setCards(all().stream().flatMap(Slot::memento).collect(Collectors.toList()));
+
+	return r;
+    }
+
     @Override
     public String toString() {
 	List<String> vals = new ArrayList<>();
@@ -266,7 +278,7 @@ public final class LocalBoard {
 	vals.add("Crystal : " + crystal);
 	vals.add("Different resources : " + differentRessourcesCount);
 
-	vals.add("Units above 3 strenght : " + unitsAbove3);
+	vals.add("Units above 3 strenght : " + unitsStrenghtAbove3);
 	vals.add("Combat : " + combat);
 	vals.add("Victory : " + victory);
 
@@ -289,7 +301,7 @@ public final class LocalBoard {
     }
 
     private Stream<Slot> units() {
-	return slots.values().stream().filter(s -> s.getCardPosition().isUnit());
+	return all().stream().filter(s -> s.getCardPosition().isUnit());
     }
 
     private IntSupplier winWar(IntSupplier combat) {

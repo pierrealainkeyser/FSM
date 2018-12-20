@@ -6,8 +6,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
+import fr.keyser.pt.SpecialEffectScope.When;
 import fr.keyser.pt2.effects.TargetableEffect;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
@@ -56,6 +58,8 @@ public abstract class Card {
     protected final MutableProp<CardPosition> position = new MutableProp<>();
     protected BoolSupplier mayCombat = position.match(CardPosition::mayCombat);
 
+    protected IntSupplier cost = ConstInt.ZERO;
+
     private Map<PhaseEvent, List<TargetableEffect>> effects = new EnumMap<>(PhaseEvent.class);
 
     public final void addAge(int delta) {
@@ -67,12 +71,20 @@ public abstract class Card {
 	data.add(effect);
     }
 
+    public final LocalBoard getLocalBoard() {
+	return board.get();
+    }
+
     public final void deploy() {
 	deployedTurn.set(currentTurn.get());
     }
 
     public final MutableInt getAge() {
 	return age;
+    }
+
+    public final Stream<TargetableEffect> getAgeEffects() {
+	return effects.getOrDefault(When.AGING, Collections.emptyList()).stream();
     }
 
     public final IntSupplier getAgeGoldGain() {
@@ -91,8 +103,21 @@ public abstract class Card {
 	return combat;
     }
 
+    public final IntSupplier getCost() {
+	return cost;
+    }
+
     public final IntSupplier getCrystal() {
 	return crystal;
+    }
+
+    public final Stream<TargetableEffect> getDeployEffects() {
+	List<TargetableEffect> eff = new ArrayList<>();
+	if (justDeployed.get()) {
+	    eff.addAll(effects.getOrDefault(When.INITIAL_DEPLOYEMENT, Collections.emptyList()));
+	}
+	eff.addAll(effects.getOrDefault(When.DEPLOYEMENT, Collections.emptyList()));
+	return eff.stream();
     }
 
     public final MutableInt getDeployGoldGain() {
@@ -107,20 +132,12 @@ public abstract class Card {
 	return dyingAgeToken;
     }
 
-    public final List<TargetableEffect> getEffects(PhaseEvent when) {
-	return Collections.unmodifiableList(effects.getOrDefault(when, Collections.emptyList()));
-    }
-
     public final IntSupplier getFood() {
 	return food;
     }
 
     public final int getId() {
-        return id;
-    }
-
-    public final BoolSupplier getJustDeployed() {
-	return justDeployed;
+	return id;
     }
 
     public final BoolSupplier getMayCombat() {
@@ -129,6 +146,7 @@ public abstract class Card {
 
     public final CardMemento getMemento() {
 	CardMemento cm = new CardMemento();
+	cm.setName(getClass().getName());
 	cm.setAge(age.getValue());
 	cm.setBuildLevel(buildLevel.getValue());
 	cm.setPosition(position.get());
@@ -151,26 +169,6 @@ public abstract class Card {
 
     public final MutableBool getSimpleDyingProtection() {
 	return simpleDyingProtection;
-    }
-
-    public ResourcesStats getStats() {
-	ResourcesStats r = new ResourcesStats();
-	r.setAge(age.getValue());
-	r.setAgeGoldGain(ageGoldGain.getValue());
-	r.setAgeLegend(ageLegend.getValue());
-	r.setCombat(combat.getValue());
-	r.setCrystal(crystal.getValue());
-	r.setDeployGoldGain(deployGoldGain.getValue());
-	r.setDeployLegend(deployLegend.getValue());
-	r.setDyingAgeToken(dyingAgeToken.getValue());
-	r.setFood(food.getValue());
-	r.setPayGoldGain(payGoldGain.getValue());
-	r.setPayLegend(payLegend.getValue());
-	r.setWarGoldGain(warGoldGain.getValue());
-	r.setWarLegend(warLegend.getValue());
-	r.setWood(wood.getValue());
-
-	return r;
     }
 
     public final IntSupplier getWarGoldGain() {
@@ -218,7 +216,7 @@ public abstract class Card {
     }
 
     public final void setId(int id) {
-        this.id = id;
+	this.id = id;
     }
 
     public final void setMemento(CardMemento m) {
@@ -233,7 +231,49 @@ public abstract class Card {
 	this.position.set(position);
     }
 
+    public ResourcesStats stats() {
+	ResourcesStats r = new ResourcesStats();
+	r.setAge(age.getValue());
+	r.setAgeGoldGain(ageGoldGain.getValue());
+	r.setAgeLegend(ageLegend.getValue());
+	r.setCombat(combat.getValue());
+	r.setCrystal(crystal.getValue());
+	r.setDeployGoldGain(deployGoldGain.getValue());
+	r.setDeployLegend(deployLegend.getValue());
+	r.setDyingAgeToken(dyingAgeToken.getValue());
+	r.setFood(food.getValue());
+	r.setPayGoldGain(payGoldGain.getValue());
+	r.setPayLegend(payLegend.getValue());
+	r.setWarGoldGain(warGoldGain.getValue());
+	r.setWarLegend(warLegend.getValue());
+	r.setWood(wood.getValue());
+
+	return r;
+    }
+
     public final void undeploy() {
 	deployedTurn.set(null);
+    }
+
+    @Override
+    public final int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + id;
+	return result;
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	Card other = (Card) obj;
+	if (id != other.id)
+	    return false;
+	return true;
     }
 }

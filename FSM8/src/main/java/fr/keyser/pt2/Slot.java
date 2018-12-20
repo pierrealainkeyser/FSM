@@ -1,6 +1,7 @@
 package fr.keyser.pt2;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.prop.BoolSupplier;
@@ -37,6 +38,8 @@ public final class Slot {
     private final IntSupplier effectiveCombat = mapInt(Slot::effectiveCombat);
 
     private final IntSupplier combat = mapInt(Card::getCombat);
+    
+    private final IntSupplier cost = mapInt(Card::getCost);
 
     private final IntSupplier age = mapInt(Card::getAge);
 
@@ -57,7 +60,7 @@ public final class Slot {
     private final IntSupplier ageGoldGain = mapInt(Card::getAgeGoldGain);
 
     private final BoolSupplier willDie = mapBool(Card::getWillDie);
-    
+
     private final BoolSupplier willLive = mapBool(Card::getWillLive);
 
     private final IntSupplier dyingAgeToken = mapInt(Card::getDyingAgeToken);
@@ -69,6 +72,14 @@ public final class Slot {
     public Slot(LocalBoard board, CardPosition cardPosition) {
 	this.board = board;
 	this.cardPosition = cardPosition;
+    }
+
+    public Stream<CardMemento> memento() {
+	Card card = this.card.get();
+	if (card != null)
+	    return Stream.of(card.getMemento());
+	else
+	    return Stream.empty();
     }
 
     <T> T get(Function<LocalBoard, T> accessor) {
@@ -88,7 +99,7 @@ public final class Slot {
     }
 
     public LocalBoard getBoard() {
-        return board;
+	return board;
     }
 
     public IntSupplier getBuildLevel() {
@@ -156,7 +167,7 @@ public final class Slot {
     }
 
     public BoolSupplier getWillLive() {
-        return willLive;
+	return willLive;
     }
 
     public IntSupplier getWood() {
@@ -190,5 +201,9 @@ public final class Slot {
 	    card.setPosition(cardPosition);
 	    card.setBoard(board);
 	}
+    }
+
+    public IntSupplier getCost() {
+        return cost;
     }
 }

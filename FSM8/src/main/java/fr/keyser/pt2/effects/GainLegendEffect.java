@@ -13,8 +13,8 @@ public class GainLegendEffect implements SelfEffect {
 
     private final IntSupplier legend;
 
-    public GainLegendEffect(IntSupplier gold) {
-	this.legend = gold;
+    public GainLegendEffect(IntSupplier legend) {
+	this.legend = legend;
     }
 
     @Override

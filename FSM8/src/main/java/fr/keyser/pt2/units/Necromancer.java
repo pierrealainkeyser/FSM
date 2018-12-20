@@ -6,7 +6,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Necromancer extends Unit {
     public Necromancer() {
-	super(1);
+	super(ConstInt.ONE);
 	combat = ConstInt.FOUR;
 	addEffect(PhaseEvent.INITIAL_DEPLOY, AgeEveryoneButMeEffect.INSTANCE);
     }

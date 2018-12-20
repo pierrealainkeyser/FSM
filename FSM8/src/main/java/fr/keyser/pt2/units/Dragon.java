@@ -6,7 +6,7 @@ import fr.keyser.pt2.prop.ConstInt;
 
 public class Dragon extends Unit {
     public Dragon() {
-	super(3);
+	super(ConstInt.THREE);
 	BoolSupplier hasCrystal = mapInt(LocalBoard::getCrystal).gte(ConstInt.ONE);
 	combat = ConstInt.SEVEN.when(hasCrystal);
     }
