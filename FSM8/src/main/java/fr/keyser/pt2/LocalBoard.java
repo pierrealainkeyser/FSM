@@ -67,9 +67,10 @@ public final class LocalBoard {
 
     private final IntSupplier differentRessourcesCount;
 
-    private Deck deck;
+    private final Deck deck;
 
-    public LocalBoard(IntSupplier currentTurn) {
+    public LocalBoard(IntSupplier currentTurn, Deck deck) {
+	this.deck = deck;
 	this.currentTurn = currentTurn;
 	addSlot(3, Position.FRONT);
 	addSlot(2, Position.BACK);
@@ -106,10 +107,6 @@ public final class LocalBoard {
 	differentRessourcesCount = ConstInt.ONE.when(food.gte(ConstInt.ONE))
 	        .add(ConstInt.ONE.when(wood.gte(ConstInt.ONE)))
 	        .add(ConstInt.ONE.when(crystal.gte(ConstInt.ONE)));
-    }
-
-    public Unit nextUnit() {
-	return deck.next();
     }
 
     private void addSlot(int count, Position position) {
@@ -306,6 +303,10 @@ public final class LocalBoard {
 
     private IntSupplier winWar(IntSupplier combat) {
 	return ConstInt.ONE.when(this.combat.gte(combat));
+    }
+
+    public Deck getDeck() {
+	return deck;
     }
 
 }

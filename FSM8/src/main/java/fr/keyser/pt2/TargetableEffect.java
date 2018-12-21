@@ -1,10 +1,10 @@
-package fr.keyser.pt2.effects;
+package fr.keyser.pt2;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt2.Slot;
+import fr.keyser.pt2.effects.ChoosenTargets;
 
 public interface TargetableEffect {
 

@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt.SpecialEffectScope.When;
-import fr.keyser.pt2.effects.TargetableEffect;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.DirtySupplier;
@@ -146,7 +145,7 @@ public abstract class Card {
 
     public final CardMemento getMemento() {
 	CardMemento cm = new CardMemento();
-	cm.setName(getClass().getName());
+	cm.setName(getName());
 	cm.setAge(age.getValue());
 	cm.setBuildLevel(buildLevel.getValue());
 	cm.setPosition(position.get());
@@ -225,6 +224,10 @@ public abstract class Card {
 	position.set(m.getPosition());
 	deployedTurn.set(m.getDeployedTurn());
 	simpleDyingProtection.set(m.isSimpleDyingProtection());
+    }
+
+    public final String getName() {
+	return getClass().getSimpleName();
     }
 
     public final void setPosition(CardPosition position) {

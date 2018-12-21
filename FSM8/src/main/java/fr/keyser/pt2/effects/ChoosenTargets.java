@@ -3,6 +3,7 @@ package fr.keyser.pt2.effects;
 import java.util.Map;
 
 import fr.keyser.pt.CardPosition;
+import fr.keyser.pt2.TargetableEffect;
 
 public class ChoosenTargets {
 

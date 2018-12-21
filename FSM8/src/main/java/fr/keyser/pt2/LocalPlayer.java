@@ -12,11 +12,7 @@ import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.buildings.Building;
 import fr.keyser.pt2.effects.CardTargets;
 import fr.keyser.pt2.effects.ChoosenTargets;
-import fr.keyser.pt2.effects.EffectLog;
-import fr.keyser.pt2.effects.Target;
-import fr.keyser.pt2.effects.TargetableEffect;
 import fr.keyser.pt2.units.Unit;
-import fr.keyser.pt2.view.FullLocalPlayerView;
 
 public class LocalPlayer {
 
@@ -24,7 +20,7 @@ public class LocalPlayer {
 
     private List<Unit> selecteds;
 
-    private List<Unit> selectables;
+    private List<String> selectables;
 
     private List<Building> buildings;
 
@@ -38,17 +34,31 @@ public class LocalPlayer {
 	this.localBoard = localBoard;
     }
 
-    public List<EffectLog> activateDeploy(CardPosition position, ChoosenTargets targets) {
+    private Card getCard(CardPosition position) {
 	Slot slot = localBoard.getSlot(position);
-	Card card = slot.getCard().get();
-	activated.add(card.getId());
+	return slot.getCard().get();
+    }
 
-	Stream<TargetableEffect> effects = card.getDeployEffects();
+    public List<EffectLog> activateDeploy(CardPosition position, ChoosenTargets targets) {
+	Card card = getCard(position);
 
-	List<EffectLog> logs = effects.flatMap(e -> e.apply(slot, targets).stream()).collect(toList());
+	List<EffectLog> logs = activate(card, targets, card.getDeployEffects());
 
 	gain(card.getDeployGoldGain().getValue(), card.getDeployLegend().getValue());
 	return logs;
+    }
+
+    private List<EffectLog> activate(Card card, ChoosenTargets targets, Stream<TargetableEffect> effects) {
+	activated.add(card.getId());
+
+	Slot slot = localBoard.getSlot(card.getPosition());
+
+	return effects.flatMap(e -> e.apply(slot, targets).stream()).collect(toList());
+    }
+
+    public List<EffectLog> activeAge(CardPosition position, ChoosenTargets targets) {
+	Card card = getCard(position);
+	return activate(card, targets, card.getAgeEffects());
     }
 
     public List<CardTargets> deployEffects() {
@@ -118,14 +128,6 @@ public class LocalPlayer {
 
     public void payPhase() {
 	gain(current.getPayGoldGain(), current.getPayLegend());
-    }
-
-    public FullLocalPlayerView viewAtStart() {
-	return previous.view();
-    }
-
-    public FullLocalPlayerView view() {
-	return current.view();
     }
 
     public void warPhase() {

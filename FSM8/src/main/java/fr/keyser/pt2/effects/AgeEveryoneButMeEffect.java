@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fr.keyser.pt2.Card;
+import fr.keyser.pt2.EffectLog;
 import fr.keyser.pt2.Slot;
 
 public class AgeEveryoneButMeEffect implements SelfEffect {

@@ -3,7 +3,10 @@ package fr.keyser.pt2.effects;
 import java.util.List;
 import java.util.stream.Stream;
 
+import fr.keyser.pt2.EffectLog;
 import fr.keyser.pt2.Slot;
+import fr.keyser.pt2.Target;
+import fr.keyser.pt2.TargetableEffect;
 
 public interface SelfEffect extends TargetableEffect {
 

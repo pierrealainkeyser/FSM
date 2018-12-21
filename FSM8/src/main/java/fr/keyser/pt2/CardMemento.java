@@ -1,7 +1,6 @@
 package fr.keyser.pt2;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt2.view.CardView;
 
 public class CardMemento {
 
@@ -16,18 +15,6 @@ public class CardMemento {
     private boolean simpleDyingProtection;
 
     private CardPosition position;
-
-    private int combat;
-
-    public CardView view() {
-	CardView v = new CardView();
-	v.setName(name);
-	v.setCombat(combat > 0 ? combat : null);
-	v.setLevel(buildLevel > 0 ? buildLevel : null);
-	v.setPosition(position);
-	v.setAge(age > 0 ? age : null);
-	return v;
-    }
 
     public int getAge() {
 	return age;

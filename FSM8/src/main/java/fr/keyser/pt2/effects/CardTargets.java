@@ -3,6 +3,7 @@ package fr.keyser.pt2.effects;
 import java.util.List;
 
 import fr.keyser.pt.CardPosition;
+import fr.keyser.pt2.Target;
 
 public class CardTargets {
 

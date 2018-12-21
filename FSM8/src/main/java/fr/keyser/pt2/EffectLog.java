@@ -1,9 +1,8 @@
-package fr.keyser.pt2.effects;
+package fr.keyser.pt2;
 
 import java.util.List;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt2.Card;
 
 public class EffectLog {
 

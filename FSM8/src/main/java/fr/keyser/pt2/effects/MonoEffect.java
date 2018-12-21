@@ -5,8 +5,10 @@ import java.util.List;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.Card;
+import fr.keyser.pt2.EffectLog;
 import fr.keyser.pt2.LocalBoard;
 import fr.keyser.pt2.Slot;
+import fr.keyser.pt2.TargetableEffect;
 
 public interface MonoEffect extends TargetableEffect {
 

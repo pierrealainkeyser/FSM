@@ -14,7 +14,7 @@ import fr.keyser.pt2.units.Unit;
 
 public class Deck {
 
-    private CardProvider provider;
+    private final CardProvider provider;
 
     private final LinkedList<String> units = new LinkedList<>();
 
@@ -22,12 +22,39 @@ public class Deck {
 
     private final List<String> buildings = new ArrayList<>();
 
+    public Deck(CardProvider provider) {
+	this.provider = provider;
+    }
+
+    public List<Building> createBuildings() {
+	return buildings.stream().map(provider::building).collect(Collectors.toList());
+    }
+
+    public void discard(String name) {
+	discarded.add(name);
+    }
+
     public DeckMemento getMemento() {
 	DeckMemento d = new DeckMemento();
 	d.setUnits(new ArrayList<>(units));
 	d.setDiscardeds(new ArrayList<>(discarded));
 	d.setBuildings(new ArrayList<>(buildings));
 	return d;
+    }
+
+    public String next() {
+	if (units.isEmpty()) {
+	    units.addAll(discarded);
+	    discarded.clear();
+	    Collections.shuffle(units);
+	}
+	String name = units.removeFirst();
+	return name;
+    }
+
+    public Unit nextUnit() {
+	String name = next();
+	return unit(name);
     }
 
     public void setMemento(DeckMemento memento) {
@@ -41,44 +68,22 @@ public class Deck {
 	buildings.addAll(memento.getBuildings());
     }
 
-    public Card restore(CardMemento memento) {
-	Card card = null;
-	String name = memento.getName();
-	if (memento.getBuildLevel() > 0)
-	    card = provider.building(name);
-	else
-	    card = track(name, provider.unit(name));
-	card.setMemento(memento);
-	return card;
-    }
-
-    public Unit next() {
-	if (units.isEmpty()) {
-	    units.addAll(discarded);
-	    discarded.clear();
-	    Collections.shuffle(units);
-	}
-	String name = units.removeFirst();
-	Unit unit = provider.unit(name);
-	return track(name, unit);
-    }
-
     private Unit track(String name, Unit unit) {
 	DirtySupplier<CardPosition> position = unit.position();
 	position.addListener(new DirtyListener() {
-
 	    @Override
 	    public void setDirty() {
 		CardPosition cp = position.get();
 		if (cp == null) {
-		    discarded.add(name);
+		    discard(name);
 		}
 	    }
 	});
 	return unit;
     }
 
-    public List<Building> createBuildings() {
-	return buildings.stream().map(provider::building).collect(Collectors.toList());
+    public Unit unit(String name) {
+	Unit unit = provider.unit(name);
+	return track(name, unit);
     }
 }

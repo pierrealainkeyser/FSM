@@ -1,4 +1,4 @@
-package fr.keyser.pt2.effects;
+package fr.keyser.pt2;
 
 import java.util.ArrayList;
 import java.util.Collections;

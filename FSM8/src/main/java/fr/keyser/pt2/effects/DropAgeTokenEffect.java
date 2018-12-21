@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import fr.keyser.pt2.Card;
+import fr.keyser.pt2.EffectLog;
 import fr.keyser.pt2.Slot;
+import fr.keyser.pt2.Target;
 import fr.keyser.pt2.prop.IntSupplier;
 
 public class DropAgeTokenEffect implements MonoEffect {

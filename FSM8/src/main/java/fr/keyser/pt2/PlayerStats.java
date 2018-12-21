@@ -1,9 +1,6 @@
 package fr.keyser.pt2;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import fr.keyser.pt2.view.FullLocalPlayerView;
 
 public class PlayerStats extends ResourcesStats {
 
@@ -35,17 +32,5 @@ public class PlayerStats extends ResourcesStats {
 
     public void setLegend(int legend) {
 	this.legend = legend;
-    }
-
-    public FullLocalPlayerView view() {
-	FullLocalPlayerView v = new FullLocalPlayerView();
-	v.setCombat(getCombat());
-	v.setGold(getGold());
-	v.setLegend(getLegend());
-	v.setFood(getFood());
-	v.setWood(getWood());
-	v.setCrystal(getCrystal());
-	v.setCards(cards.stream().map(CardMemento::view).collect(Collectors.toList()));
-	return v;
     }
 }
