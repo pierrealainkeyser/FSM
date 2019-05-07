@@ -1,12 +1,17 @@
 package fr.keyser.n.fsm;
 
-public class InstanceState {
+import java.util.HashMap;
+import java.util.Map;
 
-    private State state;
+public class InstanceState {
 
     private InstanceId id;
 
     private InstanceId parentId;
+
+    private Map<String, Object> props = new HashMap<String, Object>();
+
+    private State state;
 
     public InstanceState() {
     }
@@ -17,10 +22,6 @@ public class InstanceState {
 	this.state = state;
     }
 
-    public State getState() {
-	return state;
-    }
-
     public InstanceId getId() {
 	return id;
     }
@@ -29,21 +30,32 @@ public class InstanceState {
 	return parentId;
     }
 
-    public void setState(State current) {
-	this.state = current;
+    public Map<String, Object> getProps() {
+        return props;
+    }
+
+    public State getState() {
+	return state;
     }
 
     public void setId(InstanceId id) {
-	this.id = id;
+        this.id = id;
     }
 
     public void setParentId(InstanceId parentId) {
-	this.parentId = parentId;
+        this.parentId = parentId;
+    }
+
+    public void setProps(Map<String, Object> props) {
+        this.props = props;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
     @Override
     public String toString() {
 	return "InstanceState[state=" + state + ", id=" + id + ", parentId=" + parentId + "]";
     }
-
 }

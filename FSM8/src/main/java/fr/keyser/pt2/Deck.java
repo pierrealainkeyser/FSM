@@ -27,7 +27,19 @@ public class Deck {
     }
 
     public List<Building> createBuildings() {
-	return buildings.stream().map(provider::building).collect(Collectors.toList());
+	return buildings.stream().map(this::createBuilding).collect(Collectors.toList());
+    }
+
+    private Building createBuilding(String name) {
+	Building building = provider.building(name);
+	building.setDeck(this);
+	return building;
+    }
+
+    public Unit unit(String name) {
+	Unit unit = provider.unit(name);
+	unit.setDeck(this);
+	return track(name, unit);
     }
 
     public void discard(String name) {
@@ -82,8 +94,4 @@ public class Deck {
 	return unit;
     }
 
-    public Unit unit(String name) {
-	Unit unit = provider.unit(name);
-	return track(name, unit);
-    }
 }

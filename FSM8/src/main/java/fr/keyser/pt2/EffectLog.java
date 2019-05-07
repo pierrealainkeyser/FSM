@@ -1,5 +1,6 @@
 package fr.keyser.pt2;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.keyser.pt.CardPosition;
@@ -38,19 +39,15 @@ public class EffectLog {
 	return new EffectLog(source.getPosition(), Effect.UPGRADE, null, target.getPosition());
     }
 
-    private CardPosition source;
+    private final CardPosition source;
 
-    private Effect effect;
+    private final Effect effect;
 
-    private Integer delta;
+    private final Integer delta;
 
-    private CardPosition target;
+    private final CardPosition target;
 
-    private List<EffectLog> inner;
-
-    public EffectLog() {
-
-    }
+    private final List<EffectLog> inner = new ArrayList<>();
 
     private EffectLog(CardPosition source, Effect effect, Integer delta, CardPosition target) {
 	this.source = source;

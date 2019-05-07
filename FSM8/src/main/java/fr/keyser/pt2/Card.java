@@ -61,6 +61,16 @@ public abstract class Card {
 
     private Map<PhaseEvent, List<TargetableEffect>> effects = new EnumMap<>(PhaseEvent.class);
 
+    private Deck deck;
+
+    protected final void setDeck(Deck deck) {
+	this.deck = deck;
+    }
+
+    public final Deck getDeck() {
+	return deck;
+    }
+
     public final void addAge(int delta) {
 	getAge().add(delta);
     }

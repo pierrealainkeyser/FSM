@@ -67,10 +67,8 @@ public final class LocalBoard {
 
     private final IntSupplier differentRessourcesCount;
 
-    private final Deck deck;
 
-    public LocalBoard(IntSupplier currentTurn, Deck deck) {
-	this.deck = deck;
+    public LocalBoard(IntSupplier currentTurn) {
 	this.currentTurn = currentTurn;
 	addSlot(3, Position.FRONT);
 	addSlot(2, Position.BACK);
@@ -275,7 +273,7 @@ public final class LocalBoard {
 	vals.add("Crystal : " + crystal);
 	vals.add("Different resources : " + differentRessourcesCount);
 
-	vals.add("Units above 3 strenght : " + unitsStrenghtAbove3);
+	vals.add("Units above 3 strength : " + unitsStrenghtAbove3);
 	vals.add("Combat : " + combat);
 	vals.add("Victory : " + victory);
 
@@ -304,9 +302,4 @@ public final class LocalBoard {
     private IntSupplier winWar(IntSupplier combat) {
 	return ConstInt.ONE.when(this.combat.gte(combat));
     }
-
-    public Deck getDeck() {
-	return deck;
-    }
-
 }

@@ -49,7 +49,7 @@ public class ChoiceAutomatListener extends DelegatedAutomatListener {
     public void reaching(InstanceState state, State reached, StateType type) {
 	super.reaching(state, reached, type);
 	if (StateType.CHOICE == type) {
-	    receiver.receive(Choice.choice(state.getId()));
+	    receiver.receive(Choice.choice(state));
 	}
     }
 }

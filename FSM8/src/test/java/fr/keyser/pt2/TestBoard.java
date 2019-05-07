@@ -21,8 +21,8 @@ public class TestBoard {
 
 	MutableInt turn = new MutableInt(1);
 
-	LocalBoard lb1 = new LocalBoard(turn, null);
-	LocalBoard lb2 = new LocalBoard(turn, null);
+	LocalBoard lb1 = new LocalBoard(turn);
+	LocalBoard lb2 = new LocalBoard(turn);
 
 	lb1.setNeighbour(lb2);
 	lb2.setNeighbour(lb1);

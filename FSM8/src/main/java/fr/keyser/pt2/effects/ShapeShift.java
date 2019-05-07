@@ -20,7 +20,7 @@ public class ShapeShift implements SelfEffect {
     public List<EffectLog> apply(Slot source) {
 
 	Card card = source.getCard().get();
-	Unit unit = card.getLocalBoard().getDeck().nextUnit();
+	Unit unit = card.getDeck().nextUnit();
 
 	source.play(unit);
 	return Arrays.asList(EffectLog.deploy(unit));
