@@ -24,4 +24,9 @@ public class CardTargets {
 	return targets;
     }
 
+    @Override
+    public String toString() {
+	return source + " -> " + targets;
+    }
+
 }

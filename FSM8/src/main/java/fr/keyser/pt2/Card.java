@@ -9,7 +9,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt.SpecialEffectScope.When;
 import fr.keyser.pt2.prop.BoolSupplier;
 import fr.keyser.pt2.prop.ConstInt;
 import fr.keyser.pt2.prop.DirtySupplier;
@@ -93,7 +92,7 @@ public abstract class Card {
     }
 
     public final Stream<TargetableEffect> getAgeEffects() {
-	return effects.getOrDefault(When.AGING, Collections.emptyList()).stream();
+	return effects.getOrDefault(PhaseEvent.AGING, Collections.emptyList()).stream();
     }
 
     public final IntSupplier getAgeGoldGain() {
@@ -123,9 +122,9 @@ public abstract class Card {
     public final Stream<TargetableEffect> getDeployEffects() {
 	List<TargetableEffect> eff = new ArrayList<>();
 	if (justDeployed.get()) {
-	    eff.addAll(effects.getOrDefault(When.INITIAL_DEPLOYEMENT, Collections.emptyList()));
+	    eff.addAll(effects.getOrDefault(PhaseEvent.INITIAL_DEPLOY, Collections.emptyList()));
 	}
-	eff.addAll(effects.getOrDefault(When.DEPLOYEMENT, Collections.emptyList()));
+	eff.addAll(effects.getOrDefault(PhaseEvent.WHEN_DEPLOYED, Collections.emptyList()));
 	return eff.stream();
     }
 

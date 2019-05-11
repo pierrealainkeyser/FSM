@@ -39,4 +39,9 @@ public class Target {
 	return Collections.unmodifiableList(targets);
     }
 
+    @Override
+    public String toString() {
+	return "Target [name=" + name + ", position=" + position + ", targets=" + targets + "]";
+    }
+
 }
