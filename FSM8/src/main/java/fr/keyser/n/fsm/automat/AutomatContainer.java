@@ -90,7 +90,7 @@ public class AutomatContainer implements EventReceiver {
 	    alreadyJoined.forEach(this::removeInstance);
 
 	    // continue on the parent
-	    receive(Joined.join(id));
+	    receive(Joined.join(parentId));
 	}
     }
 
