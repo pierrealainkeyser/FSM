@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -23,6 +24,8 @@ import fr.keyser.n.fsm.listener.AutomatListener;
 import fr.keyser.n.fsm.listener.DelegatedAutomatListener;
 
 public class AutomatContainer implements EventReceiver {
+
+    public static final String INDEX = "index";
 
     private final Automat automat;
 
@@ -148,18 +151,27 @@ public class AutomatContainer implements EventReceiver {
     }
 
     public void start() {
-	startInstance(null, automat.getInitial());
+	startInstance(null, automat.getInitial(), null);
     }
 
     private void startAllChilds(InstanceId parentId, State reached) {
 	Stream<State> childs = automat.orthogonalChilds(reached);
-	childs.forEach(s -> startInstance(parentId, s));
+
+	AtomicInteger index = new AtomicInteger(0);
+	childs.forEach(s -> {
+	    startInstance(parentId, s, index);
+	    index.incrementAndGet();
+	});
     }
 
-    private void startInstance(InstanceId parentId, State state) {
+    private void startInstance(InstanceId parentId, State state, AtomicInteger index) {
 	AutomatInstance ai = new AutomatInstance(parentId, automat, state, idSupplier.get(), listener);
 	instances.put(ai.getId(), ai);
-	listener.starting(ai.getInstanceState());
+	InstanceState instanceState = ai.getInstanceState();
+	if (index != null)
+	    instanceState.getProps().put(INDEX, index.get());
+
+	listener.starting(instanceState);
 	ai.start();
     }
 

@@ -2,8 +2,7 @@ package fr.keyser.pt2;
 
 import java.util.List;
 
-public class PlayerStats extends ResourcesStats {
-
+public class PlayerMemento {
     private int gold;
 
     private int legend;
@@ -33,4 +32,5 @@ public class PlayerStats extends ResourcesStats {
     public void setLegend(int legend) {
 	this.legend = legend;
     }
+
 }

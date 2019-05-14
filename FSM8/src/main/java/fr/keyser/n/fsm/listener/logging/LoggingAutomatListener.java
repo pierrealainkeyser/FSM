@@ -54,7 +54,7 @@ public class LoggingAutomatListener extends DelegatedAutomatListener {
 
     @Override
     public void starting(InstanceState instance) {
-	logger.debug("starting {}", instance);
+	logger.debug("starting {} : {}", instance, instance.getProps());
 	super.starting(instance);
     }
 

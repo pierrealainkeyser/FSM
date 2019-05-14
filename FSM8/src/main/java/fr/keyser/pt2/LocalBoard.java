@@ -67,7 +67,6 @@ public final class LocalBoard {
 
     private final IntSupplier differentRessourcesCount;
 
-
     public LocalBoard(IntSupplier currentTurn) {
 	this.currentTurn = currentTurn;
 	addSlot(3, Position.FRONT);
@@ -241,8 +240,10 @@ public final class LocalBoard {
 	setNeighbours(left.combat, right.combat);
     }
 
-    public PlayerStats stats() {
-	PlayerStats r = new PlayerStats();
+    public PlayerView stats(int gold, int legend) {
+
+	ResourcesStats r = new ResourcesStats();
+
 	r.setAge(age.getValue());
 	r.setAgeGoldGain(ageGoldGain.getValue());
 	r.setAgeLegend(ageLegend.getValue());
@@ -257,12 +258,19 @@ public final class LocalBoard {
 	r.setWarGoldGain(warGoldGain.getValue());
 	r.setWarLegend(warLegend.getValue());
 	r.setWood(wood.getValue());
-
 	r.setVictory(victory.getValue());
 
-	r.setCards(all().stream().flatMap(Slot::memento).collect(Collectors.toList()));
+	
 
-	return r;
+	return new PlayerView(r, memento(gold, legend));
+    }
+
+    public PlayerMemento memento(int gold, int legend) {
+	PlayerMemento m = new PlayerMemento();
+	m.setGold(gold);
+	m.setLegend(legend);
+	m.setCards(all().stream().flatMap(Slot::memento).collect(Collectors.toList()));
+	return m;
     }
 
     @Override

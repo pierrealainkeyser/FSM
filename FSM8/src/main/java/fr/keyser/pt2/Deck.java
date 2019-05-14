@@ -22,8 +22,9 @@ public class Deck {
 
     private final List<String> buildings = new ArrayList<>();
 
-    public Deck(CardProvider provider) {
+    public Deck(CardProvider provider, DeckMemento memento) {
 	this.provider = provider;
+	this.setMemento(memento);
     }
 
     public List<Building> createBuildings() {
@@ -60,8 +61,7 @@ public class Deck {
 	    discarded.clear();
 	    Collections.shuffle(units);
 	}
-	String name = units.removeFirst();
-	return name;
+	return units.removeFirst();
     }
 
     public Unit nextUnit() {

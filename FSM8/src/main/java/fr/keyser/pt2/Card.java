@@ -128,6 +128,10 @@ public abstract class Card {
 	return eff.stream();
     }
 
+    public final GoldLegendGain getDeployGain() {
+	return new GoldLegendGain(deployGoldGain.getValue(), deployLegend.getValue());
+    }
+
     public final MutableInt getDeployGoldGain() {
 	return deployGoldGain;
     }
