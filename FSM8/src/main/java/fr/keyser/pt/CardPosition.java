@@ -64,7 +64,7 @@ public final class CardPosition {
 
     @Override
     public String toString() {
-	return "CardPosition [position=" + position + ", index=" + index + "]";
+	return position + "#" + index;
     }
 
 }

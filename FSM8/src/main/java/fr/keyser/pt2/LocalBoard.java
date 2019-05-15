@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -55,7 +55,7 @@ public final class LocalBoard {
 
     private final IntSupplier ageGoldGain;
 
-    private final Map<CardPosition, Slot> slots = new HashMap<>();
+    private final Map<CardPosition, Slot> slots = new LinkedHashMap<>();
 
     private final PlugableInt victory = new PlugableInt();
 
@@ -240,8 +240,7 @@ public final class LocalBoard {
 	setNeighbours(left.combat, right.combat);
     }
 
-    public PlayerView stats(int gold, int legend) {
-
+    public ResourcesStats stats() {
 	ResourcesStats r = new ResourcesStats();
 
 	r.setAge(age.getValue());
@@ -259,18 +258,11 @@ public final class LocalBoard {
 	r.setWarLegend(warLegend.getValue());
 	r.setWood(wood.getValue());
 	r.setVictory(victory.getValue());
-
-	
-
-	return new PlayerView(r, memento(gold, legend));
+	return r;
     }
 
-    public PlayerMemento memento(int gold, int legend) {
-	PlayerMemento m = new PlayerMemento();
-	m.setGold(gold);
-	m.setLegend(legend);
-	m.setCards(all().stream().flatMap(Slot::memento).collect(Collectors.toList()));
-	return m;
+    public List<CardMemento> memento() {
+	return all().stream().flatMap(Slot::memento).collect(Collectors.toList());
     }
 
     @Override

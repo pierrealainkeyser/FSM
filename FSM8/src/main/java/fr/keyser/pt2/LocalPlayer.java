@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.effects.CardTargets;
 import fr.keyser.pt2.effects.ChoosenTargets;
+import fr.keyser.pt2.prop.IntSupplier;
 
 public class LocalPlayer {
 
@@ -22,9 +23,13 @@ public class LocalPlayer {
 
     private PlayerView previous;
 
+    private int gold;
+
+    private int legend;
+
     public LocalPlayer(LocalBoard localBoard) {
 	this.localBoard = localBoard;
-	current = localBoard.stats(0, 0);
+	snapshotPrivateView();
 	makePrivateInfoPublic();
     }
 
@@ -33,7 +38,9 @@ public class LocalPlayer {
 
 	Slot slot = localBoard.getSlot(card.getPosition());
 
-	return effects.flatMap(e -> e.apply(slot, targets).stream()).collect(toList());
+	List<EffectLog> effect = effects.flatMap(e -> e.apply(slot, targets).stream()).collect(toList());
+	snapshotPrivateView();
+	return effect;
     }
 
     public List<EffectLog> activateDeploy(CardPosition position, ChoosenTargets targets) {
@@ -63,28 +70,28 @@ public class LocalPlayer {
     }
 
     public void deployPhase() {
-
 	resetDeployGain();
 
-	// creation des nouvelles stats
-	current = localBoard.stats(previous.getGold(), previous.getLegend());
+	snapshotPrivateView();
 	activated.clear();
     }
 
     public void endAgePhase() {
 	activated.clear();
-	gain(current.getAgeGain());
+	gain(current.getAge());
+	makePrivateInfoPublic();
     }
 
     public void endDeployPhase() {
-	makePrivateInfoPublic();
 	activated.clear();
 	resetDeployGain();
+	makePrivateInfoPublic();
     }
 
     private void gain(GoldLegendGain gain) {
-	current.setGold(current.getGold() + gain.getGold());
-	current.setLegend(current.getLegend() + gain.getLegend());
+	gold += gain.getGold();
+	legend += gain.getLegend();
+	snapshotPrivateView();
     }
 
     private Card getCard(CardPosition position) {
@@ -105,11 +112,16 @@ public class LocalPlayer {
     }
 
     public PlayerMemento memento() {
-	return localBoard.memento(current.getGold(), current.getLegend());
+	PlayerMemento p = new PlayerMemento();
+	p.setCards(localBoard.memento());
+	p.setGold(gold);
+	p.setLegend(legend);
+	return p;
     }
 
     public void payPhase() {
-	gain(current.getPayGain());
+	gain(current.getPay());
+	makePrivateInfoPublic();
     }
 
     private void resetDeployGain() {
@@ -123,8 +135,16 @@ public class LocalPlayer {
 	localBoard.setNeighbour(opponent.localBoard);
     }
 
+    public void setNeighbours(IntSupplier left, IntSupplier right) {
+	localBoard.setNeighbours(left, right);
+    }
+
     public void setNeighbours(LocalPlayer left, LocalPlayer right) {
 	localBoard.setNeighbours(left.localBoard, right.localBoard);
+    }
+
+    private void snapshotPrivateView() {
+	current = new PlayerView(localBoard.stats(), memento());
     }
 
     private List<CardTargets> targets(Function<Card, Stream<TargetableEffect>> mapper) {
@@ -145,6 +165,7 @@ public class LocalPlayer {
     }
 
     public void warPhase() {
-	gain(current.getWarGain());
+	gain(current.getWar());
+	makePrivateInfoPublic();
     }
 }

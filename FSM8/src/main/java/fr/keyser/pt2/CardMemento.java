@@ -58,8 +58,8 @@ public class CardMemento {
 
     @Override
     public String toString() {
-	return "CardMemento [age=" + age + ", buildLevel=" + buildLevel + ", deployedTurn=" + deployedTurn + ", simpleDyingProtection="
-	        + simpleDyingProtection + ", position=" + position + "]";
+	return "CardMemento [name=" + name + ", age=" + age + ", buildLevel=" + buildLevel + ", deployedTurn=" + deployedTurn
+	        + ", simpleDyingProtection=" + simpleDyingProtection + ", position=" + position + "]";
     }
 
     public String getName() {

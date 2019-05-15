@@ -3,76 +3,96 @@ package fr.keyser.pt2;
 import java.util.List;
 
 public class PlayerView {
-    private final PlayerMemento player;
+    private int gold;
 
-    private final ResourcesStats stats;
+    private int legend;
+
+    private List<CardMemento> cards;
+
+    private int food;
+
+    private int wood;
+
+    private int crystal;
+    private int combat;
+    private int victory;
+
+    private GoldLegendGain deploy;
+
+    private GoldLegendGain war;
+
+    private GoldLegendGain pay;
+
+    private GoldLegendGain age;
 
     public PlayerView(ResourcesStats stats, PlayerMemento player) {
-	this.stats = stats;
-	this.player = player;
-    }
-
-    public GoldLegendGain getAgeGain() {
-	return new GoldLegendGain(stats.getAgeGoldGain(), stats.getAgeLegend());
-    }
-
-    public List<CardMemento> getCards() {
-	return player.getCards();
-    }
-
-    public int getCombat() {
-	return stats.getCombat();
-    }
-
-    public int getCrystal() {
-	return stats.getCrystal();
-    }
-
-    public GoldLegendGain getDeployGain() {
-	return new GoldLegendGain(stats.getDeployGoldGain(), stats.getDeployLegend());
-    }
-
-    public int getFood() {
-	return stats.getFood();
-    }
-
-    public int getGold() {
-	return player.getGold();
-    }
-
-    public int getLegend() {
-	return player.getLegend();
-    }
-
-    public GoldLegendGain getPayGain() {
-	return new GoldLegendGain(stats.getPayGoldGain(), stats.getPayLegend());
-    }
-
-    public int getVictory() {
-	return stats.getVictory();
-    }
-
-    public GoldLegendGain getWarGain() {
-	return new GoldLegendGain(stats.getWarGoldGain(), stats.getWarLegend());
-    }
-
-    public int getWood() {
-	return stats.getWood();
-    }
-
-    void setGold(int gold) {
-	player.setGold(gold);
-    }
-
-    void setLegend(int legend) {
-	player.setLegend(legend);
+	gold = player.getGold();
+	legend = player.getLegend();
+	cards = player.getCards();
+	food = stats.getFood();
+	wood = stats.getWood();
+	crystal = stats.getCrystal();
+	combat = stats.getCombat();
+	victory = stats.getVictory();
+	age = new GoldLegendGain(stats.getAgeGoldGain(), stats.getAgeLegend());
+	deploy = new GoldLegendGain(stats.getDeployGoldGain(), stats.getDeployLegend());
+	pay = new GoldLegendGain(stats.getPayGoldGain(), stats.getPayLegend());
+	war = new GoldLegendGain(stats.getWarGoldGain(), stats.getWarLegend());
     }
 
     @Override
     public String toString() {
-	return "PlayerStats [wood=" + getWood() + ", food=" + getFood() + ", crystal=" + getCrystal() + ", combat="
-	        + getCombat() + ", victory=" + getVictory() + ", deployGain=" + getDeployGain() + ", warGain=" + getWarGain()
-	        + ", payGain=" + getPayGain() + ", ageGain=" + getAgeGain() + ", legend=" + getLegend() + ", gold="
-	        + getGold() + "]";
+	return "PlayerView [wood=" + getWood() + ", food=" + getFood() + ", crystal=" + getCrystal() + ", combat="
+	        + getCombat() + ", victory=" + getVictory() + ", deployGain=" + getDeploy() + ", warGain=" + getWar()
+	        + ", payGain=" + getPay() + ", ageGain=" + getAge() + ", legend=" + getLegend() + ", gold="
+	        + getGold() + ", cards=" + getCards() + "]";
+    }
+
+    public int getGold() {
+	return gold;
+    }
+
+    public int getLegend() {
+	return legend;
+    }
+
+    public List<CardMemento> getCards() {
+	return cards;
+    }
+
+    public int getFood() {
+	return food;
+    }
+
+    public int getWood() {
+	return wood;
+    }
+
+    public int getCrystal() {
+	return crystal;
+    }
+
+    public int getCombat() {
+	return combat;
+    }
+
+    public GoldLegendGain getDeploy() {
+	return deploy;
+    }
+
+    public GoldLegendGain getWar() {
+	return war;
+    }
+
+    public GoldLegendGain getPay() {
+	return pay;
+    }
+
+    public GoldLegendGain getAge() {
+	return age;
+    }
+
+    public int getVictory() {
+	return victory;
     }
 }
