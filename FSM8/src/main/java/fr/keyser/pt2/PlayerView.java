@@ -25,7 +25,7 @@ public class PlayerView {
 
     private GoldLegendGain age;
 
-    public PlayerView(ResourcesStats stats, PlayerMemento player) {
+    public PlayerView(ResourcesStats stats, PlayerScoreMemento player) {
 	gold = player.getGold();
 	legend = player.getLegend();
 	cards = player.getCards();

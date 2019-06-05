@@ -97,7 +97,7 @@ public class Event {
 	String base = key;
 	if (args.isEmpty())
 	    return base;
-	return base + " " + args;
+	return base + args;
     }
 
     public Collection<Object> values() {

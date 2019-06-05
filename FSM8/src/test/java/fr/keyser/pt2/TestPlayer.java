@@ -15,7 +15,7 @@ public class TestPlayer {
 
 	MutableInt turn = new MutableInt(1);
 	LocalBoard lb1 = new LocalBoard(turn);
-	LocalPlayer lp1 = new LocalPlayer(lb1);
+	LocalPlayer lp1 = new LocalPlayer(null, lb1);
 
 	CardProvider cp = new CardProvider();
 	cp.addUnit(CaveSpirit::new);

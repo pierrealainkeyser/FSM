@@ -20,36 +20,36 @@ public class LoggingAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void entering(InstanceState id, State entered, Event event) {
-	logger.debug("entering {} {} @{}", id, entered, event);
-	super.entering(id, entered, event);
+    public void entering(InstanceState instance, State entered, Event event) {
+	logger.debug("entering {} {} @{}", instance, entered, event);
+	super.entering(instance, entered, event);
     }
 
     @Override
-    public void following(InstanceState id, Transition transition) {
-	logger.debug("following {} {} ", id, transition);
-	super.following(id, transition);
+    public void following(InstanceState instance, Transition transition) {
+	logger.debug("following {} {} : {}", instance, transition, instance.getProps());
+	super.following(instance, transition);
     }
 
     @Override
-    public boolean guard(InstanceState id, Transition transition) {
-	boolean guarded = super.guard(id, transition);
+    public boolean guard(InstanceState instance, Transition transition) {
+	boolean guarded = super.guard(instance, transition);
 	if (!guarded) {
-	    logger.debug("guard reject transition {} {} ", id, transition);
+	    logger.debug("guard reject transition {} {} ", instance, transition);
 	}
 	return guarded;
     }
 
     @Override
-    public void leaving(InstanceState id, State leaved, Event event) {
-	logger.debug("leaving {} {} @{}", id, leaved, event);
-	super.leaving(id, leaved, event);
+    public void leaving(InstanceState instance, State leaved, Event event) {
+	logger.debug("leaving {} {} @{}", instance, leaved, event);
+	super.leaving(instance, leaved, event);
     }
 
     @Override
-    public void reaching(InstanceState id, State reached, StateType type) {
-	logger.debug("reaching {} {}({})", id, reached, type);
-	super.reaching(id, reached, type);
+    public void reaching(InstanceState instance, State reached, StateType type) {
+	logger.debug("reaching {} {}({})", instance, reached, type);
+	super.reaching(instance, reached, type);
     }
 
     @Override

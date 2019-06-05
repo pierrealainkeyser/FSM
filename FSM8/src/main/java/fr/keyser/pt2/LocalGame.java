@@ -1,9 +1,11 @@
 package fr.keyser.pt2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import fr.keyser.pt2.prop.MutableInt;
+import fr.keyser.pt2.units.Unit;
 
 public class LocalGame {
 
@@ -16,11 +18,12 @@ public class LocalGame {
     public LocalGame(CardProvider cardProvider, LocalGameSettings settings) {
 	this.deck = new Deck(cardProvider, settings.getDeck());
 	int nbPlayers = settings.getNbPlayers();
-	this.players = new ArrayList<>(nbPlayers);
+	List<LocalPlayer> ps = new ArrayList<>(nbPlayers);
 	for (int i = 0; i < nbPlayers; ++i) {
 	    LocalBoard board = new LocalBoard(turn);
-	    players.add(new LocalPlayer(board));
+	    ps.add(new LocalPlayer(this, board));
 	}
+	this.players = Collections.unmodifiableList(ps);
 
 	if (nbPlayers == 2) {
 	    LocalPlayer before = players.get(0);
@@ -40,12 +43,24 @@ public class LocalGame {
 	}
     }
 
+    public void distribute() {
+	int cards = players.size() > 2 ? 5 : 9;
+	for (LocalPlayer lp : players) {
+	    for (int i = 0; i < cards; ++i)
+		lp.addToHand(deck.next());
+	}
+    }
+
+    public void passCardsToNext() {
+
+    }
+
     public void nextTurn() {
 	this.turn.add(1);
     }
 
-    public LocalPlayer getPlayer(int index) {
-	return players.get(index);
+    public boolean hasNextTurn() {
+	return this.turn.getValue() < 3;
     }
 
     public void agePhase() {
@@ -72,4 +87,15 @@ public class LocalGame {
 	players.forEach(LocalPlayer::warPhase);
     }
 
+    Unit unit(String unitName) {
+	return deck.unit(unitName);
+    }
+
+    void discard(String unitName) {
+	deck.discard(unitName);
+    }
+
+    public List<LocalPlayer> getPlayers() {
+	return players;
+    }
 }

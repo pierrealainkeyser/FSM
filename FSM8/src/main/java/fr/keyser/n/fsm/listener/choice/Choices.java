@@ -7,21 +7,21 @@ import java.util.function.Supplier;
 
 public class Choices {
 
-    private final Map<String, Function<Map<String, Object>, Boolean>> choices = new HashMap<>();
+    private final Map<String, Function<Choice, Boolean>> choices = new HashMap<>();
 
     public Choices with(String index, Supplier<Boolean> supplier) {
 	return with(index, m -> supplier.get());
     }
 
-    public Choices with(String index, Function<Map<String, Object>, Boolean> supplier) {
+    public Choices with(String index, Function<Choice, Boolean> supplier) {
 	choices.put(index, supplier);
 	return this;
     }
 
     public boolean test(Choice choice) {
-	Function<Map<String, Object>, Boolean> sup = choices.get(choice.getKey());
+	Function<Choice, Boolean> sup = choices.get(choice.getKey());
 	if (sup != null)
-	    return sup.apply(choice.getProps());
+	    return sup.apply(choice);
 	else
 	    return false;
     }

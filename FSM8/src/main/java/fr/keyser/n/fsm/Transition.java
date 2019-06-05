@@ -2,6 +2,8 @@ package fr.keyser.n.fsm;
 
 import java.util.stream.Stream;
 
+import fr.keyser.n.fsm.listener.timeout.TimeOut;
+
 public final class Transition {
 
     private final State destination;
@@ -14,6 +16,10 @@ public final class Transition {
 	this.source = source;
 	this.event = event;
 	this.destination = destination;
+    }
+
+    public boolean isTimeout() {
+	return event instanceof TimeOut;
     }
 
     public Stream<State> leaving() {

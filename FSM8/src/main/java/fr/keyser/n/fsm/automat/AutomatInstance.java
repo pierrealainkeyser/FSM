@@ -1,5 +1,7 @@
 package fr.keyser.n.fsm.automat;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -24,6 +26,8 @@ class AutomatInstance {
 
     private final AutomatListener listener;
 
+    private final Map<String, Object> props = new HashMap<>();
+
     AutomatInstance(InstanceId parentId, Automat automat, State current, InstanceId id, AutomatListener listener) {
 	this.parentId = parentId;
 	this.automat = automat;
@@ -33,7 +37,7 @@ class AutomatInstance {
     }
 
     InstanceState getInstanceState() {
-	return new InstanceState(id, parentId, current);
+	return new InstanceState(id, parentId, current, props);
     }
 
     private boolean guard(Transition transition) {

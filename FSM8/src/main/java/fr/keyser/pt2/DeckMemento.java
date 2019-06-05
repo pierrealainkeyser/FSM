@@ -9,7 +9,7 @@ public class DeckMemento {
     private List<String> discardeds;
 
     private List<String> buildings;
-
+    
     public List<String> getUnits() {
 	return units;
     }

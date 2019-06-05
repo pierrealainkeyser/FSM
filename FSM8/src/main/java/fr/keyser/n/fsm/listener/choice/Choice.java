@@ -1,5 +1,6 @@
 package fr.keyser.n.fsm.listener.choice;
 
+import java.util.Collections;
 import java.util.Map;
 
 import fr.keyser.n.fsm.Event;
@@ -19,6 +20,7 @@ public class Choice extends Event {
 	return Event.event(index)
 	        .id(getId())
 	        .put(OTHERWISE, otherwise)
+	        .put(PROPS, getProps())
 	        .build(Choice::new);
 
     }
@@ -26,7 +28,7 @@ public class Choice extends Event {
     public final static Choice choice(InstanceState state) {
 	return Event.event("<choice>")
 	        .id(state.getId())
-	        .put(PROPS, state.getProps())
+	        .put(PROPS, Collections.unmodifiableMap(state.getProps()))
 	        .build(Choice::new);
     }
 

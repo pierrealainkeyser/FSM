@@ -159,17 +159,16 @@ public class AutomatContainer implements EventReceiver {
 
 	AtomicInteger index = new AtomicInteger(0);
 	childs.forEach(s -> {
-	    startInstance(parentId, s, index);
-	    index.incrementAndGet();
+	    startInstance(parentId, s,  index.getAndIncrement());
 	});
     }
 
-    private void startInstance(InstanceId parentId, State state, AtomicInteger index) {
+    private void startInstance(InstanceId parentId, State state, Integer index) {
 	AutomatInstance ai = new AutomatInstance(parentId, automat, state, idSupplier.get(), listener);
 	instances.put(ai.getId(), ai);
 	InstanceState instanceState = ai.getInstanceState();
 	if (index != null)
-	    instanceState.getProps().put(INDEX, index.get());
+	    instanceState.getProps().put(INDEX, index);
 
 	listener.starting(instanceState);
 	ai.start();

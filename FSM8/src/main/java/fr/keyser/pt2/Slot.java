@@ -38,7 +38,7 @@ public final class Slot {
     private final IntSupplier effectiveCombat = mapInt(Slot::effectiveCombat);
 
     private final IntSupplier combat = mapInt(Card::getCombat);
-    
+
     private final IntSupplier cost = mapInt(Card::getCost);
 
     private final IntSupplier age = mapInt(Card::getAge);
@@ -183,16 +183,26 @@ public final class Slot {
     }
 
     public void play(Card card) {
-	setCard(card);
+	setCard(card, true);
 	card.deploy();
     }
 
-    public void setCard(Card card) {
+    public void removeCard() {
+	setCard(null, true);
+    }
 
-	Card oldCard = this.card.get();
-	if (oldCard != null) {
-	    oldCard.setPosition(null);
-	    oldCard.setBoard(null);
+    public void moveCard(Card card) {
+	setCard(card, false);
+    }
+
+    private void setCard(Card card, boolean triggerOldCard) {
+
+	if (triggerOldCard) {
+	    Card oldCard = this.card.get();
+	    if (oldCard != null) {
+		oldCard.setPosition(null);
+		oldCard.setBoard(null);
+	    }
 	}
 
 	this.card.set(card);
@@ -204,6 +214,6 @@ public final class Slot {
     }
 
     public IntSupplier getCost() {
-        return cost;
+	return cost;
     }
 }

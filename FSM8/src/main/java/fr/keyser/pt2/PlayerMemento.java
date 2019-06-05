@@ -2,35 +2,25 @@ package fr.keyser.pt2;
 
 import java.util.List;
 
-public class PlayerMemento {
-    private int gold;
+public class PlayerMemento extends PlayerScoreMemento {
+    private List<String> hand;
 
-    private int legend;
+    private List<String> currentHand;
 
-    private List<CardMemento> cards;
-
-    public List<CardMemento> getCards() {
-	return cards;
+    public List<String> getHand() {
+	return hand;
     }
 
-    public int getGold() {
-	return gold;
+    public void setHand(List<String> hand) {
+	this.hand = hand;
     }
 
-    public int getLegend() {
-	return legend;
+    public List<String> getCurrentHand() {
+        return currentHand;
     }
 
-    public void setCards(List<CardMemento> cards) {
-	this.cards = cards;
-    }
-
-    public void setGold(int gold) {
-	this.gold = gold;
-    }
-
-    public void setLegend(int legend) {
-	this.legend = legend;
+    public void setCurrentHand(List<String> currentHand) {
+        this.currentHand = currentHand;
     }
 
 }
