@@ -10,7 +10,7 @@ import fr.keyser.n.fsm.automat.StateBuilder;
 
 public class PTMultiPlayersAutomatBuilder {
 
-    private static final String PLAY = "Play";
+    public static final String PLAY = "Play";
     private static final String END_OF_TURN_CHOICE = "endOfTurn";
     private static final String AGE = "age";
     private static final String BUILD = "build";
@@ -25,8 +25,8 @@ public class PTMultiPlayersAutomatBuilder {
     private static final String WAITING = "Waiting";
     private static final String HAS_MORE_INPUT = "HasMoreInput";
     private static final String WAITING_INPUT = "WaitingInput";
-    private static final String CHECK_INPUT = "CheckInput";
-    private static final String HAS_INPUT = "hasInput";
+    public static final String CHECK_INPUT = "CheckInput";
+    public static final String HAS_INPUT = "hasInput";
     private final int nbPlayers;
 
     public PTMultiPlayersAutomatBuilder(int nbPlayers) {
@@ -36,6 +36,10 @@ public class PTMultiPlayersAutomatBuilder {
     public static State draft(int step) {
 	return new State(TURN, DRAFT, draftStep(step));
     }
+    
+    public static State deploy() {
+  	return new State(TURN, DRAFT);
+      }
 
     public static State forPlayer(State state, int player) {
 	return state.sub(forPlayer(player));

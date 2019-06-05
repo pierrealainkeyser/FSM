@@ -43,8 +43,7 @@ public class LocalGame {
 	}
     }
 
-    public void distribute() {
-	int cards = players.size() > 2 ? 5 : 9;
+    public void distribute(int cards) {
 	for (LocalPlayer lp : players) {
 	    for (int i = 0; i < cards; ++i)
 		lp.addToHand(deck.next());
