@@ -59,7 +59,7 @@ public class LocalGame {
     }
 
     public boolean hasNextTurn() {
-	return this.turn.getValue() < 3;
+	return this.turn.getValue() < 4;
     }
 
     public void agePhase() {

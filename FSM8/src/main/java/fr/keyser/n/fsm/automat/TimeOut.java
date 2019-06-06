@@ -1,4 +1,4 @@
-package fr.keyser.n.fsm.listener.timeout;
+package fr.keyser.n.fsm.automat;
 
 import java.time.Duration;
 import java.util.Map;

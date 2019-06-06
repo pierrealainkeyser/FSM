@@ -66,6 +66,10 @@ public class Automat {
 	        .orElse(false);
     }
 
+    boolean containsState(State state) {
+	return opt(state).isPresent();
+    }
+
     private Optional<StateNode> opt(State state) {
 	return Optional.ofNullable(stateNodes.get(state));
     }

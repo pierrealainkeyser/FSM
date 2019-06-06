@@ -2,7 +2,7 @@ package fr.keyser.n.fsm;
 
 import java.util.stream.Stream;
 
-import fr.keyser.n.fsm.listener.timeout.TimeOut;
+import fr.keyser.n.fsm.automat.TimeOut;
 
 public final class Transition {
 

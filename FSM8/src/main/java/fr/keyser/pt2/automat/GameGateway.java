@@ -9,17 +9,20 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import fr.keyser.n.fsm.Event;
+import fr.keyser.n.fsm.Event.Builder;
 import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.automat.Automat;
 import fr.keyser.n.fsm.automat.AutomatContainer;
-import fr.keyser.n.fsm.container.AutomatContainerBuilder;
-import fr.keyser.n.fsm.container.AutomatContainerBuilder.StateConfigurer;
+import fr.keyser.n.fsm.automat.AutomatContainerBuilder;
+import fr.keyser.n.fsm.automat.AutomatContainerBuilder.StateConfigurer;
+import fr.keyser.n.fsm.automat.TimeOut;
 import fr.keyser.n.fsm.listener.frontier.EntryListener;
-import fr.keyser.n.fsm.listener.timeout.TimeOut;
 import fr.keyser.pt2.LocalGame;
 import fr.keyser.pt2.LocalPlayer;
+import fr.keyser.pt2.view.ActivateEffectDTO;
+import fr.keyser.pt2.view.BuildInstructionDTO;
 import fr.keyser.pt2.view.PickAndDiscardInstructionDTO;
 import fr.keyser.pt2.view.PickInstructionDTO;
 import fr.keyser.pt2.view.PlayInstructionDTO;
@@ -48,6 +51,15 @@ public class GameGateway {
 	}
 
 	private void doPlay(PlayInstructionDTO play) {
+
+	}
+
+	private void doActive(ActivateEffectDTO activate) {
+
+	}
+
+	private void doBuild(BuildInstructionDTO build) {
+
 	}
 
 	private void expect(Class<?> expectedInput, InstanceId id) {
@@ -60,12 +72,15 @@ public class GameGateway {
 	}
 
 	public boolean handleInput(Object input) {
-	    if (expectedInput != null && expectedInput.isAssignableFrom(input.getClass())) {
-		automatContainer.receive(Event.event("done").id(id).put(INPUT, input));
+	    Builder event = Event.event("done").id(id);
+	    if (expectedInput == null) {
+		automatContainer.receive(event);
+	    } else if (expectedInput.isAssignableFrom(input.getClass())) {
+		automatContainer.receive(event.put(INPUT, input));
 		return true;
-	    } else {
-		return false;
 	    }
+	    return false;
+
 	}
 
 	private boolean hasAgeEffects() {
@@ -111,11 +126,11 @@ public class GameGateway {
 	    return (is, state, evt) -> {
 		PlayerGateway pg = asPlayer(is);
 		pg.setWaiting(false);
-		if (evt instanceof TimeOut) {
+		Object obj = evt.get(INPUT);
+		if (evt instanceof TimeOut || obj == null) {
 		    consumer.accept(pg, null);
 		} else {
-		    I input = type.cast(evt.get(INPUT));
-		    consumer.accept(pg, input);
+		    consumer.accept(pg, type.cast(obj));
 		}
 	    };
 	}
@@ -140,14 +155,29 @@ public class GameGateway {
 
     private AutomatContainer build(Automat automat) {
 	AutomatContainerBuilder acb = new AutomatContainerBuilder(automat);
+
+	acb.state(PTMultiPlayersAutomatBuilder.prepareNewTurn())
+	        .entry(game::nextTurn);
+
 	draftPhase(acb);
 	deployPhase(acb);
+	warPhase(acb);
+	goldPhase(acb);
+	buildPhase(acb);
+	agePhase(acb);
+
+	acb.state(PTMultiPlayersAutomatBuilder.endOfTurn())
+	        .with(PTMultiPlayersAutomatBuilder.NEXT_TURN_CHOICE, game::hasNextTurn);
 
 	return acb.build();
     }
 
     private void deployPhase(AutomatContainerBuilder acb) {
 	State deploy = PTMultiPlayersAutomatBuilder.deploy();
+	acb.state(deploy)
+	        .entry(game::deployPhase)
+	        .exit(game::endDeployPhase);
+
 	for (int index = 0; index < players.size(); ++index) {
 	    State forPlayer = forPlayer(deploy, index);
 
@@ -159,6 +189,66 @@ public class GameGateway {
 	    acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.CHECK_INPUT))
 	            .with(PTMultiPlayersAutomatBuilder.HAS_INPUT, playerGateway::hasDeployEffects);
 
+	    inputHandler(ActivateEffectDTO.class, PlayerGateway::doActive)
+	            .configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.WAITING_INPUT)));
+
+	}
+    }
+
+    private void agePhase(AutomatContainerBuilder acb) {
+	State age = PTMultiPlayersAutomatBuilder.age();
+	acb.state(age)
+	        .entry(game::agePhase)
+	        .exit(game::endAgePhase);
+
+	for (int index = 0; index < players.size(); ++index) {
+	    State forPlayer = forPlayer(age, index);
+
+	    PlayerGateway playerGateway = players.get(index);
+
+	    acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.CHECK_INPUT))
+	            .with(PTMultiPlayersAutomatBuilder.HAS_INPUT, playerGateway::hasAgeEffects);
+
+	    acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.HAS_MORE_INPUT))
+	            .with(PTMultiPlayersAutomatBuilder.HAS_INPUT, playerGateway::hasAgeEffects);
+
+	    inputHandler(ActivateEffectDTO.class, PlayerGateway::doActive)
+	            .configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.WAITING_INPUT)));
+
+	    noOpHandler().configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.WAITING)));
+	}
+    }
+
+    private void warPhase(AutomatContainerBuilder acb) {
+	State war = PTMultiPlayersAutomatBuilder.war();
+	acb.state(war)
+	        .entry(game::warPhase);
+
+	noopPhase(acb, war);
+    }
+
+    private void goldPhase(AutomatContainerBuilder acb) {
+	State gold = PTMultiPlayersAutomatBuilder.gold();
+	acb.state(gold)
+	        .entry(game::payPhase);
+	noopPhase(acb, gold);
+    }
+
+    private void buildPhase(AutomatContainerBuilder acb) {
+	State build = PTMultiPlayersAutomatBuilder.buildPhase();
+	for (int index = 0; index < players.size(); ++index) {
+	    State forPlayer = forPlayer(build, index);
+
+	    inputHandler(BuildInstructionDTO.class, PlayerGateway::doBuild)
+	            .configure(acb.state(forPlayer));
+
+	}
+    }
+
+    private void noopPhase(AutomatContainerBuilder acb, State base) {
+	for (int index = 0; index < players.size(); ++index) {
+	    State forPlayer = forPlayer(base, index);
+	    noOpHandler().configure(acb.state(forPlayer));
 	}
     }
 
@@ -167,7 +257,8 @@ public class GameGateway {
     }
 
     private void draftPhase(AutomatContainerBuilder acb) {
-	acb.state(draft(0)).entry(this::distribute);
+	State draft = draft();
+	acb.state(draft).entry(this::distribute);
 
 	Class<? extends PickInstructionDTO> pickClass = twoPlayers ? PickAndDiscardInstructionDTO.class : PickInstructionDTO.class;
 
@@ -187,7 +278,20 @@ public class GameGateway {
 	return players.get(index);
     }
 
+    private <I> StateInputHandler<I> noOpHandler() {
+	return new StateInputHandler<>(null, (pg, i) -> {
+	});
+    }
+
     private <I> StateInputHandler<I> inputHandler(Class<I> type, BiConsumer<PlayerGateway, I> consumer) {
 	return new StateInputHandler<>(type, consumer);
+    }
+
+    public void start() {
+	automatContainer.start();
+    }
+
+    public List<PlayerGateway> getPlayers() {
+	return players;
     }
 }

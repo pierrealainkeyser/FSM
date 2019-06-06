@@ -6,9 +6,7 @@ import java.util.Map;
 
 import fr.keyser.n.fsm.EventReceiver;
 import fr.keyser.n.fsm.InstanceId;
-import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.listener.timeout.RegisteredTimeOut;
-import fr.keyser.n.fsm.listener.timeout.TimeOut;
 import fr.keyser.n.fsm.listener.timeout.TimeoutScheduler;
 
 public class TestingTimeoutScheduler implements TimeoutScheduler {
@@ -31,17 +29,6 @@ public class TestingTimeoutScheduler implements TimeoutScheduler {
 	    timeouts.remove(timeout.getId());
 
 	}
-
-	@Override
-	public boolean isSameState(State state) {
-	    return timeout.getState() == state;
-	}
-
-	@Override
-	public boolean isSameTimer(long timer) {
-	    return timeout.getTimer() == timer;
-	}
-
     }
 
     private Map<InstanceId, TestingTimeout> timeouts = new HashMap<>();

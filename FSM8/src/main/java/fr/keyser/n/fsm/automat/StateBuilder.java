@@ -58,7 +58,7 @@ public class StateBuilder implements ExtendedBuilder {
 	else
 	    return this;
     }
-    
+
     public boolean isInitial() {
 	return initial;
     }
@@ -105,6 +105,10 @@ public class StateBuilder implements ExtendedBuilder {
 	return JoiningPreTransitionBuilder::new;
     }
 
+    public static Function<StateBuilder, Supplier<? extends TransitionSource>> auto() {
+	return AutoPreTransitionBuilder::new;
+    }
+
     public static Function<StateBuilder, Supplier<? extends TransitionSource>> event(String evt) {
 	return d -> new KeyedPreTransitionBuilder(evt, d);
     }
@@ -125,6 +129,15 @@ public class StateBuilder implements ExtendedBuilder {
 		return;
 	}
 
+	if (transition instanceof AutoPreTransitionBuilder) {
+	    if (StateType.AUTO != type) {
+		throw new IllegalArgumentException("state " + state + "/" + type + " doesn't allow auto transition");
+	    } else if (!transitions.isEmpty()) {
+		throw new IllegalArgumentException("state " + state + "/" + type + " allready have an auto transition");
+	    } else
+		return;
+	}
+
 	if (transition instanceof ChoiceTransitionSourceBuilder) {
 	    if (StateType.CHOICE != type) {
 		throw new IllegalArgumentException("state " + state + "/" + type + " doesn't allow choice transition");
@@ -132,7 +145,8 @@ public class StateBuilder implements ExtendedBuilder {
 		return;
 	}
 
-	if (StateType.TERMINAL == type || StateType.JOINING == type || StateType.ORTHOGONAL == type || StateType.CHOICE == type)
+	if (StateType.TERMINAL == type || StateType.JOINING == type || StateType.ORTHOGONAL == type || StateType.CHOICE == type
+	        || StateType.AUTO == type)
 	    throw new IllegalArgumentException("state " + state + "/" + type + " doesn't allow transition");
     }
 }

@@ -1,5 +1,7 @@
 package fr.keyser.n.fsm.listener.timeout;
 
+import fr.keyser.n.fsm.automat.TimeOut;
+
 public class LazyTimeoutScheduler implements TimeoutScheduler {
 
     private TimeoutScheduler timeoutScheduler;

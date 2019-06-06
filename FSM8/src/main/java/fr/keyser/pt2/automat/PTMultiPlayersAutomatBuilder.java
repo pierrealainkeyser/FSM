@@ -1,6 +1,7 @@
 package fr.keyser.pt2.automat;
 
 import static fr.keyser.n.fsm.automat.ChoiceTransitionSourceBuilder.choice;
+import static fr.keyser.n.fsm.automat.StateBuilder.auto;
 import static fr.keyser.n.fsm.automat.StateBuilder.join;
 
 import fr.keyser.n.fsm.State;
@@ -11,20 +12,21 @@ import fr.keyser.n.fsm.automat.StateBuilder;
 public class PTMultiPlayersAutomatBuilder {
 
     public static final String PLAY = "Play";
-    private static final String END_OF_TURN_CHOICE = "endOfTurn";
+    private static final String END_OF_TURN = "endOfTurn";
     private static final String AGE = "age";
     private static final String BUILD = "build";
     private static final String GOLD = "gold";
     private static final String WAR = "war";
     private static final String DEPLOY = "deploy";
     private static final String DRAFT = "draft";
+    private static final String PREPARE_NEW_TURN = "prepareNewTurn";
     private static final String TURN = "turn";
-    private static final String NEXT_TURN_CHOICE = "nextTurn";
+    public static final String NEXT_TURN_CHOICE = "nextTurn";
     private static final String DONE_STATE = "Done";
     private static final String DONE = "done";
-    private static final String WAITING = "Waiting";
-    private static final String HAS_MORE_INPUT = "HasMoreInput";
-    private static final String WAITING_INPUT = "WaitingInput";
+    public static final String WAITING = "Waiting";
+    public static final String HAS_MORE_INPUT = "HasMoreInput";
+    public static final String WAITING_INPUT = "WaitingInput";
     public static final String CHECK_INPUT = "CheckInput";
     public static final String HAS_INPUT = "hasInput";
     private final int nbPlayers;
@@ -33,13 +35,41 @@ public class PTMultiPlayersAutomatBuilder {
 	this.nbPlayers = nbPlayers;
     }
 
-    public static State draft(int step) {
-	return new State(TURN, DRAFT, draftStep(step));
+    public static State prepareNewTurn() {
+	return new State(PREPARE_NEW_TURN);
     }
-    
+
+    public static State draft() {
+	return new State(TURN, DRAFT);
+    }
+
+    public static State draft(int step) {
+	return draft().sub(draftStep(step));
+    }
+
     public static State deploy() {
-  	return new State(TURN, DRAFT);
-      }
+	return new State(TURN, DEPLOY);
+    }
+
+    public static State buildPhase() {
+	return new State(TURN, BUILD);
+    }
+
+    public static State war() {
+	return new State(TURN, WAR);
+    }
+
+    public static State gold() {
+	return new State(TURN, GOLD);
+    }
+
+    public static State age() {
+	return new State(TURN, AGE);
+    }
+
+    public static State endOfTurn() {
+	return new State(END_OF_TURN);
+    }
 
     public static State forPlayer(State state, int player) {
 	return state.sub(forPlayer(player));
@@ -111,6 +141,8 @@ public class PTMultiPlayersAutomatBuilder {
     public Automat build() {
 	AutomatBuilder builder = new AutomatBuilder();
 
+	StateBuilder prepare = builder.auto(PREPARE_NEW_TURN);
+
 	StateBuilder turn = builder.state(TURN);
 
 	StateBuilder draft = turn.state(DRAFT);
@@ -119,8 +151,10 @@ public class PTMultiPlayersAutomatBuilder {
 	StateBuilder gold = turn.orthogonal(GOLD);
 	StateBuilder build = turn.orthogonal(BUILD);
 	StateBuilder age = turn.orthogonal(AGE);
-	StateBuilder endOfTurn = builder.choice(END_OF_TURN_CHOICE);
+	StateBuilder endOfTurn = builder.choice(END_OF_TURN);
 	StateBuilder end = builder.terminal("ended");
+
+	prepare.on(auto(), turn);
 
 	StateBuilder cur = draft.orthogonal(draftStep(0));
 	for (int i = 1; i <= 4; ++i) {
@@ -138,7 +172,7 @@ public class PTMultiPlayersAutomatBuilder {
 	createWaiting(build, age);
 	createWaitingAge(age, endOfTurn);
 
-	endOfTurn.on(choice(NEXT_TURN_CHOICE, turn).otherwise(end));
+	endOfTurn.on(choice(NEXT_TURN_CHOICE, prepare).otherwise(end));
 
 	return builder.build();
     }

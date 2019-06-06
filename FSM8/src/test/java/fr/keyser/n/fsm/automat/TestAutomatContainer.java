@@ -13,7 +13,6 @@ import fr.keyser.n.fsm.Event;
 import fr.keyser.n.fsm.EventReceiver;
 import fr.keyser.n.fsm.State;
 import fr.keyser.n.fsm.automat.TestingTimeoutScheduler.TestingTimeout;
-import fr.keyser.n.fsm.container.AutomatContainerBuilder;
 
 public class TestAutomatContainer {
 

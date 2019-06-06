@@ -18,7 +18,7 @@ import fr.keyser.pt2.units.Unit;
 
 public class LocalPlayer {
 
-    private Set<Integer> activated = new HashSet<>();
+    private Set<CardPosition> activated = new HashSet<>();
 
     private PlayerView current;
 
@@ -39,12 +39,13 @@ public class LocalPlayer {
     public LocalPlayer(LocalGame game, LocalBoard localBoard) {
 	this.game = game;
 	this.localBoard = localBoard;
+	this.gold = 2;
 	snapshotPrivateView();
 	makePrivateInfoPublic();
     }
 
     private List<EffectLog> activate(Card card, ChoosenTargets targets, Stream<TargetableEffect> effects) {
-	activated.add(card.getId());
+	activated.add(card.getPosition());
 
 	Slot slot = localBoard.getSlot(card.getPosition());
 
@@ -209,11 +210,13 @@ public class LocalPlayer {
 
     private Stream<CardTargets> targets(Slot s, Function<Card, Stream<TargetableEffect>> mapper) {
 	Card card = s.getCard().get();
-	if (card != null && !activated.contains(card.getId())) {
+	if (card != null) {
 	    CardPosition position = s.getCardPosition();
-	    List<Target> targets = mapper.apply(card).flatMap(x -> x.targets(s)).collect(toList());
-	    if (!targets.isEmpty()) {
-		return Stream.of(new CardTargets(position, targets));
+	    if (!activated.contains(position)) {
+		List<Target> targets = mapper.apply(card).flatMap(x -> x.targets(s)).collect(toList());
+		if (!targets.isEmpty()) {
+		    return Stream.of(new CardTargets(position, targets));
+		}
 	    }
 	}
 

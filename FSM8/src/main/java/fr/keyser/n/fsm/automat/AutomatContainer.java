@@ -73,6 +73,8 @@ public class AutomatContainer implements EventReceiver {
 		    checkJoinedState(state.getId(), reached);
 		} else if (StateType.TERMINAL == type) {
 		    terminateInstance(state.getId());
+		} else if (StateType.AUTO == type) {
+		    receive(AutoFollowed.auto(state));
 		}
 	    }
 	};
@@ -159,7 +161,7 @@ public class AutomatContainer implements EventReceiver {
 
 	AtomicInteger index = new AtomicInteger(0);
 	childs.forEach(s -> {
-	    startInstance(parentId, s,  index.getAndIncrement());
+	    startInstance(parentId, s, index.getAndIncrement());
 	});
     }
 

@@ -34,6 +34,5 @@ public class Joined extends Event {
 	public String toString() {
 	    return "§";
 	}
-
     }
 }

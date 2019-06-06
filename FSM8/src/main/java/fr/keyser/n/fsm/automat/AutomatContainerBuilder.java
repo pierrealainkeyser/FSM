@@ -1,4 +1,4 @@
-package fr.keyser.n.fsm.container;
+package fr.keyser.n.fsm.automat;
 
 import java.time.Duration;
 import java.util.function.Consumer;
@@ -8,8 +8,6 @@ import fr.keyser.n.fsm.EventReceiver;
 import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.LazyEventReceiver;
 import fr.keyser.n.fsm.State;
-import fr.keyser.n.fsm.automat.Automat;
-import fr.keyser.n.fsm.automat.AutomatContainer;
 import fr.keyser.n.fsm.listener.choice.ChoiceAutomatListener;
 import fr.keyser.n.fsm.listener.choice.Choices;
 import fr.keyser.n.fsm.listener.frontier.EntryAutomatListener;
@@ -102,6 +100,9 @@ public class AutomatContainerBuilder {
     }
 
     public StateConfigurer state(State state) {
+	if (!automat.containsState(state))
+	    throw new IllegalArgumentException("No such state " + state);
+
 	return new StateConfigurer(state);
     }
 

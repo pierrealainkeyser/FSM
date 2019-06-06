@@ -11,4 +11,9 @@ public class PickInstructionDTO {
     public void setPick(int pick) {
 	this.pick = pick;
     }
+
+    @Override
+    public String toString() {
+	return "[pick=" + pick + "]";
+    }
 }

@@ -10,14 +10,38 @@ import fr.keyser.n.fsm.Event;
 import fr.keyser.n.fsm.InstanceId;
 import fr.keyser.n.fsm.InstanceState;
 import fr.keyser.n.fsm.State;
+import fr.keyser.n.fsm.automat.TimeOut;
 import fr.keyser.n.fsm.listener.AutomatListener;
 import fr.keyser.n.fsm.listener.DelegatedAutomatListener;
 
 public class TimeOutAutomatListener extends DelegatedAutomatListener {
 
+    private static class BoundTimeOut {
+	public BoundTimeOut(TimeOut timeout, RegisteredTimeOut register) {
+	    this.timeout = timeout;
+	    this.register = register;
+	}
+
+	private final TimeOut timeout;
+
+	private final RegisteredTimeOut register;
+
+	public boolean isSameTimer(long timer) {
+	    return timeout.getTimer() == timer;
+	}
+
+	public boolean isSameState(State state) {
+	    return timeout.getState().equals(state);
+	}
+
+	public void cancel() {
+	    register.cancel();
+	}
+    }
+
     private final Map<State, Supplier<Duration>> timeouts = new LinkedHashMap<>();
 
-    private final Map<InstanceId, RegisteredTimeOut> registeredTimeout = new HashMap<>();
+    private final Map<InstanceId, BoundTimeOut> registeredTimeout = new HashMap<>();
 
     private long nextTimeout = 0;
 
@@ -34,7 +58,7 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     }
 
     private void schedule(TimeOut timed) {
-	registeredTimeout.put(timed.getId(), scheduler.schedule(timed));
+	registeredTimeout.put(timed.getId(), new BoundTimeOut(timed, scheduler.schedule(timed)));
     }
 
     @Override
@@ -43,7 +67,7 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
 	    TimeOut incomming = (TimeOut) event;
 
 	    // same timer
-	    RegisteredTimeOut current = registeredTimeout.get(state.getId());
+	    BoundTimeOut current = registeredTimeout.get(state.getId());
 	    return current != null && current.isSameTimer(incomming.getTimer());
 	}
 
@@ -53,7 +77,7 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     @Override
     public void terminating(InstanceState instance) {
 	InstanceId id = instance.getId();
-	RegisteredTimeOut timedOut = registeredTimeout.get(id);
+	BoundTimeOut timedOut = registeredTimeout.get(id);
 	if (timedOut != null) {
 	    removeTimedOut(id);
 	}
@@ -71,7 +95,7 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     }
 
     private void removeTimedOut(InstanceId id) {
-	RegisteredTimeOut removed = registeredTimeout.remove(id);
+	BoundTimeOut removed = registeredTimeout.remove(id);
 	if (removed != null) {
 	    removed.cancel();
 	}
@@ -80,7 +104,7 @@ public class TimeOutAutomatListener extends DelegatedAutomatListener {
     @Override
     public void leaving(InstanceState state, State leaved, Event event) {
 	InstanceId id = state.getId();
-	RegisteredTimeOut timedOut = registeredTimeout.get(id);
+	BoundTimeOut timedOut = registeredTimeout.get(id);
 	if (timedOut != null && timedOut.isSameState(leaved)) {
 	    removeTimedOut(id);
 	}

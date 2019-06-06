@@ -6,6 +6,10 @@ public interface ExtendedBuilder {
 
     StateBuilder state(String state, StateType type);
 
+    public default StateBuilder auto(String state) {
+	return state(state, StateType.AUTO);
+    }
+
     public default StateBuilder state(String state) {
 	return state(state, StateType.PLAIN);
     }
