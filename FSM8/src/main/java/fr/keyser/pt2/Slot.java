@@ -183,26 +183,22 @@ public final class Slot {
     }
 
     public void play(Card card) {
-	setCard(card, true);
+	setCard(card);
 	card.deploy();
     }
 
-    public void removeCard() {
-	setCard(null, true);
+    public Card removeCard() {
+	Card oldCard = this.card.get();
+	this.card.set(null);
+	return oldCard;
     }
 
-    public void moveCard(Card card) {
-	setCard(card, false);
-    }
+    public void setCard(Card card) {
 
-    private void setCard(Card card, boolean triggerOldCard) {
-
-	if (triggerOldCard) {
-	    Card oldCard = this.card.get();
-	    if (oldCard != null) {
-		oldCard.setPosition(null);
-		oldCard.setBoard(null);
-	    }
+	Card oldCard = this.card.get();
+	if (oldCard != null) {
+	    oldCard.setPosition(null);
+	    oldCard.setBoard(null);
 	}
 
 	this.card.set(card);

@@ -24,29 +24,29 @@ public class DelegatedAutomatListener implements AutomatListener {
     }
 
     @Override
-    public void following(InstanceState id, Transition transition) {
+    public void following(InstanceState instance, Transition transition) {
 	if (listener != null)
-	    listener.following(id, transition);
+	    listener.following(instance, transition);
     }
 
     @Override
-    public boolean guard(InstanceState id, Transition transition) {
+    public boolean guard(InstanceState instance, Transition transition) {
 	if (listener != null)
-	    return listener.guard(id, transition);
+	    return listener.guard(instance, transition);
 	else
 	    return true;
     }
 
     @Override
-    public void leaving(InstanceState id, State leaved, Event event) {
+    public void leaving(InstanceState instance, State leaved, Event event) {
 	if (listener != null)
-	    listener.leaving(id, leaved, event);
+	    listener.leaving(instance, leaved, event);
     }
 
     @Override
-    public void reaching(InstanceState id, State reached, StateType type) {
+    public void reaching(InstanceState instance, State reached, StateType type, Event event) {
 	if (listener != null)
-	    listener.reaching(id, reached, type);
+	    listener.reaching(instance, reached, type, event);
     }
 
     @Override

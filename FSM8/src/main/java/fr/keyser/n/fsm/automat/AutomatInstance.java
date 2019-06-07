@@ -57,27 +57,29 @@ class AutomatInstance {
 
     private void follow(EventProcessingStatus status, Transition t) {
 	InstanceState state = getInstanceState();
-	t.leaving().forEach(l -> listener.leaving(state, l, t.getEvent()));
+	Event event = t.getEvent();
+	t.leaving().forEach(l -> listener.leaving(state, l, event));
 	listener.following(state, t);
-	t.entering().forEach(e -> listener.entering(state, e, t.getEvent()));
+	t.entering().forEach(e -> listener.entering(state, e, event));
 
 	current = t.getDestination();
-	reachCurrentState();
+	reachCurrentState(event);
     }
 
     void start() {
 	InstanceState state = getInstanceState();
+	Event event = Started.INSTANCE;
 	if (parentId == null) {
-	    current.states().forEach(s -> listener.entering(state, s, Started.INSTANCE));
+	    current.states().forEach(s -> listener.entering(state, s, event));
 	} else
-	    listener.entering(state, current, Started.INSTANCE);
+	    listener.entering(state, current, event);
 
-	reachCurrentState();
+	reachCurrentState(event);
     }
 
-    private void reachCurrentState() {
+    private void reachCurrentState(Event event) {
 	StateType type = automat.type(current);
-	listener.reaching(getInstanceState(), current, type);
+	listener.reaching(getInstanceState(), current, type, event);
     }
 
     InstanceId getId() {

@@ -86,38 +86,38 @@ public class TestGameGateway {
 
 	// deploy
 	for (PlayerGateway pg : players) {
-	    Assertions.assertTrue(pg.isWaiting());
 	    Assertions.assertEquals(PlayInstructionDTO.class, pg.getExpectedInput());
+	    Assertions.assertTrue(pg.isWaiting());
 	    PlayInstructionDTO play = new PlayInstructionDTO();
 	    pg.handleInput(play);
 	}
 
 	// war
 	for (PlayerGateway pg : players) {
-	    Assertions.assertTrue(pg.isWaiting());
 	    Assertions.assertNull(pg.getExpectedInput());
+	    Assertions.assertTrue(pg.isWaiting());
 	    pg.handleInput(null);
 	}
 
 	// gold
 	for (PlayerGateway pg : players) {
-	    Assertions.assertTrue(pg.isWaiting());
 	    Assertions.assertNull(pg.getExpectedInput());
+	    Assertions.assertTrue(pg.isWaiting());
 	    pg.handleInput(null);
 	}
 
 	// build
 	for (PlayerGateway pg : players) {
-	    Assertions.assertTrue(pg.isWaiting());
 	    Assertions.assertEquals(BuildInstructionDTO.class, pg.getExpectedInput());
+	    Assertions.assertTrue(pg.isWaiting());
 	    BuildInstructionDTO build = new BuildInstructionDTO();
 	    pg.handleInput(build);
 	}
 
 	// age
 	for (PlayerGateway pg : players) {
-	    Assertions.assertTrue(pg.isWaiting());
 	    Assertions.assertNull(pg.getExpectedInput());
+	    Assertions.assertTrue(pg.isWaiting());
 	    pg.handleInput(null);
 	}
     }

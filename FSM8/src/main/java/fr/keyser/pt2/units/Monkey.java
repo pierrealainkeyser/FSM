@@ -5,6 +5,6 @@ import fr.keyser.pt2.prop.ConstInt;
 public class Monkey extends Unit {
     public Monkey() {
 	super(ConstInt.MINUS_ONE);
-	ageLegend = getDyingAgeToken();
+	ageGoldGain = getDyingAgeToken();
     }
 }

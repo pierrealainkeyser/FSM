@@ -156,7 +156,7 @@ public class GameGateway {
     private AutomatContainer build(Automat automat) {
 	AutomatContainerBuilder acb = new AutomatContainerBuilder(automat);
 
-	acb.state(PTMultiPlayersAutomatBuilder.prepareNewTurn())
+	acb.state(PTMultiPlayersAutomatBuilder.initTurn())
 	        .entry(game::nextTurn);
 
 	draftPhase(acb);
@@ -174,9 +174,9 @@ public class GameGateway {
 
     private void deployPhase(AutomatContainerBuilder acb) {
 	State deploy = PTMultiPlayersAutomatBuilder.deploy();
-	acb.state(deploy)
-	        .entry(game::deployPhase)
-	        .exit(game::endDeployPhase);
+
+	acb.state(PTMultiPlayersAutomatBuilder.deployInit()).entry(game::deployPhase);
+	acb.state(deploy).exit(game::endDeployPhase);
 
 	for (int index = 0; index < players.size(); ++index) {
 	    State forPlayer = forPlayer(deploy, index);
@@ -197,9 +197,8 @@ public class GameGateway {
 
     private void agePhase(AutomatContainerBuilder acb) {
 	State age = PTMultiPlayersAutomatBuilder.age();
-	acb.state(age)
-	        .entry(game::agePhase)
-	        .exit(game::endAgePhase);
+	acb.state(PTMultiPlayersAutomatBuilder.ageInit()).entry(game::agePhase);
+	acb.state(age).exit(game::endAgePhase);
 
 	for (int index = 0; index < players.size(); ++index) {
 	    State forPlayer = forPlayer(age, index);
@@ -221,7 +220,7 @@ public class GameGateway {
 
     private void warPhase(AutomatContainerBuilder acb) {
 	State war = PTMultiPlayersAutomatBuilder.war();
-	acb.state(war)
+	acb.state(PTMultiPlayersAutomatBuilder.warInit())
 	        .entry(game::warPhase);
 
 	noopPhase(acb, war);
@@ -229,7 +228,7 @@ public class GameGateway {
 
     private void goldPhase(AutomatContainerBuilder acb) {
 	State gold = PTMultiPlayersAutomatBuilder.gold();
-	acb.state(gold)
+	acb.state(PTMultiPlayersAutomatBuilder.goldInit())
 	        .entry(game::payPhase);
 	noopPhase(acb, gold);
     }
@@ -258,7 +257,8 @@ public class GameGateway {
 
     private void draftPhase(AutomatContainerBuilder acb) {
 	State draft = draft();
-	acb.state(draft).entry(this::distribute);
+	acb.state(draft.sub(PTMultiPlayersAutomatBuilder.INIT)).entry(this::distribute);
+	acb.state(draft).exit(game::pickLastCard);
 
 	Class<? extends PickInstructionDTO> pickClass = twoPlayers ? PickAndDiscardInstructionDTO.class : PickInstructionDTO.class;
 

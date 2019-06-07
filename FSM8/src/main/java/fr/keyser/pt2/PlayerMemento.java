@@ -5,7 +5,7 @@ import java.util.List;
 public class PlayerMemento extends PlayerScoreMemento {
     private List<String> hand;
 
-    private List<String> currentHand;
+    private List<String> currentDraft;
 
     public List<String> getHand() {
 	return hand;
@@ -15,12 +15,12 @@ public class PlayerMemento extends PlayerScoreMemento {
 	this.hand = hand;
     }
 
-    public List<String> getCurrentHand() {
-        return currentHand;
+    public List<String> getCurrentDraft() {
+        return currentDraft;
     }
 
-    public void setCurrentHand(List<String> currentHand) {
-        this.currentHand = currentHand;
+    public void setCurrentDraft(List<String> currentHand) {
+        this.currentDraft = currentHand;
     }
 
 }

@@ -47,9 +47,9 @@ public class LoggingAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void reaching(InstanceState instance, State reached, StateType type) {
+    public void reaching(InstanceState instance, State reached, StateType type, Event event) {
 	logger.debug("reaching {} {}({})", instance, reached, type);
-	super.reaching(instance, reached, type);
+	super.reaching(instance, reached, type, event);
     }
 
     @Override

@@ -46,8 +46,8 @@ public class ChoiceAutomatListener extends DelegatedAutomatListener {
     }
 
     @Override
-    public void reaching(InstanceState state, State reached, StateType type) {
-	super.reaching(state, reached, type);
+    public void reaching(InstanceState state, State reached, StateType type, Event event) {
+	super.reaching(state, reached, type, event);
 	if (StateType.CHOICE == type) {
 	    receiver.receive(Choice.choice(state));
 	}

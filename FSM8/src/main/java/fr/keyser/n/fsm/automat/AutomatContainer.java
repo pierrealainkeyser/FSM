@@ -64,8 +64,8 @@ public class AutomatContainer implements EventReceiver {
 	    }
 
 	    @Override
-	    public void reaching(InstanceState state, State reached, StateType type) {
-		super.reaching(state, reached, type);
+	    public void reaching(InstanceState state, State reached, StateType type, Event event) {
+		super.reaching(state, reached, type, event);
 
 		if (StateType.ORTHOGONAL == type) {
 		    startAllChilds(state.getId(), reached);

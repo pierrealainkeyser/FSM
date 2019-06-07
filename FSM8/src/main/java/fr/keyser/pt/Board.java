@@ -128,7 +128,6 @@ public class Board implements BoardContract {
 	    PlayerBoard p = players.get(i);
 	    List<MetaCard> next = next(toDraft, i, direction);
 	    p.setToDraft(next);
-
 	}
     }
 

@@ -19,8 +19,9 @@ public class PTMultiPlayersAutomatBuilder {
     private static final String WAR = "war";
     private static final String DEPLOY = "deploy";
     private static final String DRAFT = "draft";
-    private static final String PREPARE_NEW_TURN = "prepareNewTurn";
+    public static final String INIT = "init";
     private static final String TURN = "turn";
+    private static final String INIT_TURN = TURN + "-" + INIT;
     public static final String NEXT_TURN_CHOICE = "nextTurn";
     private static final String DONE_STATE = "Done";
     private static final String DONE = "done";
@@ -35,8 +36,8 @@ public class PTMultiPlayersAutomatBuilder {
 	this.nbPlayers = nbPlayers;
     }
 
-    public static State prepareNewTurn() {
-	return new State(PREPARE_NEW_TURN);
+    public static State initTurn() {
+	return new State(INIT_TURN);
     }
 
     public static State draft() {
@@ -51,6 +52,10 @@ public class PTMultiPlayersAutomatBuilder {
 	return new State(TURN, DEPLOY);
     }
 
+    public static State deployInit() {
+	return new State(TURN, DEPLOY + "-" + INIT);
+    }
+
     public static State buildPhase() {
 	return new State(TURN, BUILD);
     }
@@ -59,12 +64,24 @@ public class PTMultiPlayersAutomatBuilder {
 	return new State(TURN, WAR);
     }
 
+    public static State warInit() {
+	return new State(TURN, WAR + "-" + INIT);
+    }
+
     public static State gold() {
 	return new State(TURN, GOLD);
     }
 
+    public static State goldInit() {
+	return new State(TURN, GOLD + "-" + INIT);
+    }
+
     public static State age() {
 	return new State(TURN, AGE);
+    }
+
+    public static State ageInit() {
+	return new State(TURN, AGE + "-" + INIT);
     }
 
     public static State endOfTurn() {
@@ -141,24 +158,40 @@ public class PTMultiPlayersAutomatBuilder {
     public Automat build() {
 	AutomatBuilder builder = new AutomatBuilder();
 
-	StateBuilder prepare = builder.auto(PREPARE_NEW_TURN);
+	StateBuilder prepare = builder.auto(INIT_TURN);
 
 	StateBuilder turn = builder.state(TURN);
 
 	StateBuilder draft = turn.state(DRAFT);
+
+	StateBuilder deployInit = turn.auto(DEPLOY + "-" + INIT);
 	StateBuilder deploy = turn.orthogonal(DEPLOY);
+
+	StateBuilder warInit = turn.auto(WAR + "-" + INIT);
 	StateBuilder war = turn.orthogonal(WAR);
+
+	StateBuilder goldInit = turn.auto(GOLD + "-" + INIT);
 	StateBuilder gold = turn.orthogonal(GOLD);
+
 	StateBuilder build = turn.orthogonal(BUILD);
+
+	StateBuilder ageInit = turn.auto(AGE + "-" + INIT);
 	StateBuilder age = turn.orthogonal(AGE);
 	StateBuilder endOfTurn = builder.choice(END_OF_TURN);
 	StateBuilder end = builder.terminal("ended");
 
 	prepare.on(auto(), turn);
 
+	deployInit.on(auto(), deploy);
+	warInit.on(auto(), war);
+	goldInit.on(auto(), gold);
+	ageInit.on(auto(), age);
+
+	StateBuilder draftInit = draft.auto(INIT);
 	StateBuilder cur = draft.orthogonal(draftStep(0));
+	draftInit.on(auto(), cur);
 	for (int i = 1; i <= 4; ++i) {
-	    StateBuilder next = deploy;
+	    StateBuilder next = deployInit;
 	    if (i < 4)
 		next = draft.orthogonal(draftStep(i));
 
@@ -166,10 +199,10 @@ public class PTMultiPlayersAutomatBuilder {
 	    cur = next;
 	}
 
-	createWaitingDeploy(deploy, war);
-	createWaiting(war, gold);
+	createWaitingDeploy(deploy, warInit);
+	createWaiting(war, goldInit);
 	createWaiting(gold, build);
-	createWaiting(build, age);
+	createWaiting(build, ageInit);
 	createWaitingAge(age, endOfTurn);
 
 	endOfTurn.on(choice(NEXT_TURN_CHOICE, prepare).otherwise(end));

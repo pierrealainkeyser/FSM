@@ -30,7 +30,7 @@ public class LocalPlayer {
 
     private int legend;
 
-    private List<String> currentHand = new ArrayList<>();
+    private List<String> currentDraft = new ArrayList<>();
 
     private List<Unit> hand = new ArrayList<>();
 
@@ -90,30 +90,38 @@ public class LocalPlayer {
     public void endAgePhase() {
 	activated.clear();
 	gain(current.getAge());
+
+	// remove dying units
+	localBoard.getUnits().filter(u -> u.getWillDie().get()).forEach(u -> u.setPosition(null));
+
+	localBoard.getUnits().forEach(u -> u.getSimpleDyingProtection().set(false));
+
 	makePrivateInfoPublic();
+
     }
 
     public void endDeployPhase() {
 	activated.clear();
+	gain(current.getDeploy());
 	resetDeployGain();
 	makePrivateInfoPublic();
     }
 
     void addToHand(String unitName) {
-	currentHand.add(unitName);
+	currentDraft.add(unitName);
     }
 
     public void pick(int unitIndex) {
-	String unitName = currentHand.remove(unitIndex);
+	String unitName = currentDraft.remove(unitIndex);
 	hand.add(game.unit(unitName));
     }
 
     public void pickAndDiscard(int pickIndex, int discardIndex) {
-	String picked = currentHand.remove(pickIndex);
+	String picked = currentDraft.remove(pickIndex);
 	if (discardIndex > pickIndex)
 	    --discardIndex;
 
-	String discarded = currentHand.remove(discardIndex);
+	String discarded = currentDraft.remove(discardIndex);
 	hand.add(game.unit(picked));
 	game.discard(discarded);
     }
@@ -165,7 +173,7 @@ public class LocalPlayer {
 	PlayerMemento p = new PlayerMemento();
 	updateMemento(p);
 	p.setHand(hand.stream().map(Unit::getName).collect(toList()));
-	p.setCurrentHand(currentHand);
+	p.setCurrentDraft(currentDraft);
 	return p;
     }
 
@@ -226,5 +234,13 @@ public class LocalPlayer {
     public void warPhase() {
 	gain(current.getWar());
 	makePrivateInfoPublic();
+    }
+
+    protected List<String> getCurrentDraft() {
+        return currentDraft;
+    }
+
+    protected void setCurrentDraft(List<String> currentHand) {
+        this.currentDraft = currentHand;
     }
 }

@@ -12,6 +12,12 @@ import fr.keyser.pt2.Target;
 
 public class PreserveFromDeathEffect implements MonoEffect {
 
+    public static final PreserveFromDeathEffect INSTANCE = new PreserveFromDeathEffect();
+
+    private PreserveFromDeathEffect() {
+
+    }
+
     @Override
     public Stream<Target> targets(Slot source) {
 	return source.getBoard().getUnits().filter(c -> c.getWillDie().getValue()).map(dc -> target(dc.getPosition()));

@@ -1,5 +1,7 @@
 package fr.keyser.pt2;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +16,13 @@ public class LocalGame {
     private final Deck deck;
 
     private final List<LocalPlayer> players;
+
+    private static <T> T next(List<T> input, int current, int direction) {
+	int size = input.size();
+	int directionMod = direction % size;
+	int index = (size + current + directionMod) % size;
+	return input.get(index);
+    }
 
     public LocalGame(CardProvider cardProvider, LocalGameSettings settings) {
 	this.deck = new Deck(cardProvider, settings.getDeck());
@@ -34,8 +43,8 @@ public class LocalGame {
 
 	} else {
 	    for (int i = 0; i < nbPlayers; ++i) {
-		LocalPlayer before = players.get(((i + nbPlayers) - 1) % nbPlayers);
-		LocalPlayer after = players.get(((i + nbPlayers) + 1) % nbPlayers);
+		LocalPlayer before = next(players, i, -1);
+		LocalPlayer after = next(players, i, 1);
 		LocalPlayer player = players.get(i);
 
 		player.setNeighbours(before, after);
@@ -51,7 +60,20 @@ public class LocalGame {
     }
 
     public void passCardsToNext() {
+	boolean even = turn.getValue() % 2 == 0;
+	int direction = even ? 1 : -1;
 
+	List<List<String>> toDraft = players.stream().map(LocalPlayer::getCurrentDraft).collect(toList());
+
+	for (int i = 0; i < players.size(); ++i) {
+	    LocalPlayer p = players.get(i);
+	    List<String> next = next(toDraft, i, direction);
+	    p.setCurrentDraft(next);
+	}
+    }
+
+    public void pickLastCard() {
+	players.forEach(l -> l.pick(0));
     }
 
     public void nextTurn() {
