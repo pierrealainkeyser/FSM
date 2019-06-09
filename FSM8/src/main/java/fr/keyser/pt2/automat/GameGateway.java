@@ -1,8 +1,5 @@
 package fr.keyser.pt2.automat;
 
-import static fr.keyser.pt2.automat.PTMultiPlayersAutomatBuilder.draft;
-import static fr.keyser.pt2.automat.PTMultiPlayersAutomatBuilder.forPlayer;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -156,7 +153,7 @@ public class GameGateway {
     private AutomatContainer build(Automat automat) {
 	AutomatContainerBuilder acb = new AutomatContainerBuilder(automat);
 
-	acb.state(PTMultiPlayersAutomatBuilder.initTurn())
+	acb.state(new State(GameConst.INIT_TURN))
 	        .entry(game::nextTurn);
 
 	draftPhase(acb);
@@ -166,77 +163,77 @@ public class GameGateway {
 	buildPhase(acb);
 	agePhase(acb);
 
-	acb.state(PTMultiPlayersAutomatBuilder.endOfTurn())
-	        .with(PTMultiPlayersAutomatBuilder.NEXT_TURN_CHOICE, game::hasNextTurn);
+	acb.state(new State(GameConst.END_OF_TURN))
+	        .with(GameConst.NEXT_TURN_CHOICE, game::hasNextTurn);
 
 	return acb.build();
     }
 
     private void deployPhase(AutomatContainerBuilder acb) {
-	State deploy = PTMultiPlayersAutomatBuilder.deploy();
+	State deploy = new State(GameConst.TURN, GameConst.DEPLOY);
 
-	acb.state(PTMultiPlayersAutomatBuilder.deployInit()).entry(game::deployPhase);
+	acb.state(new State(GameConst.TURN, GameConst.INIT_DEPLOY)).entry(game::deployPhase);
 	acb.state(deploy).exit(game::endDeployPhase);
 
 	for (int index = 0; index < players.size(); ++index) {
-	    State forPlayer = forPlayer(deploy, index);
+	    State forPlayer = GameConst.forPlayer(deploy, index);
 
 	    inputHandler(PlayInstructionDTO.class, PlayerGateway::doPlay)
-	            .configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.PLAY)));
+	            .configure(acb.state(forPlayer.sub(GameConst.PLAY)));
 
 	    PlayerGateway playerGateway = players.get(index);
 
-	    acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.CHECK_INPUT))
-	            .with(PTMultiPlayersAutomatBuilder.HAS_INPUT, playerGateway::hasDeployEffects);
+	    acb.state(forPlayer.sub(GameConst.CHECK_INPUT))
+	            .with(GameConst.HAS_INPUT, playerGateway::hasDeployEffects);
 
 	    inputHandler(ActivateEffectDTO.class, PlayerGateway::doActive)
-	            .configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.WAITING_INPUT)));
+	            .configure(acb.state(forPlayer.sub(GameConst.WAITING_INPUT)));
 
 	}
     }
 
     private void agePhase(AutomatContainerBuilder acb) {
-	State age = PTMultiPlayersAutomatBuilder.age();
-	acb.state(PTMultiPlayersAutomatBuilder.ageInit()).entry(game::agePhase);
+	State age = new State(GameConst.TURN, GameConst.AGE);
+	acb.state(new State(GameConst.TURN, GameConst.INIT_AGE)).entry(game::agePhase);
 	acb.state(age).exit(game::endAgePhase);
 
 	for (int index = 0; index < players.size(); ++index) {
-	    State forPlayer = forPlayer(age, index);
+	    State forPlayer = GameConst.forPlayer(age, index);
 
 	    PlayerGateway playerGateway = players.get(index);
 
-	    acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.CHECK_INPUT))
-	            .with(PTMultiPlayersAutomatBuilder.HAS_INPUT, playerGateway::hasAgeEffects);
+	    acb.state(forPlayer.sub(GameConst.CHECK_INPUT))
+	            .with(GameConst.HAS_INPUT, playerGateway::hasAgeEffects);
 
-	    acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.HAS_MORE_INPUT))
-	            .with(PTMultiPlayersAutomatBuilder.HAS_INPUT, playerGateway::hasAgeEffects);
+	    acb.state(forPlayer.sub(GameConst.HAS_MORE_INPUT))
+	            .with(GameConst.HAS_INPUT, playerGateway::hasAgeEffects);
 
 	    inputHandler(ActivateEffectDTO.class, PlayerGateway::doActive)
-	            .configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.WAITING_INPUT)));
+	            .configure(acb.state(forPlayer.sub(GameConst.WAITING_INPUT)));
 
-	    noOpHandler().configure(acb.state(forPlayer.sub(PTMultiPlayersAutomatBuilder.WAITING)));
+	    noOpHandler().configure(acb.state(forPlayer.sub(GameConst.WAITING)));
 	}
     }
 
     private void warPhase(AutomatContainerBuilder acb) {
-	State war = PTMultiPlayersAutomatBuilder.war();
-	acb.state(PTMultiPlayersAutomatBuilder.warInit())
+	State war = new State(GameConst.TURN, GameConst.WAR);
+	acb.state(new State(GameConst.TURN, GameConst.INIT_WAR))
 	        .entry(game::warPhase);
 
 	noopPhase(acb, war);
     }
 
     private void goldPhase(AutomatContainerBuilder acb) {
-	State gold = PTMultiPlayersAutomatBuilder.gold();
-	acb.state(PTMultiPlayersAutomatBuilder.goldInit())
+	State gold = new State(GameConst.TURN, GameConst.GOLD);
+	acb.state(new State(GameConst.TURN, GameConst.INIT_GOLD))
 	        .entry(game::payPhase);
 	noopPhase(acb, gold);
     }
 
     private void buildPhase(AutomatContainerBuilder acb) {
-	State build = PTMultiPlayersAutomatBuilder.buildPhase();
+	State build = new State(GameConst.TURN, GameConst.BUILD);
 	for (int index = 0; index < players.size(); ++index) {
-	    State forPlayer = forPlayer(build, index);
+	    State forPlayer = GameConst.forPlayer(build, index);
 
 	    inputHandler(BuildInstructionDTO.class, PlayerGateway::doBuild)
 	            .configure(acb.state(forPlayer));
@@ -246,7 +243,7 @@ public class GameGateway {
 
     private void noopPhase(AutomatContainerBuilder acb, State base) {
 	for (int index = 0; index < players.size(); ++index) {
-	    State forPlayer = forPlayer(base, index);
+	    State forPlayer = GameConst.forPlayer(base, index);
 	    noOpHandler().configure(acb.state(forPlayer));
 	}
     }
@@ -256,19 +253,19 @@ public class GameGateway {
     }
 
     private void draftPhase(AutomatContainerBuilder acb) {
-	State draft = draft();
-	acb.state(draft.sub(PTMultiPlayersAutomatBuilder.INIT)).entry(this::distribute);
+	State draft = new State(GameConst.TURN, GameConst.DRAFT);
+	acb.state(draft.sub(GameConst.INIT)).entry(this::distribute);
 	acb.state(draft).exit(game::pickLastCard);
 
 	Class<? extends PickInstructionDTO> pickClass = twoPlayers ? PickAndDiscardInstructionDTO.class : PickInstructionDTO.class;
 
 	for (int step = 0; step < 4; ++step) {
-	    State draftStep = draft(step);
+	    State draftStep = draft.sub(GameConst.draftStep(step));
 	    acb.state(draftStep).exit(game::passCardsToNext);
 
 	    for (int index = 0; index < players.size(); ++index) {
 		inputHandler(pickClass, PlayerGateway::doPick)
-		        .configure(acb.state(forPlayer(draftStep, index)));
+		        .configure(acb.state(GameConst.forPlayer(draftStep, index)));
 	    }
 	}
     }
