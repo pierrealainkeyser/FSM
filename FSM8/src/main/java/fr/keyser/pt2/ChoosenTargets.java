@@ -1,10 +1,9 @@
-package fr.keyser.pt2.effects;
+package fr.keyser.pt2;
 
 import java.util.Collections;
 import java.util.Map;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt2.TargetableEffect;
 
 public class ChoosenTargets {
 

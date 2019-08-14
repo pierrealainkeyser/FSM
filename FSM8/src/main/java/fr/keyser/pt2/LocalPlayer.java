@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.effects.CardTargets;
-import fr.keyser.pt2.effects.ChoosenTargets;
 import fr.keyser.pt2.prop.IntSupplier;
 import fr.keyser.pt2.units.Unit;
 
@@ -42,6 +42,15 @@ public class LocalPlayer {
 	this.gold = 2;
 	snapshotPrivateView();
 	makePrivateInfoPublic();
+    }
+
+    public Optional<Unit> handById(int id) {
+	return hand.stream().filter(u -> u.getId() == id).findFirst();
+    }
+
+    public void deployUnit(Unit unit, CardPosition to) {
+	getSlot(to).play(unit);
+	hand.remove(unit);
     }
 
     private List<EffectLog> activate(Card card, ChoosenTargets targets, Stream<TargetableEffect> effects) {
@@ -237,10 +246,14 @@ public class LocalPlayer {
     }
 
     protected List<String> getCurrentDraft() {
-        return currentDraft;
+	return currentDraft;
     }
 
     protected void setCurrentDraft(List<String> currentHand) {
-        this.currentDraft = currentHand;
+	this.currentDraft = currentHand;
+    }
+
+    public Slot getSlot(CardPosition position) {
+	return localBoard.getSlot(position);
     }
 }

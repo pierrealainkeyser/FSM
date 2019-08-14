@@ -5,6 +5,7 @@ import java.util.List;
 
 import fr.keyser.pt.CardPosition;
 import fr.keyser.pt2.Card;
+import fr.keyser.pt2.ChoosenTargets;
 import fr.keyser.pt2.EffectLog;
 import fr.keyser.pt2.LocalBoard;
 import fr.keyser.pt2.Slot;

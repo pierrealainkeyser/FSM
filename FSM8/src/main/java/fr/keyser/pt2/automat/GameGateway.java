@@ -2,6 +2,7 @@ package fr.keyser.pt2.automat;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -16,8 +17,12 @@ import fr.keyser.n.fsm.automat.AutomatContainerBuilder;
 import fr.keyser.n.fsm.automat.AutomatContainerBuilder.StateConfigurer;
 import fr.keyser.n.fsm.automat.TimeOut;
 import fr.keyser.n.fsm.listener.frontier.EntryListener;
+import fr.keyser.pt2.Card;
+import fr.keyser.pt2.ChoosenTargets;
 import fr.keyser.pt2.LocalGame;
 import fr.keyser.pt2.LocalPlayer;
+import fr.keyser.pt2.Slot;
+import fr.keyser.pt2.units.Unit;
 import fr.keyser.pt2.view.ActivateEffectDTO;
 import fr.keyser.pt2.view.BuildInstructionDTO;
 import fr.keyser.pt2.view.PickAndDiscardInstructionDTO;
@@ -25,6 +30,22 @@ import fr.keyser.pt2.view.PickInstructionDTO;
 import fr.keyser.pt2.view.PlayInstructionDTO;
 
 public class GameGateway {
+
+    private static class MoveAction {
+
+	private Card card;
+
+	private final Slot destination;
+
+	public MoveAction(Slot source, Slot destination) {
+	    this.card = source.removeCard();
+	    this.destination = destination;
+	}
+
+	public void run() {
+	    this.destination.setCard(card);
+	}
+    }
 
     public class PlayerGateway {
 	private Class<?> expectedInput;
@@ -43,16 +64,36 @@ public class GameGateway {
 	    if (pick == null) {
 		// timeout
 	    } else {
-		player.pick(pick.getPick());
+		if (pick instanceof PickAndDiscardInstructionDTO) {
+		    PickAndDiscardInstructionDTO d = (PickAndDiscardInstructionDTO) pick;
+		    player.pickAndDiscard(d.getPick(), d.getDiscard());
+		} else
+		    player.pick(pick.getPick());
+
 	    }
 	}
 
 	private void doPlay(PlayInstructionDTO play) {
+	    List<MoveAction> moves = play.getMoves().stream().map(m -> {
+		Slot from = player.getSlot(m.getFrom());
+		Slot to = player.getSlot(m.getTo());
+
+		return new MoveAction(from, to);
+	    }).collect(Collectors.toList());
+
+	    moves.forEach(MoveAction::run);
+
+	    play.getDeploys().forEach(d -> {
+		Optional<Unit> unit = player.handById(d.getCard());
+		if (unit.isPresent()) {
+		    player.deployUnit(unit.get(), d.getTo());
+		}
+	    });
 
 	}
 
 	private void doActive(ActivateEffectDTO activate) {
-
+	    player.activateDeploy(activate.getSource(), new ChoosenTargets(activate.getTargets()));
 	}
 
 	private void doBuild(BuildInstructionDTO build) {

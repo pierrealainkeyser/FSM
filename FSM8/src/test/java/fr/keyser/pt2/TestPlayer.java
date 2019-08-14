@@ -3,7 +3,6 @@ package fr.keyser.pt2;
 import org.junit.jupiter.api.Test;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt2.effects.ChoosenTargets;
 import fr.keyser.pt2.prop.MutableInt;
 import fr.keyser.pt2.units.Alchimist;
 import fr.keyser.pt2.units.CaveSpirit;

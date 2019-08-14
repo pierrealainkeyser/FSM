@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import fr.keyser.pt.CardPosition;
-import fr.keyser.pt2.effects.ChoosenTargets;
 
 public interface TargetableEffect {
 

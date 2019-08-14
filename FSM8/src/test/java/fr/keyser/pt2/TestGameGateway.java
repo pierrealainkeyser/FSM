@@ -89,6 +89,8 @@ public class TestGameGateway {
 	    Assertions.assertEquals(PlayInstructionDTO.class, pg.getExpectedInput());
 	    Assertions.assertTrue(pg.isWaiting());
 	    PlayInstructionDTO play = new PlayInstructionDTO();
+	    play.setDeploys(new ArrayList<>());
+	    play.setMoves(new ArrayList<>());
 	    pg.handleInput(play);
 	}
 
