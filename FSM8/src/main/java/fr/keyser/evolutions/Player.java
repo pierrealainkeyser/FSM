@@ -103,7 +103,7 @@ public final class Player {
 	    after = before.evolve(instruction);
 
 	    // remove
-	    if (before.hasTrait(Trait.FATTY) && !after.hasPrivateTrait(Trait.FATTY))
+	    if (before.hasTrait(Trait.FATTY) && !after.hasTrait(Trait.FATTY))
 		scoreFat = before.getFatLevel();
 
 	} else {
@@ -191,10 +191,6 @@ public final class Player {
 
     public Player updateFertile() {
 	return changeAllSpecies(Species::updateFertile);
-    }
-
-    public Player publishTraits() {
-	return changeAllSpecies(Species::publishTraits);
     }
 
     private Player changeAllSpecies(UnaryOperator<Species> operator) {

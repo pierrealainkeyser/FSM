@@ -11,7 +11,7 @@ public final class MapCardResolver implements CardResolver {
 
     public CardId card(Trait trait, int food) {
 	CardId id = new CardId(index++);
-	cards.put(id, new Card(trait, food));
+	cards.put(id, new Card(id, trait, food));
 	return id;
     }
 
@@ -21,6 +21,9 @@ public final class MapCardResolver implements CardResolver {
 
     @Override
     public Card resolve(CardId id) {
+	if (CardId.UNKNOW.equals(id))
+	    return Card.UNKNOW;
+
 	return cards.get(id);
     }
 

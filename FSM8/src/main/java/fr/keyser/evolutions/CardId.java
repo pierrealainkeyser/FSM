@@ -1,6 +1,9 @@
 package fr.keyser.evolutions;
 
 public final class CardId {
+
+    public final static CardId UNKNOW = new CardId(-1);
+
     private final int id;
 
     public CardId(int id) {

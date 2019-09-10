@@ -181,11 +181,6 @@ public class Game {
 	return players;
     }
 
-    public Game publishTraits() {
-	return players(players.stream().map(Player::publishTraits)
-	        .collect(Collectors.toList()));
-    }
-
     public Game transfertFat() {
 	return players(players.stream().map(Player::transfertFat)
 	        .collect(Collectors.toList()));

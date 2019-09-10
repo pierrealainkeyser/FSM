@@ -26,7 +26,6 @@ public final class Evolutions {
 
     public Evolutions enterFeedingPhase() {
 	return new Evolutions(game
-	        .publishTraits()
 	        .updateFertile()
 	        .transfertFat()
 	        .feedLongNeck()

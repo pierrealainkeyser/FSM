@@ -29,6 +29,7 @@ import fr.keyser.nn.fsm.impl.Automats;
 import fr.keyser.nn.fsm.impl.ChoicePredicate;
 import fr.keyser.nn.fsm.impl.EventMsg;
 import fr.keyser.nn.fsm.impl.Instance;
+import fr.keyser.nn.fsm.impl.Merge;
 import fr.keyser.nn.fsm.impl.PayloadActionFunction;
 import fr.keyser.nn.fsm.impl.Start;
 import fr.keyser.nn.fsm.impl.TransitionGuard;
@@ -40,18 +41,20 @@ class TestAutomatsBuilder {
 	TransitionNode<Evolutions> process = evolve.auto("process")
 	        .to(waiting);
 	TransitionNode<Evolutions> done = evolve.auto("done");
+	Node<Evolutions> joining = evolve.node("joining");
 
-	done.callbackEntry((i, e) -> {
-	    i.sendMerge(i.get(Evolutions::getPlayer));
-	    i.getParent().unicast("evolveDone");
-	});
+	done.callbackEntry((i, e) -> i.getParent().unicast("evolveDone"));
 
-	done.to(-1, player);
+	done.to(-1, joining);
 
 	process.updateEntry((e, evt) -> e.evolve((EvolutionInstructions) evt.getPayload()));
 
 	waiting.event("evolve", process);
 	waiting.event("done", done);
+
+	joining.event("join", player);
+
+	joining.callbackExit((i, evt) -> i.sendMerge(-1, i.get(Evolutions::getPlayer)));
 
     }
 
@@ -177,8 +180,15 @@ class TestAutomatsBuilder {
 	Choice<Evolutions> checkNext = evolutions.choice("checkNext");
 	TransitionNode<Evolutions> complete = evolutions.auto("complete");
 
+	complete.callbackEntry((i, e) -> {
+	    if (e instanceof Merge)
+		return;
+	    i.broadcast("join");
+
+	});
+
 	Node<Evolutions> feeding = game.node("feeding");
-	complete.to(feeding);
+	complete.to(1, feeding);
 
 	Node<Evolutions> endOfTurn = game.node("endOfTurn");
 
@@ -306,6 +316,8 @@ class TestAutomatsBuilder {
 	// evolve
 	automats.submit(EventMsg.unicast("evolve", player1, evolveP1));
 	automats.submit(EventMsg.unicast("done", player1));
+	
+	dump(automats);
 
 	EvolutionInstructions evolveP2 = new EvolutionInstructions();
 	evolveP2.setIndex(-1);
@@ -313,6 +325,9 @@ class TestAutomatsBuilder {
 
 	automats.submit(EventMsg.unicast("evolve", player2, evolveP2));
 	automats.submit(EventMsg.unicast("done", player2));
+	
+
+	dump(automats);
 
 	automats.submit(EventMsg.unicast("done", player3));
 

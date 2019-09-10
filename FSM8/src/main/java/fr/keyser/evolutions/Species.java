@@ -3,6 +3,7 @@ package fr.keyser.evolutions;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -24,16 +25,14 @@ public final class Species {
 
     private final Map<Integer, CardId> traits;
 
-    private final Map<Integer, CardId> privateTraits;
-
     private final SpeciesId uid;
 
     public Species(CardResolver cardResolver, SpeciesId uid, int index) {
-	this(cardResolver, uid, index, 1, 1, 0, 0, Collections.emptyMap(), Collections.emptyMap());
+	this(cardResolver, uid, index, 1, 1, 0, 0, Collections.emptyMap());
     }
 
     private Species(CardResolver cardResolver, SpeciesId uid, int index, int population, int size, int foodLevel, int fatLevel,
-            Map<Integer, CardId> traits, Map<Integer, CardId> privateTraits) {
+            Map<Integer, CardId> traits) {
 	this.cardResolver = cardResolver;
 	this.uid = uid;
 	this.index = index;
@@ -42,7 +41,6 @@ public final class Species {
 	this.foodLevel = foodLevel;
 	this.fatLevel = fatLevel;
 	this.traits = traits;
-	this.privateTraits = privateTraits;
     }
 
     public TargetAttackAnalysis analyseAttack(Player player, TargetAttackContext ac) {
@@ -50,12 +48,39 @@ public final class Species {
 	        .filterCost(player.getHandSize());
     }
 
+    public SpeciesView visibleView(Species publicSpecies) {
+
+	Optional<Species> pub = Optional.ofNullable(publicSpecies);
+	Map<Integer, CardId> traits = new TreeMap<>();
+	pub.ifPresent(s -> traits.putAll(s.traits));
+
+	for (Entry<Integer, CardId> e : this.traits.entrySet()) {
+	    int key = e.getKey();
+
+	    CardId existings = traits.get(key);
+	    if (!e.getValue().equals(existings)) {
+		traits.put(key, CardId.UNKNOW);
+	    }
+	}
+
+	int fatlevel = pub.map(Species::getFatLevel).orElse(0);
+	return asView(fatlevel, traits);
+    }
+
+    public SpeciesView asView() {
+	return asView(fatLevel, traits);
+    }
+
+    private SpeciesView asView(int fatLevel, Map<Integer, CardId> traits) {
+	return new SpeciesView(uid, population, size, foodLevel, fatLevel,
+	        traits.values().stream().map(cardResolver::resolve).collect(Collectors.toList()));
+    }
+
     public Species applyLoss(PopulationLossSummary summary) {
 	if (summary.isExtinct())
 	    return null;
 
-	return new Species(cardResolver, uid, index, population - summary.getPopulationLoss(), size, foodLevel, fatLevel, traits,
-	        privateTraits);
+	return new Species(cardResolver, uid, index, population - summary.getPopulationLoss(), size, foodLevel, fatLevel, traits);
     }
 
     List<AttackSummary> attacksSummaries(Player player, CarnivorousContext ctx) {
@@ -75,16 +100,16 @@ public final class Species {
     }
 
     private Species clearFat() {
-	return new Species(cardResolver, uid, index, population, size, foodLevel, 0, traits, privateTraits);
+	return new Species(cardResolver, uid, index, population, size, foodLevel, 0, traits);
     }
 
-    private Set<Trait> computeTraits(Map<Integer, CardId> traits) {
+    private Set<Trait> computeTraits() {
 	return traits.values().stream().map(id -> cardResolver.resolve(id).getTrait()).collect(Collectors.toSet());
     }
 
     public Species updateFertile() {
 	if (hasTrait(Trait.FERTILE) && population < 6)
-	    return new Species(cardResolver, uid, index, population + 1, size, foodLevel, fatLevel, traits, privateTraits);
+	    return new Species(cardResolver, uid, index, population + 1, size, foodLevel, fatLevel, traits);
 	else
 	    return this;
     }
@@ -93,18 +118,14 @@ public final class Species {
 	int population = this.population + instruction.getPopulation().size();
 	int size = this.size + instruction.getSize().size();
 
-	Map<Integer, CardId> privateTraits = new TreeMap<>(this.traits);
-	privateTraits.putAll(instruction.getTraits());
+	Map<Integer, CardId> traits = new TreeMap<>(this.traits);
+	traits.putAll(instruction.getTraits());
 
-	Species newSpecies = new Species(cardResolver, uid, index, population, size, foodLevel, fatLevel, traits, privateTraits);
-	if (hasTrait(Trait.FATTY) && !newSpecies.hasPrivateTrait(Trait.FATTY))
+	Species newSpecies = new Species(cardResolver, uid, index, population, size, foodLevel, fatLevel, traits);
+	if (hasTrait(Trait.FATTY) && !newSpecies.hasTrait(Trait.FATTY))
 	    newSpecies = newSpecies.clearFat();
 
 	return newSpecies;
-    }
-
-    public Species publishTraits() {
-	return new Species(cardResolver, uid, index, population, size, foodLevel, fatLevel, privateTraits, Collections.emptyMap());
     }
 
     public Species feed(FeedingSummary summary) {
@@ -115,8 +136,7 @@ public final class Species {
 	if (hasTrait(Trait.FATTY))
 	    fatDelta = Math.max(0, food - footDelta);
 
-	return new Species(cardResolver, uid, index, population, size, foodLevel + footDelta, fatLevel + fatDelta, traits,
-	        privateTraits);
+	return new Species(cardResolver, uid, index, population, size, foodLevel + footDelta, fatLevel + fatDelta, traits);
     }
 
     public Optional<CardId> findCardWithTrait(Trait t) {
@@ -156,12 +176,8 @@ public final class Species {
 	return uid;
     }
 
-    public boolean hasPrivateTrait(Trait trait) {
-	return computeTraits(privateTraits).contains(trait);
-    }
-
     public boolean hasTrait(Trait trait) {
-	return computeTraits(traits).contains(trait);
+	return computeTraits().contains(trait);
     }
 
     public HungerStatus hunger() {
@@ -193,7 +209,7 @@ public final class Species {
     }
 
     public Species resetPopulationFood() {
-	return new Species(cardResolver, uid, index, foodLevel, size, 0, fatLevel, traits, privateTraits);
+	return new Species(cardResolver, uid, index, foodLevel, size, 0, fatLevel, traits);
     }
 
     private AttackSummary summariseAttack(Player player, TargetAttackContext ac) {
@@ -238,8 +254,6 @@ public final class Species {
 	        .append(", fatLevel=").append(fatLevel)
 	        .append(", traits=")
 	        .append(asTrait(traits))
-	        .append(", privateTraits=")
-	        .append(asTrait(privateTraits))
 	        .append("]");
 	return builder.toString();
     }
@@ -251,7 +265,6 @@ public final class Species {
     public Species transfertFat() {
 	int transfert = Math.min(getBaseFeedCapacity(), fatLevel);
 
-	return new Species(cardResolver, uid, index, population, size, foodLevel + transfert, fatLevel - transfert, traits,
-	        privateTraits);
+	return new Species(cardResolver, uid, index, population, size, foodLevel + transfert, fatLevel - transfert, traits);
     }
 }
