@@ -216,9 +216,11 @@ class TestAutomatsBuilder {
 	        .callbackEntry(syncPlayers)
 	        .callbackEntry((i, evt) -> i.broadcast("feed"));
 
-	TransitionNode<Evolutions> feedActivate = feeding.auto("activate");
+	TransitionNode<Evolutions> delay = feeding.auto("delay");
 	Node<Evolutions> feedWaiting = feeding.node("waiting");
-	feedActivate.to(1, feedWaiting);
+	delay.to(1, feedWaiting);
+
+	State playerFeedIdle = new State("player", "feed", "idle");
 
 	feedWaiting.entry((i, evt) -> {
 	    return i.update(e -> {
@@ -227,7 +229,7 @@ class TestAutomatsBuilder {
 
 		e = e.feedNextPlayer(id -> {
 		    Instance<Evolutions> iplayer = childs.get(id.getId());
-		    return iplayer.getState().equals(new State("player", "feed", "idle"));
+		    return playerFeedIdle.equals(iplayer.getState());
 		});
 
 		int activePlayer = e.getGame().getActivePlayer();
@@ -254,7 +256,7 @@ class TestAutomatsBuilder {
 	feedWaiting.event("intelligent", intelligent);
 
 	checkDone.when(ChoicePredicate.allChildsMatch(idle.state()), endOfTurn)
-	        .otherwise(feedActivate);
+	        .otherwise(delay);
 
 	feedWaiting.event("done", checkDone);
 
