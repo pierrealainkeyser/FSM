@@ -165,7 +165,7 @@ public final class Player {
     }
 
     public Species getSpecies(SpeciesId id) {
-	return species.values().stream().filter(s -> s.getUid().equals(id)).findFirst().get();
+	return species.values().stream().filter(s -> s.getUid().equals(id)).findFirst().orElse(null);
     }
 
     public int getSpeciesCount() {
