@@ -66,9 +66,9 @@ public class AutomatsBuilder<T> implements Container<T> {
 
 	private final StateChoiceEssence<T> essence;
 
-	public InnerChoice(State state) {
+	public InnerChoice(int priority, State state) {
 	    super(state);
-	    essence = ChoiceListener.choice(state, AutomatsBuilder.this::findFirstChildState);
+	    essence = ChoiceListener.choice(priority, state, AutomatsBuilder.this::findFirstChildState);
 	    addChoice(essence);
 	}
 
@@ -255,8 +255,8 @@ public class AutomatsBuilder<T> implements Container<T> {
 	}
 
 	@Override
-	public Choice<T> choice(String choice) {
-	    return edge(new InnerChoice(sub(choice)));
+	public Choice<T> choice(String choice, int priority) {
+	    return edge(new InnerChoice(priority, sub(choice)));
 	}
 
 	@Override
@@ -606,8 +606,8 @@ public class AutomatsBuilder<T> implements Container<T> {
     }
 
     @Override
-    public Choice<T> choice(String choice) {
-	return edge(new InnerChoice(new State(choice)));
+    public Choice<T> choice(String choice, int priority) {
+	return edge(new InnerChoice(priority, new State(choice)));
     }
 
     private Graph createGraph() {

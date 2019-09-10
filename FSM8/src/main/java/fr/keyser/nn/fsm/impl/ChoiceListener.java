@@ -43,9 +43,12 @@ public class ChoiceListener<T> extends DelegatedAutomatsListener<T> {
     }
 
     private static class StateChoice<T> implements TransitionSource {
+
+	private final int priority;
 	private final Map<Integer, Destination<T>> choices;
 
-	private StateChoice(Map<Integer, Destination<T>> choices) {
+	private StateChoice(int priority, Map<Integer, Destination<T>> choices) {
+	    this.priority = priority;
 	    this.choices = choices;
 	}
 
@@ -91,10 +94,14 @@ public class ChoiceListener<T> extends DelegatedAutomatsListener<T> {
 	public Stream<Transition> transition(State source, EventMsg event) {
 	    return transition(source, (Choice) event);
 	}
+
+	public int getPriority() {
+	    return priority;
+	}
     }
 
-    public static <T> StateChoiceEssence<T> choice(State source, Function<State, State> stateEncoder) {
-	return new StateChoiceEssence<>(source, stateEncoder);
+    public static <T> StateChoiceEssence<T> choice(int priority, State source, Function<State, State> stateEncoder) {
+	return new StateChoiceEssence<>(priority, source, stateEncoder);
     }
 
     public static class StateChoiceEssence<T> {
@@ -109,7 +116,10 @@ public class ChoiceListener<T> extends DelegatedAutomatsListener<T> {
 
 	private final Function<State, State> stateEncoder;
 
-	public StateChoiceEssence(State source, Function<State, State> stateEncoder) {
+	private final int priority;
+
+	public StateChoiceEssence(int priority, State source, Function<State, State> stateEncoder) {
+	    this.priority = priority;
 	    this.source = source;
 	    this.stateEncoder = stateEncoder;
 	}
@@ -134,7 +144,7 @@ public class ChoiceListener<T> extends DelegatedAutomatsListener<T> {
 		if (otherwise != null) {
 		    choices.put(i, new Destination<>(stateEncoder.apply(otherwise), null));
 		}
-		choice = new StateChoice<>(choices);
+		choice = new StateChoice<>(priority, choices);
 	    }
 	    return choice;
 	}
@@ -191,8 +201,9 @@ public class ChoiceListener<T> extends DelegatedAutomatsListener<T> {
     }
 
     private boolean handleChoice(Instance<T> instance, State entered) {
-	if (states.containsKey(entered)) {
-	    instance.submit(Choice.choice(instance.getInstanceId()));
+	StateChoice<T> stateChoice = states.get(entered);
+	if (stateChoice != null) {
+	    instance.submit(stateChoice.getPriority(), Choice.choice(instance.getInstanceId()));
 	    return true;
 	}
 	return false;

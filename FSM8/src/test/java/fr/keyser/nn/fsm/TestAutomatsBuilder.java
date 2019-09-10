@@ -57,9 +57,11 @@ class TestAutomatsBuilder {
 
     protected void createFeed(Node<Evolutions> player, Node<Evolutions> feed) {
 
-	Node<Evolutions> idle = feed.node("idle");
+	Choice<Evolutions> initial = feed.choice("initial");
 
-	Choice<Evolutions> mayEat = feed.choice("mayEat");
+	Node<Evolutions> idle = feed.node("idle");
+	Choice<Evolutions> mayEat = feed.choice("mayEat", -1);
+
 	Node<Evolutions> waiting = feed.node("waiting");
 	TransitionNode<Evolutions> carnivorous = feed.auto("carnivorous");
 	TransitionNode<Evolutions> omnivorous = feed.auto("omnivorous");
@@ -70,12 +72,26 @@ class TestAutomatsBuilder {
 
 	SpelExpressionParser parser = new SpelExpressionParser();
 
+	PayloadActionFunction<Evolutions> syncFromGame = (e, evt) -> {
+	    Object payload = evt.getPayload();
+	    if (payload instanceof Game) {
+		return e.syncFromGame((Game) payload);
+	    }
+	    return e;
+	};
+
+	idle.event("activate", waiting);
+	idle.event("sync", mayEat);
+
+	idle.updateExit(syncFromGame);
+
 	SpringELChoice<Evolutions> mayEatChoice = new SpringELChoice<>(parser.parseExpression("player.mayEat(#parent.game)"));
+	mayEat.when(mayEatChoice, idle)
+	        .otherwise(player);
 
-	idle.event("activate", mayEat);
-
-	mayEat.when(mayEatChoice, waiting)
-	        .otherwise(done);
+	// init
+	initial.when(mayEatChoice, idle)
+	        .otherwise(player);
 
 	carnivorous.to(-1, idle);
 	omnivorous.to(-1, idle);
@@ -90,17 +106,6 @@ class TestAutomatsBuilder {
 	waiting.event("done", done);
 
 	done.callbackEntry((i, e) -> i.getParent().unicast("done"));
-
-	PayloadActionFunction<Evolutions> syncFromGame = (e, evt) -> {
-	    Object payload = evt.getPayload();
-	    if (payload instanceof Game) {
-		return e.syncFromGame((Game) payload);
-	    }
-	    return e;
-	};
-
-	idle.event("sync", idle);
-	idle.updateExit(syncFromGame);
 
     }
 
@@ -213,9 +218,9 @@ class TestAutomatsBuilder {
 
 	TransitionNode<Evolutions> feedActivate = feeding.auto("activate");
 	Node<Evolutions> feedWaiting = feeding.node("waiting");
-	feedActivate.to(feedWaiting);
+	feedActivate.to(1, feedWaiting);
 
-	feedActivate.entry((i, evt) -> {
+	feedWaiting.entry((i, evt) -> {
 	    return i.update(e -> {
 
 		List<Instance<Evolutions>> childs = i.childsInstances();
@@ -274,7 +279,7 @@ class TestAutomatsBuilder {
 	CardId carnivorousId = resolver.card(Trait.CARNIVOROROUS, 3);
 	resolver.card(Trait.PACK_HUNTER, 2);
 	resolver.card(Trait.INTELIGGENT, 4);
-	resolver.card(Trait.CLIMBER, 5);
+	CardId climberId = resolver.card(Trait.CLIMBER, 5);
 	CardId collaborativeId = resolver.card(Trait.COLLABORATIVE, -2);
 	resolver.card(Trait.DEFENSIVE_HORDE, 6);
 	resolver.card(Trait.LONG_NECK, -2);
@@ -300,14 +305,32 @@ class TestAutomatsBuilder {
 	automats.submit(EventMsg.unicast("evolve", player1, evolveP1));
 	automats.submit(EventMsg.unicast("done", player1));
 
+	EvolutionInstructions evolveP2 = new EvolutionInstructions();
+	evolveP2.setIndex(-1);
+	evolveP2.getNewSpecies().add(climberId);
+
+	automats.submit(EventMsg.unicast("evolve", player2, evolveP2));
 	automats.submit(EventMsg.unicast("done", player2));
+
 	automats.submit(EventMsg.unicast("done", player3));
+
+	dump(automats);
 
 	// feed
 	automats.submit(EventMsg.unicast("omnivorous", player2, 0));
-	automats.submit(EventMsg.unicast("omnivorous", player3, 0));
 
+	dump(automats);
+	automats.submit(EventMsg.unicast("omnivorous", player3, 0));
+	dump(automats);
+
+	automats.submit(EventMsg.unicast("omnivorous", player2, 1));
+	dump(automats);
+    }
+
+    private void dump(Automats<Evolutions> automats) {
+	System.out.println("-------------");
 	System.out.println(automats.instances().stream().map(s -> s.toString()).collect(Collectors.joining("\n")));
+	System.out.println("-------------");
     }
 
     @Test

@@ -2,7 +2,11 @@ package fr.keyser.nn.fsm.builder;
 
 public interface Container<T> extends NodeContainer<T> {
 
-    Choice<T> choice(String choice);
+    default Choice<T> choice(String choice) {
+	return choice(choice, 0);
+    }
+
+    Choice<T> choice(String choice, int priority);
 
     default Region<T> region(String region) {
 	return region(region, 1);
