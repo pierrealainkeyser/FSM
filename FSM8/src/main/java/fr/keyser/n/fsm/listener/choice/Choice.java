@@ -11,7 +11,7 @@ public class Choice extends Event {
 
     private static final String PROPS = "props";
 
-    private Choice(String key, Map<String, Object> args) {
+    public Choice(String key, Map<String, Object> args) {
 	super(key, args);
 
     }
@@ -23,6 +23,14 @@ public class Choice extends Event {
 	        .put(PROPS, getProps())
 	        .build(Choice::new);
 
+    }
+    
+    
+    public final static Choice choice(String key,Event parent, boolean otherwise) {
+	return Event.event(key)
+	        .id(parent.getId())
+	        .put(OTHERWISE, otherwise)
+	        .build(Choice::new);
     }
 
     public final static Choice choice(InstanceState state) {
