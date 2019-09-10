@@ -7,19 +7,19 @@ public final class TraitBasedFoodSource implements FoodSource {
     private final FoodSource foodSource;
 
     public TraitBasedFoodSource(FoodSource foodSource, CardId cardId) {
-        this.foodSource = foodSource;
-        this.cardId = cardId;
+	this.foodSource = foodSource;
+	this.cardId = cardId;
     }
 
     public int consume(int quantity) {
-        return foodSource.consume(quantity);
+	return foodSource.consume(quantity);
     }
 
     public CardId getCardId() {
-        return cardId;
+	return cardId;
     }
 
     public FoodType getFoodType() {
-        return foodSource.getFoodType();
+	return foodSource.getFoodType();
     }
 }

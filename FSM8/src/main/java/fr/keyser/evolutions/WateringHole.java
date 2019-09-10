@@ -7,22 +7,22 @@ public final class WateringHole implements FoodSource {
     private final int food;
 
     public WateringHole(int food) {
-        this.food = food;
+	this.food = food;
     }
 
     @Override
     public int consume(int quantity) {
-        int consume = Math.min(quantity, food - consumed);
-        consumed += consume;
-        return consume;
+	int consume = Math.min(quantity, food - consumed);
+	consumed += consume;
+	return consume;
     }
 
     public int getConsumed() {
-        return consumed;
+	return consumed;
     }
 
     @Override
     public FoodType getFoodType() {
-        return FoodType.PLANT;
+	return FoodType.PLANT;
     }
 }

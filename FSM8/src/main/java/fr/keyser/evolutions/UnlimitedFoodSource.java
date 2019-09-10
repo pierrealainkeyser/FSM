@@ -8,17 +8,17 @@ public final class UnlimitedFoodSource implements FoodSource {
     private final FoodType foodType;
 
     private UnlimitedFoodSource(FoodType foodType) {
-        this.foodType = foodType;
+	this.foodType = foodType;
     }
 
     @Override
     public int consume(int quantity) {
-        return quantity;
+	return quantity;
     }
 
     @Override
     public FoodType getFoodType() {
-        return foodType;
+	return foodType;
     }
 
 }

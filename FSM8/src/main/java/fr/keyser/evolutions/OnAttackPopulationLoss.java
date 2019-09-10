@@ -10,21 +10,21 @@ public final class OnAttackPopulationLoss {
 
     public OnAttackPopulationLoss(PopulationLossSummary attacker, CostAnalysis attackerDamagePrevention,
             PopulationLossSummary victim) {
-        this.attackerDamagePrevention = attackerDamagePrevention;
-        this.attacker = attacker;
-        this.victim = victim;
+	this.attackerDamagePrevention = attackerDamagePrevention;
+	this.attacker = attacker;
+	this.victim = victim;
     }
 
     public PopulationLossSummary getAttacker() {
-        return attacker;
+	return attacker;
     }
 
     public CostAnalysis getAttackerDamagePrevention() {
-        return attackerDamagePrevention;
+	return attackerDamagePrevention;
     }
 
     public PopulationLossSummary getVictim() {
-        return victim;
+	return victim;
     }
 
 }

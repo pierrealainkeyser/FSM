@@ -10,18 +10,18 @@ public final class MapCardResolver implements CardResolver {
     private int index = 0;
 
     public CardId card(Trait trait, int food) {
-        CardId id = new CardId(index++);
-        cards.put(id, new Card(trait, food));
-        return id;
+	CardId id = new CardId(index++);
+	cards.put(id, new Card(trait, food));
+	return id;
     }
 
     public Set<CardId> ids() {
-        return cards.keySet();
+	return cards.keySet();
     }
 
     @Override
     public Card resolve(CardId id) {
-        return cards.get(id);
+	return cards.get(id);
     }
 
 }

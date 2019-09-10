@@ -17,74 +17,74 @@ public final class SpeciesFeedingContext {
     private final Species species;
 
     public SpeciesFeedingContext(Species species, FeedingActionContext context) {
-        this(species, species.getFeedCapacity(), 0, context, new ArrayList<>());
+	this(species, species.getFeedCapacity(), 0, context, new ArrayList<>());
     }
 
     private SpeciesFeedingContext(Species species, int capacity, int feed, FeedingActionContext context,
             List<FoodSource> sources) {
-        this.capacity = capacity;
-        this.feed = feed;
-        this.context = context;
-        this.sources = sources;
-        this.species = species;
+	this.capacity = capacity;
+	this.feed = feed;
+	this.context = context;
+	this.sources = sources;
+	this.species = species;
     }
 
     public SpeciesFeedingContext duplicate(FeedingActionContext context) {
-        return new SpeciesFeedingContext(species, capacity, feed, context, new ArrayList<>(sources));
+	return new SpeciesFeedingContext(species, capacity, feed, context, new ArrayList<>(sources));
     }
 
     public void feed(int quantity, FoodSource source) {
-        int remaining = Math.max(0, capacity - feed);
+	int remaining = Math.max(0, capacity - feed);
 
-        if (FoodType.PLANT == source.getFoodType()) {
-    	if (species.hasTrait(Trait.CARNIVOROROUS)) {
-    	    return;
-    	} else if (species.hasTrait(Trait.FORAGING)) {
-    	    ++quantity;
-    	}
-        }
+	if (FoodType.PLANT == source.getFoodType()) {
+	    if (species.hasTrait(Trait.CARNIVOROROUS)) {
+		return;
+	    } else if (species.hasTrait(Trait.FORAGING)) {
+		++quantity;
+	    }
+	}
 
-        int tryConsuming = Math.min(remaining, quantity);
-        int consume = source.consume(tryConsuming);
+	int tryConsuming = Math.min(remaining, quantity);
+	int consume = source.consume(tryConsuming);
 
-        if (consume > 0) {
-    	this.feed += consume;
-    	sources.add(source);
+	if (consume > 0) {
+	    this.feed += consume;
+	    sources.add(source);
 
-    	Optional<CardId> collaborative = species.findCardWithTrait(Trait.COLLABORATIVE);
-    	if (collaborative.isPresent()) {
-    	    context.feedRight(species, 1, source.traitBased(collaborative.get()));
-    	}
-        }
+	    Optional<CardId> collaborative = species.findCardWithTrait(Trait.COLLABORATIVE);
+	    if (collaborative.isPresent()) {
+		context.feedRight(species, 1, source.traitBased(collaborative.get()));
+	    }
+	}
 
     }
 
     public void feedAttack(Species target) {
-        feed(target.getPopulation(), UnlimitedFoodSource.MEAT);
+	feed(target.getPopulation(), UnlimitedFoodSource.MEAT);
     }
 
     public void feedLongNeck() {
-        feed(1, UnlimitedFoodSource.PLANT);
+	feed(1, UnlimitedFoodSource.PLANT);
     }
 
     public void feedScavenger() {
-        feed(1, UnlimitedFoodSource.MEAT);
+	feed(1, UnlimitedFoodSource.MEAT);
     }
 
     public void feedWateringHole(WateringHole wateringHole) {
-        feed(1, wateringHole);
+	feed(1, wateringHole);
     }
 
     public Species getSpecies() {
-        return species;
+	return species;
     }
 
     public void reduceCapacity(PopulationLossSummary loss) {
-        this.capacity = Math.max(0, capacity - loss.getPopulationLoss());
+	this.capacity = Math.max(0, capacity - loss.getPopulationLoss());
     }
 
     public FeedingSummary summary() {
-        return new FeedingSummary(species.getUid(), feed, sources);
+	return new FeedingSummary(species.getUid(), feed, sources);
     }
 
 }

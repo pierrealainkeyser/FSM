@@ -7,6 +7,6 @@ public interface FoodSource {
     public FoodType getFoodType();
 
     public default FoodSource traitBased(CardId trait) {
-        return new TraitBasedFoodSource(this, trait);
+	return new TraitBasedFoodSource(this, trait);
     }
 }

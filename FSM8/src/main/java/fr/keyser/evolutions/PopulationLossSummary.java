@@ -10,25 +10,25 @@ public final class PopulationLossSummary {
     private final int score;
 
     public PopulationLossSummary(int populationLoss, boolean extinct, int drawTraits, int score) {
-        this.populationLoss = populationLoss;
-        this.extinct = extinct;
-        this.drawTraits = drawTraits;
-        this.score = score;
+	this.populationLoss = populationLoss;
+	this.extinct = extinct;
+	this.drawTraits = drawTraits;
+	this.score = score;
     }
 
     public int getDrawTraits() {
-        return drawTraits;
+	return drawTraits;
     }
 
     public int getPopulationLoss() {
-        return populationLoss;
+	return populationLoss;
     }
 
     public int getScore() {
-        return score;
+	return score;
     }
 
     public boolean isExtinct() {
-        return extinct;
+	return extinct;
     }
 }
