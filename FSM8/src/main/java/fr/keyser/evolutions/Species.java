@@ -49,7 +49,7 @@ public final class Species {
 	        .filterCost(player.getHandSize());
     }
 
-    public SpeciesView visibleView(Species publicSpecies, boolean replaceWithUnknow) {
+    public SpeciesView asView(Species publicSpecies, boolean replaceWithUnknow) {
 
 	Optional<Species> pub = Optional.ofNullable(publicSpecies);
 	Map<Integer, CardView> traits = new TreeMap<>();
@@ -63,7 +63,7 @@ public final class Species {
 	    int key = e.getKey();
 
 	    CardView existings = traits.get(key);
-	    if (existings == null || !e.getValue().equals(existings.getId())) {
+	    if (existings == null || !e.getValue().equals(existings.getCard())) {
 		traits.put(key, cardResolver.asView(replaceWithUnknow ? CardId.UNKNOW : e.getValue(), true));
 	    }
 	}
@@ -72,8 +72,6 @@ public final class Species {
 	return new SpeciesView(uid, population, size, foodLevel, fatlevel,
 	        new ArrayList<>(traits.values()));
     }
-
-  
 
     public Species applyLoss(PopulationLossSummary summary) {
 	if (summary.isExtinct())

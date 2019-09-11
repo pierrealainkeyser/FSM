@@ -8,12 +8,19 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import fr.keyser.evolutions.CardId;
 import fr.keyser.evolutions.EvolutionInstructions;
 import fr.keyser.evolutions.Evolutions;
 import fr.keyser.evolutions.Game;
 import fr.keyser.evolutions.MapCardResolver;
 import fr.keyser.evolutions.Player;
+import fr.keyser.evolutions.PlayerId;
+import fr.keyser.evolutions.PlayerView;
+import fr.keyser.evolutions.PlayerViewBuilder;
 import fr.keyser.evolutions.SpeciesId;
 import fr.keyser.evolutions.Trait;
 import fr.keyser.n.fsm.InstanceId;
@@ -113,7 +120,7 @@ class TestAutomatsBuilder {
     }
 
     @Test
-    void testEvolutions() {
+    void testEvolutions() throws JsonProcessingException {
 	int nbPlayers = 3;
 
 	SpelExpressionParser parser = new SpelExpressionParser();
@@ -316,8 +323,10 @@ class TestAutomatsBuilder {
 	// evolve
 	automats.submit(EventMsg.unicast("evolve", player1, evolveP1));
 	automats.submit(EventMsg.unicast("done", player1));
-	
+
 	dump(automats);
+
+
 
 	EvolutionInstructions evolveP2 = new EvolutionInstructions();
 	evolveP2.setIndex(-1);
@@ -326,6 +335,7 @@ class TestAutomatsBuilder {
 	automats.submit(EventMsg.unicast("evolve", player2, evolveP2));
 	automats.submit(EventMsg.unicast("done", player2));
 	
+	dumpView(automats, new PlayerId(1));
 
 	dump(automats);
 
@@ -348,6 +358,18 @@ class TestAutomatsBuilder {
 	System.out.println("-------------");
 	System.out.println(automats.instances().stream().map(s -> s.toString()).collect(Collectors.joining("\n")));
 	System.out.println("-------------");
+    }
+
+    private void dumpView(Automats<Evolutions> automats, PlayerId forPlayer) throws JsonProcessingException {
+	Game g = automats.instances().get(0).get(Evolutions::getGame);
+	List<Player> players = automats.instances().stream().skip(1).map(e -> e.get(Evolutions::getPlayer)).collect(Collectors.toList());
+
+	PlayerViewBuilder builder = new PlayerViewBuilder(g, players);
+	ObjectMapper om = new ObjectMapper();
+	ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
+
+	PlayerView view = builder.getViews().get(forPlayer);
+	System.out.println(ow.writeValueAsString(view));
     }
 
     @Test

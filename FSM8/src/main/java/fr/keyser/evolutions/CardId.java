@@ -36,4 +36,8 @@ public final class CardId {
     public String toString() {
 	return id + "";
     }
+
+    public int getId() {
+        return id;
+    }
 }

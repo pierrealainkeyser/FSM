@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -43,8 +43,20 @@ public final class Player {
 	this.inHands = Collections.unmodifiableList(inHands);
     }
 
+    public List<CardView> handsAsView() {
+	return inHands.stream().map(id -> cardResolver.asView(id, true)).collect(Collectors.toList());
+    }
+
     public TargetAttackContext attackForSpecies(Species target) {
 	return new TargetAttackContext(findNext(target, false).orElse(null), target, findRight(target).orElse(null));
+    }
+
+    private Player changeAllSpecies(UnaryOperator<Species> operator) {
+	NavigableMap<Integer, Species> news = new TreeMap<>(species);
+	for (Entry<Integer, Species> e : news.entrySet()) {
+	    e.setValue(operator.apply(e.getValue()));
+	}
+	return new Player(cardResolver, index, foodEated, news, foodPlayed, inHands);
     }
 
     public Player clearExtinctsSpecies(List<CardId> draws) {
@@ -145,6 +157,10 @@ public final class Player {
 	        .reduce(0, (l, r) -> l + r);
     }
 
+    public int getFoodEated() {
+	return foodEated;
+    }
+
     public Stream<Integer> getFoodPlayed() {
 	if (foodPlayed == null)
 	    return Stream.empty();
@@ -185,22 +201,6 @@ public final class Player {
 	return max.map(SpeciesId::next).orElse(new SpeciesId(index, 0));
     }
 
-    public Player transfertFat() {
-	return changeAllSpecies(Species::transfertFat);
-    }
-
-    public Player updateFertile() {
-	return changeAllSpecies(Species::updateFertile);
-    }
-
-    private Player changeAllSpecies(UnaryOperator<Species> operator) {
-	NavigableMap<Integer, Species> news = new TreeMap<>(species);
-	for (Entry<Integer, Species> e : news.entrySet()) {
-	    e.setValue(operator.apply(e.getValue()));
-	}
-	return new Player(cardResolver, index, foodEated, news, foodPlayed, inHands);
-    }
-
     public Player playFood(CardId foodPlayed) {
 	List<CardId> inHands = new ArrayList<>(this.inHands);
 	inHands.remove(foodPlayed);
@@ -229,6 +229,25 @@ public final class Player {
 	        .append(", foodEated=").append(foodEated).append(", foodPlayed=")
 	        .append(foodPlayed == null ? null : cardResolver.resolve(foodPlayed)).append("]");
 	return builder.toString();
+    }
+
+    public PlayerSpeciesView asView(Player publicPlayer, boolean replaceWithUnknow) {
+	List<SpeciesView> views = new ArrayList<>(species.size());
+	for (Entry<Integer, Species> e : species.entrySet()) {
+	    int index = e.getKey();
+	    Species privateSpecies = e.getValue();
+	    Species publicSpecies = publicPlayer.species.get(index);
+	    views.add(privateSpecies.asView(publicSpecies, replaceWithUnknow));
+	}
+	return new PlayerSpeciesView(views);
+    }
+
+    public Player transfertFat() {
+	return changeAllSpecies(Species::transfertFat);
+    }
+
+    public Player updateFertile() {
+	return changeAllSpecies(Species::updateFertile);
     }
 
     private Player updateSpecies(SpeciesId id, Function<Species, Species> functor) {

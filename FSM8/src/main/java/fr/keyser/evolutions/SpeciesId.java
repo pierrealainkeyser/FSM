@@ -55,4 +55,8 @@ public final class SpeciesId {
 	return player + "#" + id;
     }
 
+    public int getId() {
+        return id;
+    }
+
 }

@@ -6,23 +6,23 @@ public class CardView {
 
     private final int food;
 
-    private CardId id;
+    private CardId card;
 
     private final Trait trait;
 
-    public CardView(CardId id, int food, Trait trait, boolean faceDown) {
-	this.id = id;
+    public CardView(CardId card, int food, Trait trait, boolean faceDown) {
+	this.card = card;
 	this.food = food;
 	this.trait = trait;
 	this.faceDown = faceDown;
     }
 
-    public CardId getId() {
-        return id;
+    public CardId getCard() {
+        return card;
     }
 
-    public void setId(CardId id) {
-        this.id = id;
+    public void setCard(CardId id) {
+        this.card = id;
     }
 
     public boolean isFaceDown() {
