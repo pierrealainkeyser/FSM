@@ -319,9 +319,6 @@ class TestAutomatsBuilder {
 	resolver.card(Trait.LONG_NECK, -2);
 	resolver.card(Trait.EMBUSCADE, 2);
 
-	for (int i = 0; i < 80; ++i)
-	    resolver.card(Trait.EMBUSCADE, 2);
-
 	List<CardId> decks = new ArrayList<>(resolver.ids());
 
 	automats.submit(Start.start(new Evolutions(new Game(nbPlayers, resolver, 0, decks))));

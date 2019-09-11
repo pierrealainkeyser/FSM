@@ -129,14 +129,13 @@ public class Game {
     private Game draw(int ammount, Consumer<List<CardId>> callback) {
 
 	List<CardId> drawn = new ArrayList<>();
-
 	List<CardId> remaining = new ArrayList<>();
+
 	List<CardId> newDiscard = this.discard;
 
 	boolean done = this.done;
 	if (decks.size() >= ammount) {
-	    drawn.addAll(decks.subList(0, ammount));
-	    remaining.addAll(decks.subList(ammount, decks.size()));
+	    draw(decks, ammount, drawn, remaining);
 	} else {
 	    drawn.addAll(decks);
 	    List<CardId> newDeck = new ArrayList<>(discard);
@@ -144,8 +143,7 @@ public class Game {
 
 	    int drawMore = ammount - drawn.size();
 
-	    drawn.addAll(newDeck.subList(0, drawMore));
-	    remaining.addAll(newDeck.subList(drawMore, newDeck.size()));
+	    draw(newDeck, Math.min(drawMore, newDeck.size()), drawn, remaining);
 
 	    newDiscard = new ArrayList<>();
 	    done = true;
@@ -154,6 +152,11 @@ public class Game {
 	callback.accept(drawn);
 
 	return new Game(activePlayer, players, firstPlayer, foodPool, remaining, newDiscard, done);
+    }
+
+    private static void draw(List<CardId> source, int ammount, List<CardId> drawn, List<CardId> remaining) {
+	drawn.addAll(source.subList(0, ammount));
+	remaining.addAll(source.subList(ammount, source.size()));
     }
 
     public Game nextPlayer() {
