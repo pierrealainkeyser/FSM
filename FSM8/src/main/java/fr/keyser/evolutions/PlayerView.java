@@ -31,8 +31,8 @@ public class PlayerView {
 	return self;
     }
 
-    public PlayerSpeciesView getSpecies() {
-	return species;
+    public List<SpeciesView> getSpecies() {
+	return species.getSpecies();
     }
 
 }

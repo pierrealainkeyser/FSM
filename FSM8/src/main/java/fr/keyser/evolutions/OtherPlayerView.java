@@ -1,5 +1,7 @@
 package fr.keyser.evolutions;
 
+import java.util.List;
+
 public class OtherPlayerView {
 
     private final int cardsInHand;
@@ -15,8 +17,9 @@ public class OtherPlayerView {
         return cardsInHand;
     }
 
-    public PlayerSpeciesView getSpecies() {
-        return species;
+    public List<SpeciesView> getSpecies() {
+	return species.getSpecies();
     }
+
 
 }

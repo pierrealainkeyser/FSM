@@ -1,5 +1,6 @@
 package fr.keyser.nn.fsm;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -8,9 +9,13 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 
 import fr.keyser.evolutions.CardId;
 import fr.keyser.evolutions.EvolutionInstructions;
@@ -326,15 +331,13 @@ class TestAutomatsBuilder {
 
 	dump(automats);
 
-
-
 	EvolutionInstructions evolveP2 = new EvolutionInstructions();
 	evolveP2.setIndex(-1);
 	evolveP2.getNewSpecies().add(climberId);
 
 	automats.submit(EventMsg.unicast("evolve", player2, evolveP2));
 	automats.submit(EventMsg.unicast("done", player2));
-	
+
 	dumpView(automats, new PlayerId(1));
 
 	dump(automats);
@@ -365,8 +368,36 @@ class TestAutomatsBuilder {
 	List<Player> players = automats.instances().stream().skip(1).map(e -> e.get(Evolutions::getPlayer)).collect(Collectors.toList());
 
 	PlayerViewBuilder builder = new PlayerViewBuilder(g, players);
-	ObjectMapper om = new ObjectMapper();
-	ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
+
+	SimpleModule sm = new SimpleModule();
+	sm.addSerializer(PlayerId.class, new StdScalarSerializer<PlayerId>(PlayerId.class) {
+
+	    @Override
+	    public void serialize(PlayerId value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		gen.writeString("" + value.getId());
+
+	    }
+	});
+
+	sm.addSerializer(CardId.class, new StdScalarSerializer<CardId>(CardId.class) {
+
+	    @Override
+	    public void serialize(CardId value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		gen.writeString("" + value.getId());
+
+	    }
+	});
+
+	sm.addSerializer(SpeciesId.class, new StdScalarSerializer<SpeciesId>(SpeciesId.class) {
+
+	    @Override
+	    public void serialize(SpeciesId value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		gen.writeString(value.getPlayer().getId() + "#" + value.getId());
+
+	    }
+	});
+
+	ObjectWriter ow = new ObjectMapper().registerModule(sm).writer().withDefaultPrettyPrinter();
 
 	PlayerView view = builder.getViews().get(forPlayer);
 	System.out.println(ow.writeValueAsString(view));
