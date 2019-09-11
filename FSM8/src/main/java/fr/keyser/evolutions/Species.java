@@ -1,5 +1,6 @@
 package fr.keyser.evolutions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,33 +49,31 @@ public final class Species {
 	        .filterCost(player.getHandSize());
     }
 
-    public SpeciesView visibleView(Species publicSpecies) {
+    public SpeciesView visibleView(Species publicSpecies, boolean replaceWithUnknow) {
 
 	Optional<Species> pub = Optional.ofNullable(publicSpecies);
-	Map<Integer, CardId> traits = new TreeMap<>();
-	pub.ifPresent(s -> traits.putAll(s.traits));
+	Map<Integer, CardView> traits = new TreeMap<>();
+	pub.ifPresent(s -> {
+	    for (Entry<Integer, CardId> e : s.traits.entrySet()) {
+		traits.put(e.getKey(), cardResolver.asView(e.getValue(), false));
+	    }
+	});
 
 	for (Entry<Integer, CardId> e : this.traits.entrySet()) {
 	    int key = e.getKey();
 
-	    CardId existings = traits.get(key);
-	    if (!e.getValue().equals(existings)) {
-		traits.put(key, CardId.UNKNOW);
+	    CardView existings = traits.get(key);
+	    if (existings == null || !e.getValue().equals(existings.getId())) {
+		traits.put(key, cardResolver.asView(replaceWithUnknow ? CardId.UNKNOW : e.getValue(), true));
 	    }
 	}
 
 	int fatlevel = pub.map(Species::getFatLevel).orElse(0);
-	return asView(fatlevel, traits);
+	return new SpeciesView(uid, population, size, foodLevel, fatlevel,
+	        new ArrayList<>(traits.values()));
     }
 
-    public SpeciesView asView() {
-	return asView(fatLevel, traits);
-    }
-
-    private SpeciesView asView(int fatLevel, Map<Integer, CardId> traits) {
-	return new SpeciesView(uid, population, size, foodLevel, fatLevel,
-	        traits.values().stream().map(cardResolver::resolve).collect(Collectors.toList()));
-    }
+  
 
     public Species applyLoss(PopulationLossSummary summary) {
 	if (summary.isExtinct())

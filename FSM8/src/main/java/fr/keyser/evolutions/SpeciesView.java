@@ -14,9 +14,9 @@ public class SpeciesView {
 
     private final int size;
 
-    private final List<Card> traits;
+    private final List<CardView> traits;
 
-    public SpeciesView(SpeciesId id, int population, int size, int foodLevel, int fatLevel, List<Card> traits) {
+    public SpeciesView(SpeciesId id, int population, int size, int foodLevel, int fatLevel, List<CardView> traits) {
 	this.id = id;
 	this.population = population;
 	this.size = size;
@@ -45,7 +45,7 @@ public class SpeciesView {
 	return size;
     }
 
-    public List<Card> getTraits() {
+    public List<CardView> getTraits() {
 	return traits;
     }
 

@@ -2,26 +2,23 @@ package fr.keyser.evolutions;
 
 public final class Card {
 
-    public final static Card UNKNOW = new Card(CardId.UNKNOW, Trait.HIDDEN_TRAIT, 0);
+    public final static Card UNKNOW = new Card(Trait.HIDDEN_TRAIT, 0);
 
     private final int food;
 
-    private final CardId id;
-
     private final Trait trait;
 
-    public Card(CardId id, Trait trait, int food) {
-	this.id = id;
+    public Card(Trait trait, int food) {
 	this.trait = trait;
 	this.food = food;
     }
 
-    public int getFood() {
-	return food;
+    public CardView asView(CardId id, boolean faceDown) {
+	return new CardView(id, food, trait, faceDown);
     }
 
-    public CardId getId() {
-        return id;
+    public int getFood() {
+	return food;
     }
 
     public Trait getTrait() {
