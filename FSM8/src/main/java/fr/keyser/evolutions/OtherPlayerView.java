@@ -1,25 +1,17 @@
 package fr.keyser.evolutions;
 
-import java.util.List;
-
-public class OtherPlayerView {
+public class OtherPlayerView extends AbstractPlayerView {
 
     private final int cardsInHand;
 
-    private final PlayerSpeciesView species;
-
-    public OtherPlayerView(int cardsInHand, PlayerSpeciesView species) {
+    public OtherPlayerView(PlayerSpeciesView species, PlayerStatus status, int cardsInHand) {
+	super(species, status);
 	this.cardsInHand = cardsInHand;
-	this.species = species;
+
     }
 
     public int getCardsInHand() {
-        return cardsInHand;
+	return cardsInHand;
     }
-
-    public List<SpeciesView> getSpecies() {
-	return species.getSpecies();
-    }
-
 
 }

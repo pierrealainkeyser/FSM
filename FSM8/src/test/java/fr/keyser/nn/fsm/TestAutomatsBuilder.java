@@ -23,7 +23,9 @@ import fr.keyser.evolutions.Evolutions;
 import fr.keyser.evolutions.Game;
 import fr.keyser.evolutions.MapCardResolver;
 import fr.keyser.evolutions.Player;
+import fr.keyser.evolutions.PlayerAndStatus;
 import fr.keyser.evolutions.PlayerId;
+import fr.keyser.evolutions.PlayerStatus;
 import fr.keyser.evolutions.PlayerView;
 import fr.keyser.evolutions.PlayerViewBuilder;
 import fr.keyser.evolutions.SpeciesId;
@@ -59,7 +61,8 @@ class TestAutomatsBuilder {
 
 	done.to(-1, joining);
 
-	process.updateEntry((e, evt) -> e.evolve((EvolutionInstructions) evt.getPayload()));
+	process.updateEntry((e, evt) -> e.evolve((EvolutionInstructions) evt.getPayload()))
+	        .callbackEntry((i, evt) -> i.getParent().unicast("evolve", evt.getPayload()));
 
 	waiting.event("evolve", process);
 	waiting.event("done", done);
@@ -113,7 +116,7 @@ class TestAutomatsBuilder {
 	intelligent.to(-1, idle);
 
 	omnivorous.callbackEntry((i, evt) -> i.getParent().unicast("omnivorous",
-	        new SpeciesId(i.get(e -> e.getPlayer().getIndex()), (Integer) evt.getPayload())));
+	        i.get(e -> new SpeciesId(e.getPlayer().getIndex(), (Integer) evt.getPayload()))));
 
 	waiting.event("carnivorous", carnivorous);
 	waiting.event("omnivorous", omnivorous);
@@ -202,7 +205,9 @@ class TestAutomatsBuilder {
 	Node<Evolutions> feeding = game.node("feeding");
 	complete.to(1, feeding);
 
-	Node<Evolutions> endOfTurn = game.node("endOfTurn");
+	TransitionNode<Evolutions> endOfTurn = game.auto("endOfTurn");
+	endOfTurn.updateEntry((e, evt) -> e.cleanEndTurn());
+	endOfTurn.to(checkTurn);
 
 	activate.to(wait)
 	        .callbackEntry((i, e) -> {
@@ -211,12 +216,17 @@ class TestAutomatsBuilder {
 	            active.unicast("evolve");
 	        });
 	wait.updateExit((e, evt) -> {
-	    if ("evolveDone".equals(evt.getKey())) {
+	    String key = evt.getKey();
+	    if ("evolveDone".equals(key)) {
 		return e.nextPlayer();
+	    } else if ("evolve".equals(key)) {
+		EvolutionInstructions instr = (EvolutionInstructions) evt.getPayload();
+		return e.discard(instr.discarded());
 	    }
 	    return e;
 	});
 	wait.event("evolveDone", checkNext);
+	wait.event("evolve", wait);
 
 	checkNext.when(new SpringELChoice<>(parser.parseExpression("game.activeIsFirst")), complete)
 	        .otherwise(activate);
@@ -239,12 +249,12 @@ class TestAutomatsBuilder {
 	        .callbackEntry((i, evt) -> i.broadcast("feed"));
 
 	TransitionNode<Evolutions> delay = feeding.auto("delay");
-	Node<Evolutions> feedWaiting = feeding.node("waiting");
-	delay.to(1, feedWaiting);
+	Node<Evolutions> feedWait = feeding.node("wait");
+	delay.to(1, feedWait);
 
 	State playerFeedIdle = new State("player", "feed", "idle");
 
-	feedWaiting.entry((i, evt) -> {
+	feedWait.entry((i, evt) -> {
 	    return i.update(e -> {
 
 		List<Instance<Evolutions>> childs = i.childsInstances();
@@ -273,16 +283,16 @@ class TestAutomatsBuilder {
 	omnivorous.updateEntry((e, evt) -> e.feedOmnivorous((SpeciesId) evt.getPayload()))
 	        .callbackEntry(syncPlayers);
 
-	feedWaiting.event("carnivorous", carnivorous);
-	feedWaiting.event("omnivorous", omnivorous);
-	feedWaiting.event("intelligent", intelligent);
+	feedWait.event("carnivorous", carnivorous);
+	feedWait.event("omnivorous", omnivorous);
+	feedWait.event("intelligent", intelligent);
 
 	checkDone.when(ChoicePredicate.allChildsMatch(idle.state()), endOfTurn)
 	        .otherwise(delay);
 
-	feedWaiting.event("done", checkDone);
+	feedWait.event("done", checkDone);
 
-	feedWaiting
+	feedWait
 	        .updateExit((e, evt) -> {
 	            String key = evt.getKey();
 	            if ("carnivorous".equals(key) || "omnivorous".equals(key) || "done".equals(key)) {
@@ -299,7 +309,7 @@ class TestAutomatsBuilder {
 	CardId alarmId = resolver.card(Trait.ALARM, 3);
 	resolver.card(Trait.FORAGING, 6);
 	CardId longNeckId = resolver.card(Trait.LONG_NECK, 4);
-	resolver.card(Trait.FERTILE, 5);
+	CardId fertileId = resolver.card(Trait.FERTILE, 5);
 	CardId carnivorousId = resolver.card(Trait.CARNIVOROROUS, 3);
 	resolver.card(Trait.PACK_HUNTER, 2);
 	resolver.card(Trait.INTELIGGENT, 4);
@@ -308,6 +318,9 @@ class TestAutomatsBuilder {
 	resolver.card(Trait.DEFENSIVE_HORDE, 6);
 	resolver.card(Trait.LONG_NECK, -2);
 	resolver.card(Trait.EMBUSCADE, 2);
+
+	for (int i = 0; i < 80; ++i)
+	    resolver.card(Trait.EMBUSCADE, 2);
 
 	List<CardId> decks = new ArrayList<>(resolver.ids());
 
@@ -319,11 +332,16 @@ class TestAutomatsBuilder {
 	InstanceId player3 = new InstanceId("3");
 	automats.submit(EventMsg.unicast("playCard", player1, alarmId));
 	automats.submit(EventMsg.unicast("playCard", player2, carnivorousId));
+
+	dump(automats);
+	dumpView(automats, new PlayerId(1));
+
 	automats.submit(EventMsg.unicast("playCard", player3, collaborativeId));
 
 	EvolutionInstructions evolveP1 = new EvolutionInstructions();
 	evolveP1.setIndex(0);
 	evolveP1.getTraits().put(0, longNeckId);
+	evolveP1.getSize().add(fertileId);
 
 	// evolve
 	automats.submit(EventMsg.unicast("evolve", player1, evolveP1));
@@ -352,9 +370,11 @@ class TestAutomatsBuilder {
 	dump(automats);
 	automats.submit(EventMsg.unicast("omnivorous", player3, 0));
 	dump(automats);
+	dumpView(automats, new PlayerId(1));
 
 	automats.submit(EventMsg.unicast("omnivorous", player2, 1));
 	dump(automats);
+	dumpView(automats, new PlayerId(0));
     }
 
     private void dump(Automats<Evolutions> automats) {
@@ -363,9 +383,44 @@ class TestAutomatsBuilder {
 	System.out.println("-------------");
     }
 
+    private static PlayerStatus asStatus(State gameState, State state) {
+
+	State idle = new State("player", "idle");
+
+	if (new State("game", "filling", "wait").equals(gameState)) {
+	    if (idle.equals(state))
+		return PlayerStatus.DONE;
+	    else
+		return PlayerStatus.ACTIVE;
+
+	} else if (new State("game", "evolutions", "wait").equals(gameState)) {
+
+	    if (new State("player", "evolve", "joining").equals(state))
+		return PlayerStatus.DONE;
+	    else if (new State("player", "evolve", "waiting").equals(state))
+		return PlayerStatus.ACTIVE;
+	    else
+		return PlayerStatus.WAITING;
+
+	} else if (new State("game", "feeding", "wait").equals(gameState)) {
+	    if (idle.equals(state))
+		return PlayerStatus.DONE;
+	    else if (new State("player", "feed", "waiting").equals(state))
+		return PlayerStatus.ACTIVE;
+	    else
+		return PlayerStatus.WAITING;
+	}
+
+	return null;
+    }
+
     private void dumpView(Automats<Evolutions> automats, PlayerId forPlayer) throws JsonProcessingException {
-	Game g = automats.instances().get(0).get(Evolutions::getGame);
-	List<Player> players = automats.instances().stream().skip(1).map(e -> e.get(Evolutions::getPlayer)).collect(Collectors.toList());
+	Instance<Evolutions> instance = automats.instances().get(0);
+	Game g = instance.get(Evolutions::getGame);
+	State gameState = instance.getState();
+	List<PlayerAndStatus> players = automats.instances().stream().skip(1)
+	        .map(e -> new PlayerAndStatus(e.get(Evolutions::getPlayer), asStatus(gameState, e.getState())))
+	        .collect(Collectors.toList());
 
 	PlayerViewBuilder builder = new PlayerViewBuilder(g, players);
 

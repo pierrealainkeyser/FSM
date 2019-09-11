@@ -21,7 +21,7 @@ public class PlayerViewBuilder {
 
     private final Map<PlayerId, PlayerView> views;
 
-    public PlayerViewBuilder(Game game, List<Player> privates) {
+    public PlayerViewBuilder(Game game, List<PlayerAndStatus> privates) {
 	Map<PlayerId, PlayerView> views = new LinkedHashMap<>();
 
 	List<PlayerDualView> duals = new ArrayList<>();
@@ -29,32 +29,34 @@ public class PlayerViewBuilder {
 	int size = privates.size();
 	for (int i = 0; i < size; ++i) {
 	    Player publicPlayer = game.getPlayer(i);
-	    Player privatePlayer = privates.get(i);
+	    Player privatePlayer = privates.get(i).getPlayer();
 	    PlayerDualView dual = new PlayerDualView(privatePlayer.asView(publicPlayer, false),
 	            privatePlayer.asView(publicPlayer, true));
 	    duals.add(dual);
 	}
 
 	for (int i = 0; i < size; ++i) {
-	    Player privatePlayer = privates.get(i);
+	    PlayerAndStatus pas = privates.get(i);
+	    Player privatePlayer = pas.getPlayer();
 	    PlayerSpeciesView currentView = duals.get(i).privateView;
 
 	    List<OtherPlayerView> players = createPublic(privates, duals, i);
 
 	    views.put(privatePlayer.getIndex(),
-	            new PlayerView(privatePlayer.getIndex(), players, currentView, privatePlayer.handsAsView()));
+	            new PlayerView(currentView, pas.getStatus(), game.getFoodPool(), players, privatePlayer.handsAsView()));
 
 	}
 
 	this.views = Collections.unmodifiableMap(views);
     }
 
-    private List<OtherPlayerView> createPublic(List<Player> privates, List<PlayerDualView> duals, int skip) {
+    private List<OtherPlayerView> createPublic(List<PlayerAndStatus> privates, List<PlayerDualView> duals, int skip) {
 	int size = duals.size();
 	List<OtherPlayerView> privatesView = new ArrayList<>(size - 1);
 	for (int j = 0; j < size; ++j) {
 	    if (j != skip) {
-		privatesView.add(new OtherPlayerView(privates.get(j).getHandSize(), duals.get(j).publicView));
+		PlayerAndStatus pas = privates.get(j);
+		privatesView.add(new OtherPlayerView(duals.get(j).publicView, pas.getStatus(), pas.getPlayer().getHandSize()));
 	    }
 	}
 	return privatesView;

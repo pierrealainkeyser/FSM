@@ -1,5 +1,6 @@
 package fr.keyser.evolutions;
 
+import java.util.Collection;
 import java.util.function.Predicate;
 
 public final class Evolutions {
@@ -22,6 +23,10 @@ public final class Evolutions {
 
     public Evolutions playFood(CardId foodPlayed) {
 	return new Evolutions(null, player.playFood(foodPlayed));
+    }
+
+    public Evolutions cleanEndTurn() {
+	return new Evolutions(game.cleanEndTurn());
     }
 
     public Evolutions enterFeedingPhase() {
@@ -64,7 +69,10 @@ public final class Evolutions {
 	    return player.toString();
 	else
 	    return "";
+    }
 
+    public Evolutions discard(Collection<CardId> collection) {
+	return new Evolutions(game.discard(collection));
     }
 
     public Evolutions nextTurn() {

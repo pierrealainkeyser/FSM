@@ -1,5 +1,6 @@
 package fr.keyser.evolutions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,6 +16,14 @@ public final class EvolutionInstructions {
     private Set<CardId> size = new HashSet<>();
 
     private Map<Integer, CardId> traits = new HashMap<>();
+
+    public Collection<CardId> discarded() {
+	Set<CardId> all = new HashSet<>();
+	all.addAll(newSpecies);
+	all.addAll(population);
+	all.addAll(size);
+	return all;
+    }
 
     public int getIndex() {
 	return index;

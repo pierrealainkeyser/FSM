@@ -2,10 +2,12 @@ package fr.keyser.evolutions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -135,7 +137,6 @@ public class Game {
 	if (decks.size() >= ammount) {
 	    drawn.addAll(decks.subList(0, ammount));
 	    remaining.addAll(decks.subList(ammount, decks.size()));
-
 	} else {
 	    drawn.addAll(decks);
 	    List<CardId> newDeck = new ArrayList<>(discard);
@@ -157,6 +158,18 @@ public class Game {
 
     public Game nextPlayer() {
 	return new Game((activePlayer + 1) % players.size(), players, firstPlayer, foodPool, decks, discard, done);
+    }
+
+    private Game nextFirstPlayer() {
+	int nfirst = (firstPlayer + 1) % players.size();
+	return new Game(nfirst, players, nfirst, foodPool, decks, discard, done);
+    }
+
+    public Game discard(Collection<CardId> collection) {
+	List<CardId> discard = new ArrayList<>(this.discard);
+	discard.addAll(collection);
+	return new Game(activePlayer, players, firstPlayer, foodPool, decks, discard, done);
+
     }
 
     public Game drawNewTurn() {
@@ -182,16 +195,35 @@ public class Game {
     }
 
     public Game transfertFat() {
-	return players(players.stream().map(Player::transfertFat)
+	return operationPlayers(Player::transfertFat);
+    }
+
+    private Game operationPlayers(UnaryOperator<Player> mapper) {
+	return players(players.stream().map(mapper)
 	        .collect(Collectors.toList()));
+    }
+
+    public Game cleanEndTurn() {
+
+	Game current = operationPlayers(Player::doScore);
+	List<Player> newPlayers = new ArrayList<>();
+	for (Player p : current.players) {
+	    int toDraw = p.getExtinctionCardsToDraw();
+	    if (toDraw > 0) {
+		List<CardId> draws = new ArrayList<>(toDraw);
+		current = current.draw(toDraw, draws::addAll);
+		newPlayers.add(p.clearExtinctsSpecies(draws));
+	    } else
+		newPlayers.add(p);
+	}
+	return current.players(newPlayers).nextFirstPlayer();
     }
 
     public Game updateFertile() {
 	if (foodPool <= 0)
 	    return this;
 
-	return players(players.stream().map(Player::updateFertile)
-	        .collect(Collectors.toList()));
+	return operationPlayers(Player::updateFertile);
     }
 
     public Game feedLongNeck() {
@@ -267,7 +299,7 @@ public class Game {
 	return players(players);
     }
 
-    public Game players(List<Player> players) {
+    private Game players(List<Player> players) {
 	return new Game(activePlayer, players, firstPlayer, foodPool, decks, discard, done);
     }
 
