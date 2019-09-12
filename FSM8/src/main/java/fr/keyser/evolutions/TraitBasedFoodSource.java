@@ -11,6 +11,7 @@ public final class TraitBasedFoodSource implements FoodSource {
 	this.cardId = cardId;
     }
 
+    @Override
     public int consume(int quantity) {
 	return foodSource.consume(quantity);
     }
@@ -19,7 +20,13 @@ public final class TraitBasedFoodSource implements FoodSource {
 	return cardId;
     }
 
+    @Override
     public FoodType getFoodType() {
 	return foodSource.getFoodType();
+    }
+
+    @Override
+    public FoodOrigin getOrigin() {
+	return foodSource.getOrigin();
     }
 }

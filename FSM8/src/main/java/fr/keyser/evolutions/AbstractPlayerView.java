@@ -8,7 +8,10 @@ public abstract class AbstractPlayerView {
 
     private final PlayerStatus status;
 
-    protected AbstractPlayerView(PlayerSpeciesView species, PlayerStatus status) {
+    private final int index;
+
+    protected AbstractPlayerView(int index, PlayerSpeciesView species, PlayerStatus status) {
+	this.index = index;
 	this.species = species;
 	this.status = status;
     }
@@ -19,5 +22,9 @@ public abstract class AbstractPlayerView {
 
     public final PlayerStatus getStatus() {
 	return status;
+    }
+
+    public final int getIndex() {
+	return index;
     }
 }

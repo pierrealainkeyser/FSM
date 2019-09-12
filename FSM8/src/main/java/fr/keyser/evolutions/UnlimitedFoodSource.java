@@ -21,4 +21,9 @@ public final class UnlimitedFoodSource implements FoodSource {
 	return foodType;
     }
 
+    @Override
+    public FoodOrigin getOrigin() {
+	return FoodOrigin.RESERVE;
+    }
+
 }

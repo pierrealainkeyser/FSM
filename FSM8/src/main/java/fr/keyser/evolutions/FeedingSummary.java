@@ -1,29 +1,29 @@
 package fr.keyser.evolutions;
 
-import java.util.List;
+import java.util.Set;
 
 public final class FeedingSummary {
     private final int food;
 
-    private final List<FoodSource> sources;
+    private final Set<FoodOrigin> origins;
 
     private final SpeciesId species;
 
-    public FeedingSummary(SpeciesId species, int food, List<FoodSource> sources) {
+    public FeedingSummary(SpeciesId species, int food, Set<FoodOrigin> origins) {
 	this.species = species;
 	this.food = food;
-	this.sources = sources;
+	this.origins = origins;
     }
 
     public int getFood() {
 	return food;
     }
 
-    public List<FoodSource> getSources() {
-	return sources;
-    }
-
     public SpeciesId getSpecies() {
 	return species;
+    }
+
+    public final Set<FoodOrigin> getOrigins() {
+	return origins;
     }
 }

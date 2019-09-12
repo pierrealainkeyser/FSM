@@ -102,9 +102,12 @@ public class Game {
     public boolean isActiveIsFirst() {
 	return firstPlayer == activePlayer;
     }
+    
+    public CarnivorousContext carnivorousContext() {
+	return new CarnivorousContext(scavengersCtx(), targets().collect(Collectors.toList()));
+    }
 
     private CarnivorousContext carnivorousContext(Species target) {
-
 	Player player = getPlayer(target);
 	return new CarnivorousContext(scavengersCtx(), Arrays.asList(player.attackForSpecies(target)));
     }
@@ -331,5 +334,9 @@ public class Game {
 
     public int getActivePlayer() {
 	return activePlayer;
+    }
+
+    public int getFirstPlayer() {
+        return firstPlayer;
     }
 }

@@ -17,7 +17,7 @@ public final class TargetAttackContext {
     }
 
     public TargetAttackAnalysis analyse(Species carnivorous) {
-	return new TargetAttackAnalysis(carnivorous, target, computeViolations(carnivorous));
+	return new TargetAttackAnalysis(carnivorous, target.getUid(), computeViolations(carnivorous));
     }
 
     private List<AttackViolation> computeViolations(Species carnivorous) {
@@ -45,5 +45,9 @@ public final class TargetAttackContext {
 
     public boolean isSelf(Species other) {
 	return target.isSame(other);
+    }
+
+    public final Species getTarget() {
+        return target;
     }
 }

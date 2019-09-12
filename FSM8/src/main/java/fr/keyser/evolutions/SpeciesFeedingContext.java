@@ -3,6 +3,7 @@ package fr.keyser.evolutions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class SpeciesFeedingContext {
 
@@ -29,11 +30,11 @@ public final class SpeciesFeedingContext {
 	this.species = species;
     }
 
-    public SpeciesFeedingContext duplicate(FeedingActionContext context) {
+    SpeciesFeedingContext duplicate(FeedingActionContext context) {
 	return new SpeciesFeedingContext(species, capacity, feed, context, new ArrayList<>(sources));
     }
 
-    public void feed(int quantity, FoodSource source) {
+    void feed(int quantity, FoodSource source) {
 	int remaining = Math.max(0, capacity - feed);
 
 	if (FoodType.PLANT == source.getFoodType()) {
@@ -84,7 +85,9 @@ public final class SpeciesFeedingContext {
     }
 
     public FeedingSummary summary() {
-	return new FeedingSummary(species.getUid(), feed, sources);
+	return new FeedingSummary(species.getUid(), feed, sources.stream()
+	        .map(FoodSource::getOrigin)
+	        .collect(Collectors.toSet()));
     }
 
 }

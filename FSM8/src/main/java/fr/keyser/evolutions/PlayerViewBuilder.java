@@ -21,7 +21,7 @@ public class PlayerViewBuilder {
 
     private final Map<PlayerId, PlayerView> views;
 
-    public PlayerViewBuilder(Game game, List<PlayerAndStatus> privates) {
+    public PlayerViewBuilder(GamePhase phase, Game game, List<PlayerAndStatus> privates) {
 	Map<PlayerId, PlayerView> views = new LinkedHashMap<>();
 
 	List<PlayerDualView> duals = new ArrayList<>();
@@ -43,7 +43,8 @@ public class PlayerViewBuilder {
 	    List<OtherPlayerView> players = createPublic(privates, duals, i);
 
 	    views.put(privatePlayer.getIndex(),
-	            new PlayerView(currentView, pas.getStatus(), game.getFoodPool(), players, privatePlayer.handsAsView()));
+	            new PlayerView(i, currentView, phase, game.getFirstPlayer(), pas.getStatus(), game.getFoodPool(), players,
+	                    privatePlayer.handsAsView()));
 
 	}
 
@@ -56,7 +57,7 @@ public class PlayerViewBuilder {
 	for (int j = 0; j < size; ++j) {
 	    if (j != skip) {
 		PlayerAndStatus pas = privates.get(j);
-		privatesView.add(new OtherPlayerView(duals.get(j).publicView, pas.getStatus(), pas.getPlayer().getHandSize()));
+		privatesView.add(new OtherPlayerView(j, duals.get(j).publicView, pas.getStatus(), pas.getPlayer().getHandSize()));
 	    }
 	}
 	return privatesView;

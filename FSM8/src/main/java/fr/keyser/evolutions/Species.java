@@ -80,16 +80,18 @@ public final class Species {
 	return new Species(cardResolver, uid, index, population - summary.getPopulationLoss(), size, foodLevel, fatLevel, traits);
     }
 
-    List<AttackSummary> attacksSummaries(Player player, CarnivorousContext ctx) {
-	return attacksSummaries(player, ctx.getTargetAttackContexts());
-    }
-
-    public List<AttackSummary> attacksSummaries(Player player, List<TargetAttackContext> targetAttackContexts) {
-	return targetAttackContexts.stream()
+    public List<AttackSummary> attacksSummaries(Player player, CarnivorousContext ctx) {
+	return ctx.getTargetAttackContexts().stream()
 	        .filter(a -> !a.isSelf(this)) // can't attack self
 	        .map(a -> summariseAttack(player, a))
 	        .collect(Collectors.toList());
+    }
 
+    public List<FeedingAttackOperation> feedingAttackOperations(Player player, CarnivorousContext ctx) {
+	return ctx.getTargetAttackContexts().stream()
+	        .filter(a -> !a.isSelf(this)) // can't attack self
+	        .map(a -> ctx.summary(this, a.getTarget(), summariseAttack(player, a)))
+	        .collect(Collectors.toList());
     }
 
     public PopulationLossSummary checkPopulation() {
@@ -217,7 +219,7 @@ public final class Species {
 	if (analysis.isPossible()) {
 	    CostAnalysis evitableDamage = null;
 	    PopulationLossSummary attackerDamage = null;
-	    Species target = analysis.getTarget();
+	    Species target = ac.getTarget();
 	    boolean horned = target.hasTrait(Trait.HORNED);
 	    if (horned) {
 		attackerDamage = populationLoss(-1);

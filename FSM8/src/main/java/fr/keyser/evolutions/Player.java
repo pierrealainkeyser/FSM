@@ -90,6 +90,24 @@ public final class Player {
 	return new Player(cardResolver, index, foodEated + scored, newSpecies, foodPlayed, inHands);
     }
 
+    public List<FeedingOperation> computeFeedingOperations(Game game) {
+	CarnivorousContext carnivorous = game.carnivorousContext();
+
+	return species.values().stream().flatMap(s -> {
+	    if (s.hunger() != HungerStatus.FULL) {
+		if (s.hasTrait(Trait.CARNIVOROROUS)) {
+		    return s.feedingAttackOperations(this, carnivorous).stream();
+		} else if (game.getFoodPool() > 0) {
+		    FeedingActionContext fac = new FeedingActionContext(game);
+		    fac.get(s).feedWateringHole(new WateringHole(game.getFoodPool()));
+		    return Stream.of(new FeedingWateringHoleOperation(s.getUid(), fac.summary()));
+		}
+	    }
+
+	    return Stream.empty();
+	}).collect(Collectors.toList());
+    }
+
     public Player draws(List<CardId> cards) {
 
 	List<CardId> inHands = new ArrayList<>(this.inHands);

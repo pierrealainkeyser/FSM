@@ -21,6 +21,7 @@ import fr.keyser.evolutions.CardId;
 import fr.keyser.evolutions.EvolutionInstructions;
 import fr.keyser.evolutions.Evolutions;
 import fr.keyser.evolutions.Game;
+import fr.keyser.evolutions.GamePhase;
 import fr.keyser.evolutions.MapCardResolver;
 import fr.keyser.evolutions.Player;
 import fr.keyser.evolutions.PlayerAndStatus;
@@ -380,17 +381,31 @@ class TestAutomatsBuilder {
 	System.out.println("-------------");
     }
 
-    private static PlayerStatus asStatus(State gameState, State state) {
+    private static GamePhase asPhase(State gameState) {
+	if (new State("game", "filling", "wait").equals(gameState))
+	    return GamePhase.FILL;
+
+	if (new State("game", "evolutions", "wait").equals(gameState))
+	    return GamePhase.EVOLVE;
+
+	if (new State("game", "feeding", "wait").equals(gameState))
+	    return GamePhase.FEED;
+
+	return GamePhase.ENDED;
+
+    }
+
+    private static PlayerStatus asStatus(GamePhase phase, State state) {
 
 	State idle = new State("player", "idle");
 
-	if (new State("game", "filling", "wait").equals(gameState)) {
+	if (GamePhase.FILL == phase) {
 	    if (idle.equals(state))
 		return PlayerStatus.DONE;
 	    else
 		return PlayerStatus.ACTIVE;
 
-	} else if (new State("game", "evolutions", "wait").equals(gameState)) {
+	} else if (GamePhase.EVOLVE == phase) {
 
 	    if (new State("player", "evolve", "joining").equals(state))
 		return PlayerStatus.DONE;
@@ -399,7 +414,7 @@ class TestAutomatsBuilder {
 	    else
 		return PlayerStatus.WAITING;
 
-	} else if (new State("game", "feeding", "wait").equals(gameState)) {
+	} else if (GamePhase.FEED == phase) {
 	    if (idle.equals(state))
 		return PlayerStatus.DONE;
 	    else if (new State("player", "feed", "waiting").equals(state))
@@ -414,12 +429,13 @@ class TestAutomatsBuilder {
     private void dumpView(Automats<Evolutions> automats, PlayerId forPlayer) throws JsonProcessingException {
 	Instance<Evolutions> instance = automats.instances().get(0);
 	Game g = instance.get(Evolutions::getGame);
-	State gameState = instance.getState();
+	GamePhase gamePhase = asPhase(instance.getState());
+
 	List<PlayerAndStatus> players = automats.instances().stream().skip(1)
-	        .map(e -> new PlayerAndStatus(e.get(Evolutions::getPlayer), asStatus(gameState, e.getState())))
+	        .map(e -> new PlayerAndStatus(e.get(Evolutions::getPlayer), asStatus(gamePhase, e.getState())))
 	        .collect(Collectors.toList());
 
-	PlayerViewBuilder builder = new PlayerViewBuilder(g, players);
+	PlayerViewBuilder builder = new PlayerViewBuilder(gamePhase, g, players);
 
 	SimpleModule sm = new SimpleModule();
 	sm.addSerializer(PlayerId.class, new StdScalarSerializer<PlayerId>(PlayerId.class) {

@@ -25,4 +25,9 @@ public final class WateringHole implements FoodSource {
     public FoodType getFoodType() {
 	return FoodType.PLANT;
     }
+
+    @Override
+    public FoodOrigin getOrigin() {
+	return FoodOrigin.WATERING_HOLE;
+    }
 }

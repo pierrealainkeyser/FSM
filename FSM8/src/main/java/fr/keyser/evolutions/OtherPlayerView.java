@@ -4,8 +4,8 @@ public class OtherPlayerView extends AbstractPlayerView {
 
     private final int cardsInHand;
 
-    public OtherPlayerView(PlayerSpeciesView species, PlayerStatus status, int cardsInHand) {
-	super(species, status);
+    public OtherPlayerView(int index, PlayerSpeciesView species, PlayerStatus status, int cardsInHand) {
+	super(index, species, status);
 	this.cardsInHand = cardsInHand;
 
     }

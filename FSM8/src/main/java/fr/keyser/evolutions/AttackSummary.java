@@ -1,24 +1,20 @@
 package fr.keyser.evolutions;
 
-public final class AttackSummary {
+public class AttackSummary {
     private final TargetAttackAnalysis analysis;
 
-    private final OnAttackPopulationLoss results;
+    private final OnAttackPopulationLoss populationLoss;
 
-    public AttackSummary(TargetAttackAnalysis analysis, OnAttackPopulationLoss results) {
+    public AttackSummary(TargetAttackAnalysis analysis, OnAttackPopulationLoss populationLoss) {
 	this.analysis = analysis;
-	this.results = results;
+	this.populationLoss = populationLoss;
     }
 
-    public TargetAttackAnalysis getAnalysis() {
+    public final TargetAttackAnalysis getAnalysis() {
 	return analysis;
     }
 
-    public OnAttackPopulationLoss getPopulationLoss() {
-	return results;
-    }
-
-    public boolean isPossible() {
-	return results != null;
+    public final OnAttackPopulationLoss getPopulationLoss() {
+	return populationLoss;
     }
 }

@@ -7,17 +7,17 @@ public final class TargetAttackAnalysis {
 
     private final CostAnalysis costs;
 
-    private final Species target;
+    private final SpeciesId target;
 
     private final List<AttackViolation> violations;
 
-    private TargetAttackAnalysis(Species target, List<AttackViolation> violations, CostAnalysis costs) {
+    private TargetAttackAnalysis(SpeciesId target, List<AttackViolation> violations, CostAnalysis costs) {
 	this.target = target;
 	this.violations = violations;
 	this.costs = costs;
     }
 
-    public TargetAttackAnalysis(Species carnivorous, Species target, List<AttackViolation> violations) {
+    public TargetAttackAnalysis(Species carnivorous, SpeciesId target, List<AttackViolation> violations) {
 	this(target, violations, CostAnalysis.analysis(carnivorous, violations));
     }
 
@@ -32,7 +32,7 @@ public final class TargetAttackAnalysis {
 	return costs.getCosts();
     }
 
-    public Species getTarget() {
+    public SpeciesId getTarget() {
 	return target;
     }
 
