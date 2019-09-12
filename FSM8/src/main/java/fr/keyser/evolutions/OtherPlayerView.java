@@ -1,6 +1,6 @@
 package fr.keyser.evolutions;
 
-public class OtherPlayerView extends AbstractPlayerView {
+public final class OtherPlayerView extends AbstractPlayerView {
 
     private final int cardsInHand;
 

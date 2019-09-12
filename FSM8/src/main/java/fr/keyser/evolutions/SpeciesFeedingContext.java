@@ -3,7 +3,6 @@ package fr.keyser.evolutions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class SpeciesFeedingContext {
 
@@ -81,13 +80,15 @@ public final class SpeciesFeedingContext {
     }
 
     public void reduceCapacity(PopulationLossSummary loss) {
-	this.capacity = Math.max(0, capacity - loss.getPopulationLoss());
+	this.capacity = Math.max(0, capacity + loss.getDelta());
+    }
+
+    public boolean hasEated() {
+	return feed > 0;
     }
 
     public FeedingSummary summary() {
-	return new FeedingSummary(species.getUid(), feed, sources.stream()
-	        .map(FoodSource::getOrigin)
-	        .collect(Collectors.toSet()));
+	return new FeedingSummary(species.getUid(), feed);
     }
 
 }

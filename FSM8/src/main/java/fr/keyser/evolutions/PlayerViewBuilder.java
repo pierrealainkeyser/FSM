@@ -42,9 +42,15 @@ public class PlayerViewBuilder {
 
 	    List<OtherPlayerView> players = createPublic(privates, duals, i);
 
+	    PlayerStatus status = pas.getStatus();
+	    List<FeedingOperation> operations = null;
+	    if (GamePhase.FEED == phase && PlayerStatus.ACTIVE == status) {
+		operations = privatePlayer.computeFeedingOperations(game);
+	    }
+
 	    views.put(privatePlayer.getIndex(),
-	            new PlayerView(i, currentView, phase, game.getFirstPlayer(), pas.getStatus(), game.getFoodPool(), players,
-	                    privatePlayer.handsAsView()));
+	            new PlayerView(i, currentView, phase, game.getFirstPlayer(), status, game.getFoodPool(), players,
+	                    privatePlayer.handsAsView(), operations));
 
 	}
 

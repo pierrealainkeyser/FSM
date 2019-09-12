@@ -77,7 +77,7 @@ public final class Species {
 	if (summary.isExtinct())
 	    return null;
 
-	return new Species(cardResolver, uid, index, population - summary.getPopulationLoss(), size, foodLevel, fatLevel, traits);
+	return new Species(cardResolver, uid, index, population - summary.getDelta(), size, foodLevel, fatLevel, traits);
     }
 
     public List<AttackSummary> attacksSummaries(Player player, CarnivorousContext ctx) {

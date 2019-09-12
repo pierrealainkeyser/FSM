@@ -45,6 +45,7 @@ public final class FeedingActionContext {
 
     public List<FeedingSummary> summary() {
 	return feedingContext.values().stream()
+	        .filter(SpeciesFeedingContext::hasEated)
 	        .map(SpeciesFeedingContext::summary)
 	        .collect(Collectors.toList());
     }

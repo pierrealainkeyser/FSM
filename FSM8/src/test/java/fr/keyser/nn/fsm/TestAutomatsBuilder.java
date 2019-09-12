@@ -2,6 +2,7 @@ package fr.keyser.nn.fsm;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import fr.keyser.evolutions.CardId;
 import fr.keyser.evolutions.EvolutionInstructions;
 import fr.keyser.evolutions.Evolutions;
+import fr.keyser.evolutions.FeedingOperation;
 import fr.keyser.evolutions.Game;
 import fr.keyser.evolutions.GamePhase;
 import fr.keyser.evolutions.MapCardResolver;
@@ -313,9 +315,9 @@ class TestAutomatsBuilder {
 	CardId fertileId = resolver.card(Trait.FERTILE, 5);
 	CardId carnivorousId = resolver.card(Trait.CARNIVOROROUS, 3);
 	resolver.card(Trait.PACK_HUNTER, 2);
-	resolver.card(Trait.INTELIGGENT, 4);
+	CardId collaborativeId = resolver.card(Trait.COLLABORATIVE, 4);
 	CardId climberId = resolver.card(Trait.CLIMBER, 5);
-	CardId collaborativeId = resolver.card(Trait.COLLABORATIVE, -2);
+	CardId intelligentId = resolver.card(Trait.INTELIGGENT, -2);
 	resolver.card(Trait.DEFENSIVE_HORDE, 6);
 	resolver.card(Trait.LONG_NECK, -2);
 	resolver.card(Trait.EMBUSCADE, 2);
@@ -334,7 +336,7 @@ class TestAutomatsBuilder {
 	dump(automats);
 	dumpView(automats, new PlayerId(1));
 
-	automats.submit(EventMsg.unicast("playCard", player3, collaborativeId));
+	automats.submit(EventMsg.unicast("playCard", player3, intelligentId));
 
 	EvolutionInstructions evolveP1 = new EvolutionInstructions();
 	evolveP1.setIndex(0);
@@ -350,6 +352,7 @@ class TestAutomatsBuilder {
 	EvolutionInstructions evolveP2 = new EvolutionInstructions();
 	evolveP2.setIndex(-1);
 	evolveP2.getNewSpecies().add(climberId);
+	evolveP2.getTraits().put(0, collaborativeId);
 
 	automats.submit(EventMsg.unicast("evolve", player2, evolveP2));
 	automats.submit(EventMsg.unicast("done", player2));
@@ -363,6 +366,8 @@ class TestAutomatsBuilder {
 	dump(automats);
 
 	// feed
+	dumpView(automats, new PlayerId(1));
+
 	automats.submit(EventMsg.unicast("omnivorous", player2, 0));
 
 	dump(automats);
@@ -437,6 +442,13 @@ class TestAutomatsBuilder {
 
 	PlayerViewBuilder builder = new PlayerViewBuilder(gamePhase, g, players);
 
+	ObjectWriter ow = createWriter();
+
+	PlayerView view = builder.getViews().get(forPlayer);
+	System.out.println(ow.writeValueAsString(view));
+    }
+
+    private ObjectWriter createWriter() {
 	SimpleModule sm = new SimpleModule();
 	sm.addSerializer(PlayerId.class, new StdScalarSerializer<PlayerId>(PlayerId.class) {
 
@@ -466,9 +478,54 @@ class TestAutomatsBuilder {
 	});
 
 	ObjectWriter ow = new ObjectMapper().registerModule(sm).writer().withDefaultPrettyPrinter();
+	return ow;
+    }
 
-	PlayerView view = builder.getViews().get(forPlayer);
-	System.out.println(ow.writeValueAsString(view));
+    @Test
+    void testCarnivorous() throws JsonProcessingException {
+	MapCardResolver resolver = new MapCardResolver();
+	CardId carnivorousId = resolver.card(Trait.CARNIVOROROUS, 3);
+	CardId moreId = resolver.card(Trait.CARNIVOROROUS, 3);
+	CardId scavengerId = resolver.card(Trait.SCAVENGER, 3);
+	CardId hornedId = resolver.card(Trait.HORNED, 3);
+	CardId cimberId = resolver.card(Trait.CLIMBER, 3);
+	CardId intelligentId = resolver.card(Trait.INTELIGGENT, 3);
+	CardId intelligent2Id = resolver.card(Trait.INTELIGGENT, 3);
+
+	Game g = new Game(4, resolver, 0, new ArrayList<>(resolver.ids()));
+
+	Player carnivorous = g.getPlayer(0)
+	        .draws(Arrays.asList(carnivorousId, moreId, intelligentId, intelligent2Id))
+	        .evolve(createWithTraits(0, carnivorousId, moreId))
+	        .evolve(createWithTraits(1, intelligentId));
+	g = g.mergePlayer(carnivorous);
+
+	Player horned = g.getPlayer(1)
+	        .draws(Arrays.asList(hornedId))
+	        .evolve(createWithTraits(0, hornedId));
+	g = g.mergePlayer(horned);
+
+	Player scavenger = g.getPlayer(2)
+	        .draws(Arrays.asList(scavengerId))
+	        .evolve(createWithTraits(0, scavengerId));
+	g = g.mergePlayer(scavenger);
+
+	Player climber = g.getPlayer(3)
+	        .draws(Arrays.asList(cimberId))
+	        .evolve(createWithTraits(0, cimberId));
+	g = g.mergePlayer(climber);
+
+	List<FeedingOperation> opts = carnivorous.computeFeedingOperations(g);
+	System.out.println(createWriter().writeValueAsString(opts));
+
+    }
+
+    private EvolutionInstructions createWithTraits(int index, CardId carnivorousId, CardId... size) {
+	EvolutionInstructions ei = new EvolutionInstructions();
+	ei.setIndex(0);
+	ei.getSize().addAll(Arrays.asList(size));
+	ei.getTraits().put(index, carnivorousId);
+	return ei;
     }
 
     @Test

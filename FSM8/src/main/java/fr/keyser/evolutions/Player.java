@@ -97,10 +97,13 @@ public final class Player {
 	    if (s.hunger() != HungerStatus.FULL) {
 		if (s.hasTrait(Trait.CARNIVOROROUS)) {
 		    return s.feedingAttackOperations(this, carnivorous).stream();
-		} else if (game.getFoodPool() > 0) {
-		    FeedingActionContext fac = new FeedingActionContext(game);
-		    fac.get(s).feedWateringHole(new WateringHole(game.getFoodPool()));
-		    return Stream.of(new FeedingWateringHoleOperation(s.getUid(), fac.summary()));
+		} else {
+		    int foodPool = game.getFoodPool();
+		    if (foodPool > 0) {
+		        FeedingActionContext fac = new FeedingActionContext(game);
+		        fac.get(s).feedWateringHole(new WateringHole(foodPool));
+		        return Stream.of(new FeedingWateringHoleOperation(s.getUid(), fac.summary()));
+		    }
 		}
 	    }
 
@@ -171,7 +174,7 @@ public final class Player {
 	return species.values().stream()
 	        .map(Species::checkPopulation)
 	        .filter(PopulationLossSummary::isExtinct)
-	        .map(PopulationLossSummary::getPopulationLoss)
+	        .map(PopulationLossSummary::getDelta)
 	        .reduce(0, (l, r) -> l + r);
     }
 

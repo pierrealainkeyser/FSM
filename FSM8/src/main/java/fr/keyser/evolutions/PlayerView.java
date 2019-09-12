@@ -2,7 +2,7 @@ package fr.keyser.evolutions;
 
 import java.util.List;
 
-public class PlayerView extends AbstractPlayerView {
+public final class PlayerView extends AbstractPlayerView {
 
     private final List<CardView> inHands;
 
@@ -14,14 +14,17 @@ public class PlayerView extends AbstractPlayerView {
 
     private final int firstPlayer;
 
+    private final List<FeedingOperation> operations;
+
     public PlayerView(int index, PlayerSpeciesView species, GamePhase phase, int firstPlayer, PlayerStatus status, int foodPool,
-            List<OtherPlayerView> players, List<CardView> inHands) {
+            List<OtherPlayerView> players, List<CardView> inHands, List<FeedingOperation> operations) {
 	super(index, species, status);
 	this.foodPool = foodPool;
 	this.firstPlayer = firstPlayer;
 	this.players = players;
 	this.inHands = inHands;
 	this.phase = phase;
+	this.operations = operations;
     }
 
     public List<CardView> getInHands() {
@@ -42,6 +45,10 @@ public class PlayerView extends AbstractPlayerView {
 
     public int getFirstPlayer() {
 	return firstPlayer;
+    }
+
+    public List<FeedingOperation> getOperations() {
+        return operations;
     }
 
 }
