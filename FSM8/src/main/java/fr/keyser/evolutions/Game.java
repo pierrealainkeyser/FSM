@@ -243,7 +243,7 @@ public class Game {
 	return players(feedAll(longNeck));
     }
 
-    public Game feedOmnivorous(SpeciesId id) {
+    public Game feedWateringHole(SpeciesId id) {
 
 	FeedingActionContext ctx = new FeedingActionContext(this);
 	WateringHole hole = new WateringHole(foodPool);

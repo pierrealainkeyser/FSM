@@ -45,8 +45,8 @@ public final class Evolutions {
 	return player;
     }
 
-    public Evolutions feedOmnivorous(SpeciesId id) {
-	return new Evolutions(game.feedOmnivorous(id));
+    public Evolutions feedWateringHole(SpeciesId id) {
+	return new Evolutions(game.feedWateringHole(id));
     }
 
     public Evolutions mergePlayer(Player player) {
