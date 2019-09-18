@@ -104,6 +104,14 @@ public class EvolutionsAutomatsBuilder {
 	return e.feedWateringHole((SpeciesId) evt.getPayload());
     }
 
+    private static Evolutions feedCarnivorous(Evolutions e, EventMsg evt) {
+	return e.feedCarnivorous((AttackInstructions) evt.getPayload());
+    }
+
+    private static Evolutions feedIntelligent(Evolutions e, EventMsg evt) {
+	return e.feedIntelligent((IntelligentInstructions) evt.getPayload());
+    }
+
     private static void forwardDone(Instance<Evolutions> i, EventMsg evt) {
 	i.getParent().unicast(DONE_EVENT);
     }
@@ -118,8 +126,17 @@ public class EvolutionsAutomatsBuilder {
     }
 
     private static void forwardWateringHole(Instance<Evolutions> i, EventMsg evt) {
+	int payload = (Integer) evt.getPayload();
 	i.getParent().unicast(WATERING_HOLE_EVENT,
-	        i.get(e -> new SpeciesId(e.getPlayer().getIndex(), (Integer) evt.getPayload())));
+	        i.get(e -> new SpeciesId(e.getPlayer().getIndex(), payload)));
+    }
+
+    private static void forwardCarnivorous(Instance<Evolutions> i, EventMsg evt) {
+	i.getParent().unicast(CARNIVOROUS_EVENT, evt.getPayload());
+    }
+
+    private static void forwardIntelligent(Instance<Evolutions> i, EventMsg evt) {
+	i.getParent().unicast(INTELLIGENT_EVENT, evt.getPayload());
     }
 
     private final static Evolutions mergePlayer(Evolutions e, Object o) {
@@ -285,7 +302,12 @@ public class EvolutionsAutomatsBuilder {
 	        .callbackEntry(EvolutionsAutomatsBuilder::syncPlayers);
 
 	carnivorous.to(checkDone);
+	carnivorous.updateEntry(EvolutionsAutomatsBuilder::feedCarnivorous)
+	        .callbackEntry(EvolutionsAutomatsBuilder::syncPlayers);
+
 	intelligent.to(checkDone);
+	intelligent.updateEntry(EvolutionsAutomatsBuilder::feedIntelligent)
+	        .callbackEntry(EvolutionsAutomatsBuilder::syncPlayers);
 
 	checkDone.when(CHOICE_ALL_IDLE, endOfTurn)
 	        .otherwise(delay);
@@ -358,16 +380,17 @@ public class EvolutionsAutomatsBuilder {
 	initial.when(mayEatChoice, idle)
 	        .otherwise(player);
 
-	carnivorous.to(-1, idle);
-	wateringHole.to(-1, idle);
-	intelligent.to(-1, idle);
-
-	wateringHole.callbackEntry(EvolutionsAutomatsBuilder::forwardWateringHole);
-
 	waiting.event(CARNIVOROUS_EVENT, carnivorous);
 	waiting.event(WATERING_HOLE_EVENT, wateringHole);
 	waiting.event(INTELLIGENT_EVENT, intelligent);
 	waiting.event(DONE_EVENT, done);
+
+	carnivorous.to(-1, idle)
+	        .callbackEntry(EvolutionsAutomatsBuilder::forwardCarnivorous);
+	wateringHole.to(-1, idle)
+	        .callbackEntry(EvolutionsAutomatsBuilder::forwardWateringHole);
+	intelligent.to(-1, idle)
+	        .callbackEntry(EvolutionsAutomatsBuilder::forwardIntelligent);
 
 	done.callbackEntry(EvolutionsAutomatsBuilder::forwardDone);
 

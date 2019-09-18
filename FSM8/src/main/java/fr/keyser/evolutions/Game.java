@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -64,11 +66,27 @@ public class Game {
 	return this;
     }
 
-    public Game feedCarnivorous(SpeciesId attackerID, SpeciesId victimId, boolean preventAttack) {
-	Game current = this;
+    public Game feedCarnivorous(AttackInstructions instruction) {
 
-	Species attacker = current.getSpecies(attackerID);
-	Player player = current.getPlayer(attackerID);
+	SpeciesId attackerId = instruction.getAttacker();
+	SpeciesId victimId = instruction.getVictim();
+
+	boolean preventAttack = !instruction.getDamageReduction().isEmpty();
+
+	Species attacker = getSpecies(attackerId);
+
+	// pay cost
+	Player player = getPlayer(attackerId)
+	        .discard(instruction);
+
+	// cost to pay
+	Set<CardId> discarded = new HashSet<>();
+	discarded.addAll(instruction.getDamageReduction());
+	discarded.addAll(instruction.getTraitAvoidances());
+
+	Game current = mergePlayer(player)
+	        .discard(discarded);
+
 	Species victim = current.getSpecies(victimId);
 	CarnivorousContext ctx = current.carnivorousContext(victim);
 	AttackSummary summary = attacker.attacksSummaries(player, ctx).get(0);
@@ -93,7 +111,7 @@ public class Game {
 	current = current.consumeLoss(victimId, victimLoss);
 
 	if (attackerLoss != null && !preventAttack) {
-	    current = current.consumeLoss(attackerID, attackerLoss);
+	    current = current.consumeLoss(attackerId, attackerLoss);
 	}
 
 	return current;
@@ -102,7 +120,7 @@ public class Game {
     public boolean isActiveIsFirst() {
 	return firstPlayer == activePlayer;
     }
-    
+
     public CarnivorousContext carnivorousContext() {
 	return new CarnivorousContext(scavengersCtx(), targets().collect(Collectors.toList()));
     }
@@ -254,6 +272,11 @@ public class Game {
 	return deltaFoodPool(feedAll(ctx), -hole.getConsumed());
     }
 
+    public Game feedIntelligent(IntelligentInstructions instructions) {
+	// TODO
+	return this;
+    }
+
     public Game fillFoodPool() {
 	Integer delta = this.players.stream().flatMap(p -> p.getFoodPlayed())
 	        .collect(Collectors.reducing(Integer.valueOf(0), (l, r) -> l + r));
@@ -337,6 +360,6 @@ public class Game {
     }
 
     public int getFirstPlayer() {
-        return firstPlayer;
+	return firstPlayer;
     }
 }

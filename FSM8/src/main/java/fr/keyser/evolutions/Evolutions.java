@@ -49,8 +49,20 @@ public final class Evolutions {
 	return new Evolutions(game.feedWateringHole(id));
     }
 
+    public Evolutions feedInteligent(SpeciesId id) {
+	return new Evolutions(game.feedWateringHole(id));
+    }
+
     public Evolutions mergePlayer(Player player) {
 	return new Evolutions(game.mergePlayer(player), null);
+    }
+
+    public Evolutions feedCarnivorous(AttackInstructions instruction) {
+	return new Evolutions(game.feedCarnivorous(instruction), null);
+    }
+
+    public Evolutions feedIntelligent(IntelligentInstructions instruction) {
+	return new Evolutions(game.feedIntelligent(instruction), null);
     }
 
     public Evolutions evolve(EvolutionInstructions instruction) {

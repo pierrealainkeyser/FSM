@@ -43,6 +43,13 @@ public final class Player {
 	this.inHands = Collections.unmodifiableList(inHands);
     }
 
+    public Player discard(AttackInstructions instruction) {
+	List<CardId> inHands = new ArrayList<>(this.inHands);
+	inHands.removeAll(instruction.getDamageReduction());
+	inHands.removeAll(instruction.getTraitAvoidances());
+	return new Player(cardResolver, index, foodEated, species, foodPlayed, inHands);
+    }
+
     public List<CardView> handsAsView() {
 	return inHands.stream().map(id -> cardResolver.asView(id, true)).collect(Collectors.toList());
     }
@@ -100,9 +107,9 @@ public final class Player {
 		} else {
 		    int foodPool = game.getFoodPool();
 		    if (foodPool > 0) {
-		        FeedingActionContext fac = new FeedingActionContext(game);
-		        fac.get(s).feedWateringHole(new WateringHole(foodPool));
-		        return Stream.of(new FeedingWateringHoleOperation(s.getUid(), fac.summary()));
+			FeedingActionContext fac = new FeedingActionContext(game);
+			fac.get(s).feedWateringHole(new WateringHole(foodPool));
+			return Stream.of(new FeedingWateringHoleOperation(s.getUid(), fac.summary()));
 		    }
 		}
 	    }
