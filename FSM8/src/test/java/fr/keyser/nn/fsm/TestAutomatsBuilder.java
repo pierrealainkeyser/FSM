@@ -16,10 +16,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 
+import fr.keyser.evolutions.AttackInstructions;
 import fr.keyser.evolutions.CardId;
 import fr.keyser.evolutions.EvolutionInstructions;
 import fr.keyser.evolutions.Evolutions;
 import fr.keyser.evolutions.EvolutionsAutomatsBuilder;
+import fr.keyser.evolutions.FeedingAttackOperation;
 import fr.keyser.evolutions.FeedingOperation;
 import fr.keyser.evolutions.Game;
 import fr.keyser.evolutions.GamePhase;
@@ -186,6 +188,14 @@ class TestAutomatsBuilder {
 
 	List<FeedingOperation> opts = carnivorous.computeFeedingOperations(g);
 	System.out.println(createWriter().writeValueAsString(opts));
+
+	FeedingAttackOperation opt = (FeedingAttackOperation) opts.get(1);
+	AttackInstructions ai = new AttackInstructions();
+	ai.setAttacker(opt.getSpecies());
+	ai.setVictim(opt.getAnalysis().getTarget());
+
+	g = g.feedCarnivorous(ai);
+	System.out.println(g);
 
     }
 

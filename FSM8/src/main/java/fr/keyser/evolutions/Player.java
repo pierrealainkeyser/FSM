@@ -281,20 +281,24 @@ public final class Player {
     private Player updateSpecies(SpeciesId id, Function<Species, Species> functor) {
 	NavigableMap<Integer, Species> news = new TreeMap<>(species);
 
+	int deltaFood = 0;
+
 	Iterator<Entry<Integer, Species>> it = news.entrySet().iterator();
 	while (it.hasNext()) {
 	    Entry<Integer, Species> e = it.next();
-	    if (e.getValue().getUid().equals(id)) {
-		Species result = functor.apply(e.getValue());
-		if (result == null)
+	    Species src = e.getValue();
+	    if (src.getUid().equals(id)) {
+		Species result = functor.apply(src);
+		if (result == null) {
 		    it.remove();
-		else
+		    deltaFood = src.getFoodLevel() + src.getFatLevel();
+		} else
 		    e.setValue(result);
 		break;
 	    }
 	}
 
-	return new Player(cardResolver, index, foodEated, news, foodPlayed, inHands);
+	return new Player(cardResolver, index, foodEated + deltaFood, news, foodPlayed, inHands);
     }
 
 }
